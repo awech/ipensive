@@ -104,6 +104,7 @@ for array in config.arrays:
 
     print('Making plot...')
     try:
+        utils.web_folders(st,array,t2,config)
         utils.plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config)
     except:
         continue

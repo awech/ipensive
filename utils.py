@@ -165,6 +165,32 @@ def grab_data(scnl,T1,T2,fill_value=0):
     st.detrend('demean')
     return st
 
+
+def web_folders(st,array,t2,config):
+    from shutil import copyfile
+    if not path.exists(config.out_dir):
+        mkdir(config.out_dir)
+
+    network='AVO'
+    if st[0].stats.network=='MI':
+        network='CNMI'
+
+    d0=config.out_dir+'/'+network
+    if not path.exists(d0):
+        mkdir(d0)
+    d0=config.out_dir+'/'+network+'/'+array['Name']
+    if not path.exists(d0):
+        mkdir(d0)
+    d0=config.out_dir+'/'+network+'/'+array['Name']+'/'+str(t2.year)
+    if not path.exists(d0):
+        mkdir(d0)
+    d2=d0+'/'+'{:03d}'.format(t2.julday)
+    if not path.exists(d2):
+        mkdir(d2)
+    copyfile('index.html',config.out_dir+'/index.html')
+    return
+
+
 def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
 
     ########## big plot ##########
@@ -249,26 +275,11 @@ def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
     hc=plt.colorbar(sc,cax=cbaxes)
     hc.set_label('MCCM')
     
-
-    if not path.exists(config.out_dir):
-        mkdir(config.out_dir)
-
     network='AVO'
     if st[0].stats.network=='MI':
         network='CNMI'
-
-    d0=config.out_dir+'/'+network
-    if not path.exists(d0):
-        mkdir(d0)
-    d0=config.out_dir+'/'+network+'/'+array['Name']
-    if not path.exists(d0):
-        mkdir(d0)
     d0=config.out_dir+'/'+network+'/'+array['Name']+'/'+str(t2.year)
-    if not path.exists(d0):
-        mkdir(d0)
     d2=d0+'/'+'{:03d}'.format(t2.julday)
-    if not path.exists(d2):
-        mkdir(d2)
     filename=d2+'/'+array['Name']+'_'+t2.strftime('%Y%m%d-%H%M')+'.png'
     plt.savefig(filename,dpi=72,format='png')
     plt.close('all')
