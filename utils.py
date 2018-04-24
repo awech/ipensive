@@ -60,6 +60,8 @@ def setup_coordinate_system(st):
 
 
 def inversion(st):
+    ## inversion originally written by M. Haney in matlab
+    ## modified and converted to Python by A. Wech
     lags   = np.array([])
     Cmax   = np.array([])
 
