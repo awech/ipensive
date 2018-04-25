@@ -13,3 +13,6 @@ Modify lines 545 - 561 (and 567) in <i>index.html</i> to match the networks and 
 Make sure you have write privileges to 'out_dir' in <i>config.py</i> and that this directory is accessible from the web
 <br><br>
 (Note that <i>index.html</i> was originally written by Tom Parker)
+
+### Back populate data
+Modify T1 and T2 in <i>back_populate.py</i> and run this script to generate images between time T1 and T2

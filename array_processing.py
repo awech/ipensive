@@ -19,6 +19,7 @@ import warnings
 if len(sys.argv) == 1:                              # no time given, use current time
     T0=UTCDateTime.utcnow()                         # get current timestamp
     T0=UTCDateTime(T0.strftime('%Y-%m-%d %H:%M')[:-1]+'0') # round down to the nearest 10-minute
+    time.sleep(config.latency+config.window_length)
 else:                                               # time given, use it
     if len(sys.argv)==2:                            # time given as single string (eg. 201705130301)
         T0 = sys.argv[1]
@@ -35,7 +36,6 @@ else:                                               # time given, use it
         sys.exit()
 
 
-time.sleep(config.latency)
 t1 = T0-config.duration
 t2 = T0
 print('{} - {}'.format(t1.strftime('%Y.%m.%d %H:%M'),t2.strftime('%Y.%m.%d %H:%M')))
@@ -43,7 +43,7 @@ for array in config.arrays:
     print('--- ' + array['Name'] + ' ---')
     #### download data ####
     SCNL  = DataFrame.from_dict(array['SCNL'])
-    st    = utils.grab_data(SCNL['scnl'].tolist(),t1-20,t2+20+config.window_length,fill_value=0)
+    st    = utils.grab_data(SCNL['scnl'].tolist(),t1-config.latency,t2+config.latency+config.window_length,fill_value=0)
     st    = utils.add_coordinate_info(st,SCNL)
     array = utils.get_volcano_backazimuth(st,array)
     ########################
