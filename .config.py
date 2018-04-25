@@ -1,4 +1,5 @@
 out_dir='/path/to/output/directory'
+working_dir='/path/to/working/directory'
 winston_address='winston address'
 winston_port=11111
 winston_address_cnmi='CNMI winston address'
