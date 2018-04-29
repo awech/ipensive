@@ -171,7 +171,7 @@ def web_folders(st,array,t2,config):
     if not path.exists(config.out_dir):
         mkdir(config.out_dir)
 
-    network='AVO'
+    network=config.network
     if st[0].stats.network=='MI':
         network='CNMI'
 
@@ -275,7 +275,7 @@ def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
     hc=plt.colorbar(sc,cax=cbaxes)
     hc.set_label('MCCM')
     
-    network='AVO'
+    network=config.network
     if st[0].stats.network=='MI':
         network='CNMI'
     d0=config.out_dir+'/'+network+'/'+array['Name']+'/'+str(t2.year)
