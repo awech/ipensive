@@ -187,7 +187,7 @@ def web_folders(st,array,t2,config):
     d2=d0+'/'+'{:03d}'.format(t2.julday)
     if not path.exists(d2):
         mkdir(d2)
-    copyfile('index.html',config.out_dir+'/index.html')
+    copyfile(config.working_dir+'/index.html',config.out_dir+'/index.html')
     return
 
 
