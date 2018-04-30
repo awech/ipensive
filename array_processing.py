@@ -5,6 +5,7 @@ Created on 24-Apr-2018
 @author: awech
 """
 
+import os
 import sys
 import numpy as np
 from pandas import DataFrame
@@ -14,6 +15,7 @@ import time
 import config
 import utils
 import warnings
+os.chdir(config.working_dir)
 
 
 if len(sys.argv) == 1:                              # no time given, use current time
