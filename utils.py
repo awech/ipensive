@@ -310,7 +310,7 @@ def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
     hc=plt.colorbar(sc,cax=cbaxes)
     hc.set_label('MCCM')
     
-    print array['Name']
+    print(array['Name'])
     d0=config.out_web_dir+'/'+config.network+'/'+array['Name']+'/'+str(t2.year)
     d2=d0+'/'+'{:03d}'.format(t2.julday)
     filename=d2+'/'+array['Name']+'_'+t2.strftime('%Y%m%d-%H%M')+'.png'
