@@ -7,6 +7,7 @@ Created on 24-Apr-2018
 
 import os
 import sys
+sys.dont_write_bytecode = True  # don't write .pyc files (probably slightly faster without this, but more cluttered)
 import numpy as np
 from pandas import DataFrame
 from obspy.core import UTCDateTime
