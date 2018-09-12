@@ -1,10 +1,11 @@
-#!/Users/awech/anaconda/bin/python
+#!/data/miniconda2/envs/quake_python/bin/python
 # -*- coding: utf-8 -*-
 """
 Created on 24-Apr-2018
 @author: awech
 """
 
+import os
 import sys
 import numpy as np
 from pandas import DataFrame
@@ -14,7 +15,7 @@ import time
 import config
 import utils
 import warnings
-
+os.chdir(config.working_dir)
 
 if len(sys.argv) == 1:                              # no time given, use current time
     T0=UTCDateTime.utcnow()                         # get current timestamp
@@ -85,26 +86,53 @@ for array in config.arrays:
     azimuth  = []
     mccm     = []
     t        = []
+    rms      = []
+    pressure = []
     for st_win in st.slide(window_length=config.window_length,step=config.overlap):
         try:
             for tr in st_win:
                 tr.data = tr.data*array['digouti']
-            vel, az, rms, cmax = utils.inversion(st_win)
+            vel, az, rms0, cmax = utils.inversion(st_win)
             velocity.append(vel)
             azimuth.append(az)
             mccm.append(np.median(cmax))
             t_tmp=st_win[0].stats.starttime
             t.append(dates.date2num((st_win[0].stats.starttime+config.window_length/2.).datetime))
+            rms.append(rms0)
+            pressure.append(np.max(np.abs(st_win[0].data)))
         except:
+            print('Something went wrong in the inversion...')
             continue
     t        = np.array(t)
     mccm     = np.array(mccm)
     velocity = np.array(velocity)
     azimuth  = np.array(azimuth)
+    rms      = np.array(rms)
+    pressure = np.array(pressure)
 
-    print('Making plot...')
     try:
+        print('Setting up web output folders')
         utils.web_folders(st,array,t2,config)
+        print('Making plot...')
         utils.plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config)
     except:
+        import traceback
+        b=traceback.format_exc()
+        message = ''.join('{}\n'.format(a) for a in b.splitlines())
+        print('Something went wrong making the plot:')
+        print(message)
         continue
+
+    if config.out_valve_dir:
+        try:
+            print('Writing csv file...')
+            t=np.array([UTCDateTime(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
+            name=st[0].stats.station
+            utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, config, name)
+        except:
+            import traceback
+            b=traceback.format_exc()
+            message = ''.join('{}\n'.format(a) for a in b.splitlines())
+            print('Something went wrong writing the csv file:')
+            print(message)
+            continue

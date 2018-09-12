@@ -1,9 +1,9 @@
-out_dir='/path/to/output/directory'
-working_dir='/path/to/working/directory'
-winston_address='winston address'
-winston_port=11111
-winston_address_cnmi='CNMI winston address'
-winston_port_cnmi=11111
+out_web_dir='/lamp/www/seismic/ipensive'
+out_valve_dir='/lamp/valve3/seismic/infrasound/raw'
+working_dir='/usr/local/ipensive'
+winston_address='hvo-wws.wr.usgs.gov'
+winston_port=16022
+network='HVO'
 
 duration      = 600  # DON'T CHANGE THIS!
 latency       = 30.0 # seconds between timestamps and end of data window
@@ -13,118 +13,80 @@ f2		      = 10.0 # maximum frequency for bandpass filter
 window_length = 30   # window length for each calculation [seconds]
 overlap       = 15   # seconds
 min_chan      = 3
-mcthresh      = 0.6  # where to draw the threshold line in MCCM plot
+mcthresh      = 0.5  # where to draw the threshold line in MCCM plot
 
 # Infrasound channels list
 arrays=[
-	dict({'Name':'Okmok',
+	dict({'Name':'Ahua',
 		  'SCNL':[
-					{'scnl':'OK01.BDF.AV.--'	, 'sta_lat': 53.41084	, 'sta_lon': -167.91431},
-					{'scnl':'OK02.BDF.AV.--'	, 'sta_lat': 53.41002	, 'sta_lon': -167.91367},
-					{'scnl':'OK03.BDF.AV.--'	, 'sta_lat': 53.40995	, 'sta_lon': -167.91505},
-					{'scnl':'OK04.BDF.AV.--'	, 'sta_lat': 53.41031	, 'sta_lon': -167.91440}],
-		'digouti':  (1/419430.0)/0.05,
+					{'scnl':'AHUD.BDF.HV.01'	, 'sta_lat': 19.371500	, 'sta_lon': -155.263400},
+					{'scnl':'AHUD.BDF.HV.02'	, 'sta_lat': 19.371935  , 'sta_lon': -155.263505},
+					{'scnl':'AHUD.BDF.HV.03'	, 'sta_lat': 19.371370  , 'sta_lon': -155.262850},
+					{'scnl':'AHUD.BDF.HV.04'	, 'sta_lat': 19.371195  , 'sta_lon': -155.263880}],
+		'digouti':  (1/6291.3),
 		'volcano':[
-					{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
-					{'name': 'Cleveland','v_lat': 52.8222,   'v_lon': -169.9464},
-					{'name': 'Okmok',	 'v_lat': 53.428865, 'v_lon': -168.131632},
-					{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200}]}),
+					{'name': 'Halemaumau', 'v_lat': 19.405360,   'v_lon': -155.280972},
+					{'name': 'PuuOo','v_lat': 19.388485,   'v_lon': -155.106042},
+					{'name': 'MLsummit',	 'v_lat': 19.472753, 'v_lon': -155.590970},
+					{'name': 'MLswrz', 'v_lat': 19.346941,   'v_lon': -155.667472}]}),
 
-
-
-	dict({'Name':'Sand Point',
+	dict({'Name':'Ainapo',
 		  'SCNL':[
-					{'scnl':'SDPI.BDF.AV.01'	, 'sta_lat': 55.34900	, 'sta_lon': -160.47640},
-					{'scnl':'SDPI.BDF.AV.02'	, 'sta_lat': 55.34870	, 'sta_lon': -160.47683},
-					{'scnl':'SDPI.BDF.AV.03'	, 'sta_lat': 55.34934	, 'sta_lon': -160.47732},
-					{'scnl':'SDPI.BDF.AV.04'	, 'sta_lat': 55.34952	, 'sta_lon': -160.47661},
-					{'scnl':'SDPI.BDF.AV.05'	, 'sta_lat': 55.34922	, 'sta_lon': -160.47650},
-					{'scnl':'SDPI.BDF.AV.06'	, 'sta_lat': 55.34919	, 'sta_lon': -160.47710},
-				 ],
-	   'digouti': (1/419430.0)/(1e-2),
-	   'volcano':[
-	   				{'name': 'Pavlof',    'v_lat': 55.417622,'v_lon': -161.893669},
-	   				{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
-	   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961}]}),
+					{'scnl':'AIND.BDF.HV.01'	, 'sta_lat': 19.372062	, 'sta_lon': -155.457170},
+					{'scnl':'AIND.BDF.HV.02'	, 'sta_lat': 19.372244  , 'sta_lon': -155.457710},
+					{'scnl':'AIND.BDF.HV.03'	, 'sta_lat': 19.372158  , 'sta_lon': -155.456800},
+					{'scnl':'AIND.BDF.HV.04'	, 'sta_lat': 19.371567  , 'sta_lon': -155.457410}],
+		'digouti':  (1/6291.3),
+		'volcano':[
+					{'name': 'Halemaumau', 'v_lat': 19.405360,   'v_lon': -155.280972},
+					{'name': 'PuuOo','v_lat': 19.388485,   'v_lon': -155.106042},
+					{'name': 'MLsummit',	 'v_lat': 19.472753, 'v_lon': -155.590970},
+					{'name': 'MLnerz',	 'v_lat': 19.525019, 'v_lon': -155.486837},
+					{'name': 'MLswrz', 'v_lat': 19.346941,   'v_lon': -155.667472}]}),
 
+	dict({'Name':'Nanawale',
+		'SCNL':[
+					{'scnl':'WALE.HDF.HV.01'        , 'sta_lat': 19.4942275  , 'sta_lon': -154.91405},
+					{'scnl':'WALE.HDF.HV.02'        , 'sta_lat': 19.4943302  , 'sta_lon': -154.91453},
+					{'scnl':'WALE.HDF.HV.03'        , 'sta_lat': 19.4946066  , 'sta_lon': -154.91475},
+					{'scnl':'WALE.HDF.HV.04'        , 'sta_lat': 19.4948083  , 'sta_lon': -154.91434},
+					{'scnl':'WALE.HDF.HV.05'        , 'sta_lat': 19.4949789  , 'sta_lon': -154.91403},
+					{'scnl':'WALE.HDF.HV.06'        , 'sta_lat': 19.4946475  , 'sta_lon': -154.91388}],
+		'digouti':  (2.6686e-4),
+                'volcano':[
+					{'name': 'Fissure 8', 'v_lat': 19.460222,   'v_lon': -154.908751},
+					{'name': 'Fissure 10', 'v_lat': 19.455894,   'v_lon': -154.919373},
+					{'name': 'Fissure 22', 'v_lat': 19.474969,   'v_lon': -154.884739},
+					{'name': 'Fissure 16/18', 'v_lat': 19.478863,   'v_lon': -154.876357},
+					{'name': 'Kapoho Cone',  'v_lat': 19.500132, 'v_lon': -154.839707},
+					{'name': 'Cracks on 130', 'v_lat': 19.446489,   'v_lon': -154.941694},
+					{'name': 'PuuOo','v_lat': 19.388485,   'v_lon': -155.106042},
+					{'name': 'Ocean Entry', 'v_lat': 19.498129, 'v_lon': -154.814505}]}),
 
+#	dict({'Name':'North Pit',
+#		  'SCNL':[
+#					{'scnl':'NPT.HDF.HV.01'	, 'sta_lat': 19.411640	, 'sta_lon': -155.28107},
+#					#{'scnl':'NPT.HDF.HV.02'	, 'sta_lat': 19.412110  , 'sta_lon': -155.28110},
+#					{'scnl':'NPT.HDF.HV.03'	, 'sta_lat': 19.411972  , 'sta_lon': -155.280642},
+#					{'scnl':'NPT.HDF.HV.04'	, 'sta_lat': 19.412015  , 'sta_lon': -155.280997}],
+#		'digouti':  (1/906.0),
+#		'volcano':[
+#					{'name': 'Halemaumau', 'v_lat': 19.405360,   'v_lon': -155.280972},
+#					{'name': 'PuuOo','v_lat': 19.388485,   'v_lon': -155.106042},
+#					{'name': 'MLsummit',	 'v_lat': 19.472753, 'v_lon': -155.590970},
+#					{'name': 'MLnerz',	 'v_lat': 19.525019, 'v_lon': -155.486837},
+#					{'name': 'MLswrz', 'v_lat': 19.346941,   'v_lon': -155.667472}]}),
 
-	dict({'Name':'Adak',
-		  'SCNL':[
-					{'scnl':'ADKI.BDF.AV.01'	, 'sta_lat': 51.86190727	, 'sta_lon': -176.6438598},
-					{'scnl':'ADKI.BDF.AV.02'	, 'sta_lat': 51.86324162	, 'sta_lon': -176.6435998},
-					{'scnl':'ADKI.BDF.AV.03'	, 'sta_lat': 51.86226962	, 'sta_lon': -176.6446503},
-					{'scnl':'ADKI.BDF.AV.04'	, 'sta_lat': 51.86246609	, 'sta_lon': -176.6457851},
-					{'scnl':'ADKI.BDF.AV.05'	, 'sta_lat': 51.86326916	, 'sta_lon': -176.6461231},
-					{'scnl':'ADKI.BDF.AV.06'	, 'sta_lat': 51.86157572	, 'sta_lon': -176.6469340}],
-	   'digouti': (1/419430.0)/(0.05),
-	   'volcano':[
-				   {'name':	'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
-				   {'name':	'Great Sitkin','v_lat': 52.077282, 'v_lon': -176.131317},
-				   {'name':	'Moffett',     'v_lat': 51.931876, 'v_lon': -176.740191}]}),
-
-
-
-
-	dict({'Name':'Cleveland',
-		  'SCNL':[
-					{'scnl':'CLCO1.BDF.AV.--'	, 'sta_lat': 52.7864125000	, 'sta_lon': -169.7229250000},
-					{'scnl':'CLCO2.BDF.AV.--'	, 'sta_lat': 52.7871866667	, 'sta_lon': -169.7244333330},
-					{'scnl':'CLCO3.BDF.AV.--'	, 'sta_lat': 52.7874600000	, 'sta_lon': -169.7210166667},
-					{'scnl':'CLCO4.BDF.AV.--'	, 'sta_lat': 52.7861266667	, 'sta_lon': -169.7203966667},
-					{'scnl':'CLCO5.BDF.AV.--'	, 'sta_lat': 52.7851866667	, 'sta_lon': -169.7250066667},
-				 ],
-	   'digouti': (1/419430.0)/(1.62e-2),
-	   'volcano':[
-				   {'name':	'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
-				   {'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360}]}),
-
-
-	dict({'Name':'Akutan',
-  		  'SCNL':[
-					{'scnl':'AKS.BDF.AV.--'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
-					{'scnl':'AKS.BDG.AV.--'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
-					{'scnl':'AKS.BDH.AV.--'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
-					{'scnl':'AKS.BDI.AV.--'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
-			    ],
-		  'digouti': (1/419430.0)/0.05,
-		  'volcano':[
-				   {'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200},
-				   {'name': 'Akutan',   'v_lat': 54.1300,   'v_lon': -165.9900},
-				   {'name': 'Westdahl', 'v_lat': 54.5200,   'v_lon': -164.6500}]}),
-
-
-	dict({'Name':'Saipan',
-		  'SCNL':[
-					{'scnl':'FLX2.BDF.MI.01'	, 'sta_lat': 15.23481	, 'sta_lon': 145.79219},
-					{'scnl':'FLX2.BDF.MI.02'	, 'sta_lat': 15.23325	, 'sta_lon': 145.79242},
-					{'scnl':'FLX2.BDF.MI.03'	, 'sta_lat': 15.23461	, 'sta_lon': 145.79097},
-					{'scnl':'FLX2.BDF.MI.04'	, 'sta_lat': 15.23206	, 'sta_lon': 145.79389},
-					{'scnl':'FLX2.BDF.MI.05'	, 'sta_lat': 15.23217	, 'sta_lon': 145.79119},
-					{'scnl':'FLX2.BDF.MI.06'	, 'sta_lat': 15.23650	, 'sta_lon': 145.79053},
-					# {'scnl':'DPS.BDF.MI.--'		, 'sta_lat': 15.24082	, 'sta_lon': 145.78909},
-					# {'scnl':'HTSP.BDF.MI.--'	, 'sta_lat': 15.23166	, 'sta_lon': 145.79851},
-					# {'scnl':'GOLF.BDF.MI.--'	, 'sta_lat': 15.22511	, 'sta_lon': 145.78625}, # still has IML sensor
-					# {'scnl':'FLX.BDF.MI.--'		, 'sta_lat': 15.23389	, 'sta_lon': 145.79172},
-				 ],
-	   'digouti': (1/419430.0)/(1e-2),
-	   'volcano':[
-				   {'name':	'Anatahan?', 'v_lat': 18.141555, 'v_lon': 145.786260}]}),
-
-
-
-	dict({'Name':'Sarigan',
-		  'SCNL':[
-					{'scnl':'SRN1.BDF.MI.--'	, 'sta_lat': 16.70035	, 'sta_lon': 145.77809},
-					{'scnl':'SRN2.BDF.MI.--'	, 'sta_lat': 16.69977	, 'sta_lon': 145.77798},
-					{'scnl':'SRN3.BDF.MI.--'	, 'sta_lat': 16.69960	, 'sta_lon': 145.77841},
-					{'scnl':'SRN4.BDF.MI.--'	, 'sta_lat': 16.69990	, 'sta_lon': 145.77876},
-					# {'scnl':'SRN5.BDF.MI.--'	, 'sta_lat': 16.70036	, 'sta_lon': 145.77872},
-					{'scnl':'SRN6.BDF.MI.--'	, 'sta_lat': 16.70003	, 'sta_lon': 145.77838},
-				 ],
-	   'digouti': (1/419430.0)/(1e-2),
-	   'volcano':[
-				   {'name':	'Pagan?',   'v_lat': 18.141555,	'v_lon': 145.786260},
-				   {'name':	'Anatahan?','v_lat': 16.351323,	'v_lon': 145.687602}]}),
+	dict({'Name':'ERZ2',
+	  'SCNL':[
+					{'scnl':'ERZ2.HDF.HV.01'	, 'sta_lat': 19.474760	, 'sta_lon': -154.833630},
+					{'scnl':'ERZ2.HDF.HV.02'	, 'sta_lat': 19.474380  , 'sta_lon': -154.834030},
+					{'scnl':'ERZ2.HDF.HV.03'	, 'sta_lat': 19.475210  , 'sta_lon': -154.833980}],
+		'digouti':  (1/6291.3),
+		'volcano':[
+					{'name': 'Fissure 17', 'v_lat': 19.483665,   'v_lon': -154.871967},
+					{'name': 'Kapoho Cone',	 'v_lat': 19.500132, 'v_lon': -154.839707},
+                                        {'name': 'Fissure 8', 'v_lat': 19.460222,   'v_lon': -154.908751},
+					{'name': 'Kapoho Ocean Entry', 'v_lat': 19.480619, 'v_lon': -154.820470}]}),
 
 ]

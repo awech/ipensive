@@ -106,8 +106,9 @@ def get_volcano_backazimuth(st,array):
     lon0=np.mean([tr.stats.coordinates.longitude for tr in st])
     lat0=np.mean([tr.stats.coordinates.latitude for tr in st])
     for volc in array['volcano']:
-        tmp=gps2dist_azimuth(lat0,lon0,volc['v_lat'],volc['v_lon'])
-        volc['back_azimuth']=tmp[1]
+        if not volc.has_key('back_azimuth'):
+            tmp=gps2dist_azimuth(lat0,lon0,volc['v_lat'],volc['v_lon'])
+            volc['back_azimuth']=tmp[1]
     return array
 
  
@@ -168,27 +169,43 @@ def grab_data(scnl,T1,T2,fill_value=0):
 
 def web_folders(st,array,t2,config):
     from shutil import copyfile
-    if not path.exists(config.out_dir):
-        mkdir(config.out_dir)
+    if not path.exists(config.out_web_dir):
+        mkdir(config.out_web_dir)
 
-    network='AVO'
-    if st[0].stats.network=='MI':
-        network='CNMI'
-
-    d0=config.out_dir+'/'+network
+    d0=config.out_web_dir+'/'+config.network
     if not path.exists(d0):
         mkdir(d0)
-    d0=config.out_dir+'/'+network+'/'+array['Name']
+    d0=config.out_web_dir+'/'+config.network+'/'+array['Name']
     if not path.exists(d0):
         mkdir(d0)
-    d0=config.out_dir+'/'+network+'/'+array['Name']+'/'+str(t2.year)
+    d0=config.out_web_dir+'/'+config.network+'/'+array['Name']+'/'+str(t2.year)
     if not path.exists(d0):
         mkdir(d0)
     d2=d0+'/'+'{:03d}'.format(t2.julday)
     if not path.exists(d2):
         mkdir(d2)
-    copyfile('index.html',config.out_dir+'/index.html')
+    copyfile(config.working_dir+'/index.html',config.out_web_dir+'/index.html')
     return
+
+
+def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, config, name):
+    from pandas import DataFrame
+
+    A=DataFrame({'TIMESTAMP':t,
+                 'CHANNEL':name,
+                 'Azimuth':azimuth,
+                 'Velocity':velocity,
+                 'MCCM':mccm,
+                 'Pressure':pressure,
+                 'rms':rms})
+
+    A=A[['TIMESTAMP','CHANNEL','Azimuth','Velocity','MCCM','Pressure','rms']]
+
+    A['Velocity']=1000*A['Velocity']
+
+    filename=config.out_valve_dir+'/'+name+'_'+t2.strftime('%Y%m%d-%H%M')+'.txt'
+
+    A.to_csv(filename,index=False,header=True,sep=',',float_format='%.3f')
 
 
 def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
@@ -250,12 +267,29 @@ def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
     axs1.set_ylabel('Trace Velocity\n [km/s]')
     
     axs1=plt.subplot(4,1,4)
-    for volc in array['volcano']:
-        axs1.plot([T1,T2],[volc['back_azimuth'],volc['back_azimuth']],'--',color='gray',zorder=-1)
-        axs1.text(t[1],volc['back_azimuth']-6,volc['name'],bbox={'facecolor':'white','edgecolor':'white','pad':0},fontsize=8,style='italic',zorder=10)
-    sc=axs1.scatter(t,azimuth,c=mccm,edgecolors='k',lw=.3,cmap=cm,zorder=1000)
+    azlim1=0
+    azlim2=360
+    if 'azlim1' in array.keys():
+        azlim1 = array['azlim1']
+    if 'azlim2' in array.keys():
+        azlim2 = array['azlim2']
 
-    axs1.set_ylim(0,360)
+    if azlim2 < azlim1:
+        azlim1=azlim1-360
+        for volc in array['volcano']:
+            if volc['back_azimuth']>180:
+                axs1.plot([T1,T2],[volc['back_azimuth']-360,volc['back_azimuth']-360],'--',color='gray',zorder=-1)
+                axs1.text(t[1],volc['back_azimuth']-6-360,volc['name'],bbox={'facecolor':'white','edgecolor':'white','pad':0},fontsize=8,style='italic',zorder=10)
+            else:
+                axs1.plot([T1,T2],[volc['back_azimuth'],volc['back_azimuth']],'--',color='gray',zorder=-1)
+                axs1.text(t[1],volc['back_azimuth']-6,volc['name'],bbox={'facecolor':'white','edgecolor':'white','pad':0},fontsize=8,style='italic',zorder=10)
+        azimuth[azimuth>180]+=-360
+    else:
+        for volc in array['volcano']:
+            axs1.plot([T1,T2],[volc['back_azimuth'],volc['back_azimuth']],'--',color='gray',zorder=-1)
+            axs1.text(t[1],volc['back_azimuth']-6,volc['name'],bbox={'facecolor':'white','edgecolor':'white','pad':0},fontsize=8,style='italic',zorder=10)
+    sc=axs1.scatter(t,azimuth,c=mccm,edgecolors='k',lw=.3,cmap=cm,zorder=1000)
+    axs1.set_ylim(azlim1,azlim2)
     axs1.set_xlim(T1,T2)
     sc.set_clim(cax)
     axs1.set_ylabel('Back-azimuth\n [deg]')
@@ -275,10 +309,8 @@ def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
     hc=plt.colorbar(sc,cax=cbaxes)
     hc.set_label('MCCM')
     
-    network='AVO'
-    if st[0].stats.network=='MI':
-        network='CNMI'
-    d0=config.out_dir+'/'+network+'/'+array['Name']+'/'+str(t2.year)
+    print array['Name']
+    d0=config.out_web_dir+'/'+config.network+'/'+array['Name']+'/'+str(t2.year)
     d2=d0+'/'+'{:03d}'.format(t2.julday)
     filename=d2+'/'+array['Name']+'_'+t2.strftime('%Y%m%d-%H%M')+'.png'
     plt.savefig(filename,dpi=72,format='png')
@@ -321,8 +353,17 @@ def plot_results(t1,t2,t,st,mccm,velocity,azimuth,array,config):
 
     
     axs1=plt.subplot(4,1,4)
+    azlim1=0
+    azlim2=360
+    if 'azlim1' in array.keys():
+        azlim1 = array['azlim1']
+    if 'azlim2' in array.keys():
+        azlim2 = array['azlim2']
+    if azlim2 < azlim1:
+        azlim1=azlim1-360
+        azimuth[azimuth>180]+=-360
     sc=axs1.scatter(t,azimuth,s=8*np.ones_like(t),c=mccm,edgecolors='k',lw=.3,cmap=cm)
-    axs1.set_ylim(0,360)
+    axs1.set_ylim(azlim1,azlim2)
     axs1.set_xlim(T1,T2)
     sc.set_clim(cax)
     axs1.set_xticks([])
