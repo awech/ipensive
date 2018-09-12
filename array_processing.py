@@ -17,6 +17,7 @@ import utils
 import warnings
 os.chdir(config.working_dir)
 
+
 if len(sys.argv) == 1:                              # no time given, use current time
     T0=UTCDateTime.utcnow()                         # get current timestamp
     T0=UTCDateTime(T0.strftime('%Y-%m-%d %H:%M')[:-1]+'0') # round down to the nearest 10-minute

@@ -5,6 +5,7 @@ winston_address='hvo-wws.wr.usgs.gov'
 winston_port=16022
 network='HVO'
 
+
 duration      = 600  # DON'T CHANGE THIS!
 latency       = 30.0 # seconds between timestamps and end of data window
 taper_val     = 5.0  # seconds to taper beginning and end of trace before filtering
@@ -14,6 +15,7 @@ window_length = 30   # window length for each calculation [seconds]
 overlap       = 15   # seconds
 min_chan      = 3
 mcthresh      = 0.5  # where to draw the threshold line in MCCM plot
+
 
 # Infrasound channels list
 arrays=[
