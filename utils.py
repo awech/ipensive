@@ -106,7 +106,7 @@ def get_volcano_backazimuth(st,array):
     lon0=np.mean([tr.stats.coordinates.longitude for tr in st])
     lat0=np.mean([tr.stats.coordinates.latitude for tr in st])
     for volc in array['volcano']:
-        if not volc.has_key('back_azimuth'):
+        if 'back_azimuth' not in volc:
             tmp=gps2dist_azimuth(lat0,lon0,volc['v_lat'],volc['v_lon'])
             volc['back_azimuth']=tmp[1]
     return array
