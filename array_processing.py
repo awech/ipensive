@@ -125,7 +125,7 @@ for array in config.arrays:
         print(message)
         continue
 
-    if config.out_valve_dir:
+    if hasattr(config,'out_valve_dir'):
         try:
             print('Writing csv file...')
             t=np.array([UTCDateTime(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
