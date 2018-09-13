@@ -123,12 +123,9 @@ def grab_data(scnl,T1,T2,fill_value=0):
     print('Grabbing data...')
 
     st=Stream()
-
+    client = Client(config.winston_address, config.winston_port)
     for sta in scnl:
-        if sta.split('.')[2]=='MI':
-            client = Client(config.winston_address_cnmi, config.winston_port_cnmi)
-        else:
-            client = Client(config.winston_address, config.winston_port)
+        
         try:
             tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1], T1, T2, cleanup=True)
             if len(tr)>1:
