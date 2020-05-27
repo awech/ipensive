@@ -1,8 +1,12 @@
-out_web_dir = '/lamp/www/seismic/ipensive'
+out_web_dir = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'
+
+#######
+# TODO: Determine if we need these
 out_valve_dir = '/lamp/valve3/seismic/infrasound/raw'
 working_dir = '/usr/local/ipensive'
 winston_address = 'hvo-wws.wr.usgs.gov'
 winston_port = 16022
+##########
 
 duration = 600  # DON'T CHANGE THIS!
 latency = 30.0  # seconds between timestamps and end of data window
@@ -22,24 +26,34 @@ arrays = [
         'arrays': [
             {'Name': 'Dillingham',
              'network': 'AVO',
-             # Station identifier for IRIS,
-             # Alpha value for array
+             'id': 'DLL',
+             'Alpha': 0.75,
              # Other parameters needed? CHAN? LOC?
              },
             {'Name': 'Sand Point',
                 'network': 'AVO',
+                'id': 'SDPI',
+                'Alpha': 0.75,
              },
             {'Name': 'Akutan',
                 'network': 'AVO',
+                'id': 'AKS',
+                'Alpha': 0.75,
              },
             {'Name': 'Okmok',
                 'network': 'AVO',
+                'id': 'OKIF',
+                'Alpha': 0.75,
              },
             {'Name': 'Cleveland',
                 'network': 'AVO',
+                'id': 'CLCO*',
+                'Alpha': 0.75,
              },
             {'Name': 'Adak',
                 'network': 'AVO',
+                'id': 'ADKI',
+                'Alpha': 0.75,
              },
         ]
     },

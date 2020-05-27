@@ -51,7 +51,7 @@ WINOVER = config.overlap
 for net in config.arrays:
     NET = net['network']
     for array in net['arrays']:
-        STA = array['Name']  # TODO: Or probably station identifier
+        STA = array['id']  # TODO: Or probably station identifier
 
         # LTS alpha parameter - subset size
         ALPHA = 0.75  # TODO: Get from array dictionary?
