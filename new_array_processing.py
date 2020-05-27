@@ -4,7 +4,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 from obspy import UTCDateTime
-from obspy.clients.fdsn import Client
+from obspy.clients.fdsn import Client, header
 
 # Import the package.
 import lts_array
@@ -37,7 +37,6 @@ STARTTIME = ENDTIME - config.duration
 
 # %% Read in and filter data
 # Array Parameters
-CHAN = '*DF'  # TODO: Do these need to change, or are they all the same for all arrays?
 LOC = '*'
 
 # Filter limits
@@ -52,14 +51,21 @@ for net in config.arrays:
     NET = net['network']
     for array in net['arrays']:
         STA = array['id']  # TODO: Or probably station identifier
+        CHAN = array['channel']
 
         # LTS alpha parameter - subset size
-        ALPHA = 0.75  # TODO: Get from array dictionary?
+        ALPHA = array['Alpha']
 
         print('Reading in data from IRIS')
         client = Client("IRIS")
-        st = client.get_waveforms(NET, STA, LOC, CHAN,
-                                  STARTTIME, ENDTIME, attach_response=True)
+        try:
+
+            st = client.get_waveforms(NET, STA, LOC, CHAN,
+                                      STARTTIME, ENDTIME, attach_response=True)
+        except header.FDSNNoDataException:
+            print(f"No data retrieved for {STA}")
+            continue
+
         st.merge(fill_value='latest')
         st.trim(STARTTIME, ENDTIME, pad='true', fill_value=0)
         st.sort()
@@ -107,9 +113,16 @@ for net in config.arrays:
         # %% Plotting
         # TODO: Figure out if this is the output we need, and if so, save to
         # proper directories as PNG.
-        fig, axs = lts_array.lts_array_plot(stf, lts_vel, lts_baz, t, mdccm, stdict)
+        try:
+            fig, axs = lts_array.lts_array_plot(stf, lts_vel, lts_baz, t, mdccm, stdict)
+        except UnboundLocalError:
+            print(f"Unable to generate plots for {STA}")
+            continue
 
         d0 = config.out_web_dir + '/' + NET + '/' + STA + '/' + str(ENDTIME.year)
         d2 = d0 + '/' + '{:03d}'.format(ENDTIME.julday)
         filename = d2 + '/' + STA + '_' + ENDTIME.strftime('%Y%m%d-%H%M') + '.png'
+
+        # DEBUG
+        filename = f"/tmp/{STA}.png"
         fig.savefig(filename, dpi = 72, format = 'png')

@@ -14,7 +14,7 @@ taper_val = 5.0  # seconds to taper beginning and end of trace before filtering
 f1 = 0.5  # minimum frequency for bandpass filter
 f2 = 5.0  # maximum frequency for bandpass filter
 window_length = 30   # window length for each calculation [seconds]
-overlap = 15   # seconds
+overlap = .5   # percent
 min_chan = 3
 mcthresh = 0.5  # where to draw the threshold line in MCCM plot
 
@@ -25,50 +25,50 @@ arrays = [
         'network': 'AV',
         'arrays': [
             {'Name': 'Dillingham',
-             'network': 'AVO',
              'id': 'DLL',
              'Alpha': 0.75,
-             # Other parameters needed? CHAN? LOC?
+             'channel': 'HDF',
              },
             {'Name': 'Sand Point',
-                'network': 'AVO',
-                'id': 'SDPI',
-                'Alpha': 0.75,
+             'id': 'SDPI',
+             'Alpha': 0.75,
+             'channel': 'HDF',
              },
             {'Name': 'Akutan',
-                'network': 'AVO',
-                'id': 'AKS',
-                'Alpha': 0.75,
+             'id': 'AKS',
+             'Alpha': 0.75,
+             'channel': 'BD*',
              },
             {'Name': 'Okmok',
-                'network': 'AVO',
-                'id': 'OKIF',
-                'Alpha': 0.75,
+             'id': 'OKIF',
+             'Alpha': 0.75,
+             'channel': 'HDF',
              },
             {'Name': 'Cleveland',
-                'network': 'AVO',
-                'id': 'CLCO*',
-                'Alpha': 0.75,
+             'id': 'CLC*',
+             'Alpha': 0.75,
+             'channel': 'BDF',
+
              },
             {'Name': 'Adak',
-                'network': 'AVO',
-                'id': 'ADKI',
-                'Alpha': 0.75,
+             'id': 'ADKI',
+             'Alpha': 0.75,
+             'channel': 'HDF',
              },
         ]
     },
     # CNMI arrays
-    {
-        'network': 'CNMI',
-        'arrays': [
-            {'Name': 'Saipan',
-             'network': 'CNMI',
-             },
-            {'Name': 'Sarigan',
-             'network': 'CNMI',
-             },
-        ],
-    }
+    #     {
+    #         'network': 'CNMI',
+    #         'arrays': [
+    #             {'Name': 'Saipan',
+    #              'network': 'CNMI',
+    #              },
+    #             {'Name': 'Sarigan',
+    #              'network': 'CNMI',
+    #              },
+    #         ],
+    #     }
 ]
 
 # Infrasound channels list
