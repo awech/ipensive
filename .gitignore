@@ -1,0 +1,10 @@
+.DS_Store
+lts_array
+bin
+include
+share
+lib
+pyvenv.cfg
+*.wpr
+*.wpu
+__pycache__
