@@ -23,6 +23,7 @@ arrays = [
     # AVO Arrays
     {
         'network': 'AV',
+        'display name': 'AVO',
         'arrays': [
             {'Name': 'Dillingham',
              'id': 'DLL',

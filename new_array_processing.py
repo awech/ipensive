@@ -1,5 +1,6 @@
 # %% module imports
 import argparse
+import os
 import warnings
 
 import matplotlib.pyplot as plt
@@ -49,8 +50,10 @@ WINOVER = config.overlap
 
 for net in config.arrays:
     NET = net['network']
+    NETDISP = net['display name']
     for array in net['arrays']:
-        STA = array['id']  # TODO: Or probably station identifier
+        STA = array['id']
+        STANAME = array['Name']
         CHAN = array['channel']
 
         # LTS alpha parameter - subset size
@@ -111,7 +114,7 @@ for net in config.arrays:
         lts_vel, lts_baz, t, mdccm, stdict, sigma_tau = lts_array.ltsva(stf, rij, WINLEN, WINOVER, ALPHA)
 
         # %% Plotting
-        # TODO: Figure out if this is the output we need, and if so, save to
+        # TODO: save to
         # proper directories as PNG.
         try:
             fig, axs = lts_array.lts_array_plot(stf, lts_vel, lts_baz, t, mdccm, stdict)
@@ -119,10 +122,74 @@ for net in config.arrays:
             print(f"Unable to generate plots for {STA}")
             continue
 
-        d0 = config.out_web_dir + '/' + NET + '/' + STA + '/' + str(ENDTIME.year)
-        d2 = d0 + '/' + '{:03d}'.format(ENDTIME.julday)
-        filename = d2 + '/' + STA + '_' + ENDTIME.strftime('%Y%m%d-%H%M') + '.png'
-
         # DEBUG
-        filename = f"/tmp/{STA}.png"
+        config.out_web_dir = "/Users/israel/Development/web-infrasound"
+
+        # Generate the save path
+        d2 = os.path.join(config.out_web_dir, NETDISP, STANAME, str(ENDTIME.year),
+                          '{:03d}'.format(ENDTIME.julday))
+
+        # Just for good measure, make sure it is the "real" path
+        d2 = os.path.realpath(d2)
+
+        # Make sure directory exists
+        os.makedirs(d2, exist_ok = True)
+
+        filename = os.path.join(d2, f"{STANAME}_{ENDTIME.strftime('%Y%m%d-%H%M')}.png")
+        thumbnail_name = os.path.join(d2, f"{STANAME}_{ENDTIME.strftime('%Y%m%d-%H%M')}_thumb.png")
+
+        plt.subplots_adjust(top = 0.98)
+
+        # Adjust the colorbar positions
+        # FIXME: This is ugly, but works because the two axes are always
+        # added in the same order.
+        # The first one is the vertical bar, the second the horizontal.
+        # Would be better if we had some positive indication of which was which.
+        found_first = False
+
+        for axis in fig.axes:
+            if axis not in axs:
+                # This is a colorbar
+                pos = axis.get_position().get_points().flatten()
+                if not found_first:
+                    # Vertical color bar. Move to the left.
+                    found_first = True
+                    pos[0] -= .03
+                    pos[2] = .02
+                else:
+                    pass
+                    # This is the horizontal color bar. Nudge it up (and to the left).
+                    pos[0] -= .08
+                    pos[1] += .015
+                    pos[3] = .02
+
+                axis.set_position(pos)
+
         fig.savefig(filename, dpi = 72, format = 'png')
+
+        # Reconfigure plots for thumbnails
+        fig.set_size_inches(4.0, 5.5)
+        plt.subplots_adjust(left=0, right=0.99, bottom= 0.01, top=1.0,
+                            wspace=0, hspace=0)
+
+        for axis in fig.axes:
+            if axis not in axs:
+                axis.remove()  # remove colorbars
+            else:
+                # Remove tick marks and labels
+                axis.tick_params(axis = 'both', which = 'both',
+                                 bottom = False, top = False,
+                                 labelbottom = False, left = False,
+                                 right = False, labelleft = False)
+
+                # Remove text labels
+                for txt in axis.texts:
+                    txt.remove()
+
+        colorbar_axes = [x for x in fig.axes if x not in axs]
+        for axis in colorbar_axes:
+            axis.remove()
+
+        # Lower DPI, but larger image size = smaller dots
+        fig.savefig(thumbnail_name, dpi = 36, format = 'png')
+
