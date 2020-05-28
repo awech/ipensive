@@ -8,3 +8,5 @@ pyvenv.cfg
 *.wpr
 *.wpu
 __pycache__
+AVO
+index.html

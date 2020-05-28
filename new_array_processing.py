@@ -6,6 +6,7 @@ import warnings
 import matplotlib.pyplot as plt
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client, header
+import jinja2
 
 # Import the package.
 import lts_array
@@ -48,12 +49,18 @@ FMAX = config.f2
 WINLEN = config.window_length
 WINOVER = config.overlap
 
+all_nets = []
+all_stations = {}
 for net in config.arrays:
     NET = net['network']
     NETDISP = net['display name']
+    all_nets.append(NETDISP)
+    all_stations[NETDISP] = []
     for array in net['arrays']:
         STA = array['id']
         STANAME = array['Name']
+        all_stations[NETDISP].append(STANAME)
+
         CHAN = array['channel']
 
         # LTS alpha parameter - subset size
@@ -121,9 +128,6 @@ for net in config.arrays:
         except UnboundLocalError:
             print(f"Unable to generate plots for {STA}")
             continue
-
-        # DEBUG
-        config.out_web_dir = "/Users/israel/Development/web-infrasound"
 
         # Generate the save path
         d2 = os.path.join(config.out_web_dir, NETDISP, STANAME, str(ENDTIME.year),
@@ -193,3 +197,12 @@ for net in config.arrays:
         # Lower DPI, but larger image size = smaller dots
         fig.savefig(thumbnail_name, dpi = 36, format = 'png')
 
+# Write out the new HTML file
+script_path = os.path.dirname(__file__)
+
+with open(os.path.join(script_path, 'index.template'), 'r') as f:
+    template = jinja2.Template(f.read())
+
+html = template.render(networks = all_nets, stations = all_stations)
+with open(os.path.join(config.out_web_dir, 'index.html'), 'w') as f:
+    f.write(html)
