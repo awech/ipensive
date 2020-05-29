@@ -552,7 +552,7 @@ input:disabled {
 	{% for net in stations %}
 	<select id="{{net}}Subnets" class="nav subnet">
 	    {% for sta in stations[net] %}
-	    <option value="{{sta}}" class="nav">{{sta}}</option>
+	    <option value="{{sta}}" class="nav">{{sta}} Array</option>
 	    {% endfor %}
 	</select>
 	{% endfor %}
