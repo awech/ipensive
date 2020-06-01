@@ -16,7 +16,6 @@ import lts_array
 # And the config file
 import config
 
-
 def get_volcano_backazimuth(latlist, lonlist, volcanoes):
     lon0 = np.mean(lonlist)
     lat0 = np.mean(latlist)
@@ -119,17 +118,6 @@ if __name__ == "__main__":
 
             # Get element rijs
             rij = lts_array.getrij(latlist, lonlist)
-
-            # Plot array coordinates as a check
-            fig1 = plt.figure(1)
-            plt.clf()
-            plt.plot(rij[0, :], rij[1, :], 'ro')
-            plt.axis('equal')
-            plt.ylabel('km')
-            plt.xlabel('km')
-            plt.title(stf[0].stats.station)
-            for i, tr in enumerate(stf):
-                plt.text(rij[0, i], rij[1, i], tr.stats.location)
 
             # %% Run LTS array processing
             lts_vel, lts_baz, t, mdccm, stdict, sigma_tau = lts_array.ltsva(stf, rij, WINLEN, WINOVER, ALPHA)
