@@ -29,32 +29,57 @@ arrays = [
              'id': 'DLL',
              'Alpha': 0.75,
              'channel': 'HDF',
+             'volcano': [
+                 {'name': 'Bogoslof', 'v_lat': 53.9310, 'v_lon': -168.0360},
+                 {'name': 'Veniaminof', 'v_lat': 56.195825, 'v_lon': -159.389536},
+                 {'name': 'Semisopochnoi', 'v_lat': 51.947, 'v_lon': 179.623}]
              },
             {'Name': 'Sand Point',
              'id': 'SDPI',
              'Alpha': 0.75,
              'channel': 'HDF',
+             'volcano': [
+                 {'name': 'Pavlof', 'v_lat': 55.417622, 'v_lon': -161.893669},
+                 {'name': 'Veniaminof', 'v_lat': 56.195825, 'v_lon': -159.389536},
+                 {'name': 'Shishaldin', 'v_lat': 54.755856, 'v_lon': -163.969961}]
              },
             {'Name': 'Akutan',
              'id': 'AKS',
              'Alpha': 0.75,
              'channel': 'BD*',
+             'volcano': [
+                 {'name': 'Makushin', 'v_lat': 53.8900, 'v_lon': -166.9200},
+                 {'name': 'Akutan', 'v_lat': 54.1300, 'v_lon': -165.9900},
+                 {'name': 'Westdahl', 'v_lat': 54.5200, 'v_lon': -164.6500}]
              },
             {'Name': 'Okmok',
              'id': 'OKIF',
              'Alpha': 0.75,
              'channel': 'HDF',
+             'volcano': [
+                 {'name': 'Bogoslof', 'v_lat': 53.9310, 'v_lon': -168.0360},
+                 {'name': 'Cleveland', 'v_lat': 52.8222, 'v_lon': -169.9464},
+                 {'name': 'Okmok', 'v_lat': 53.428865, 'v_lon': -168.131632},
+                 {'name': 'Makushin', 'v_lat': 53.8900, 'v_lon': -166.9200}]
              },
             {'Name': 'Cleveland',
-             'id': 'CLC*',
+             'id': 'CLCO2',
              'Alpha': 0.75,
              'channel': 'BDF',
+             'volcano': [
+                 {'name': 'Cleveland', 'v_lat': 52.8222, 'v_lon': -169.9464},
+                 {'name': 'Bogoslof', 'v_lat': 53.9310, 'v_lon': -168.0360}]
 
              },
             {'Name': 'Adak',
              'id': 'ADKI',
              'Alpha': 0.75,
              'channel': 'HDF',
+             'volcano': [
+                 {'name': 'Cleveland', 'v_lat': 52.8222, 'v_lon': -169.9464},
+                 {'name': 'Great Sitkin', 'v_lat': 52.077282, 'v_lon': -176.131317},
+                 {'name': 'Moffett', 'v_lat': 51.931876, 'v_lon': -176.740191},
+                 {'name': 'Semisopochnoi', 'v_lat': 51.947, 'v_lon': 179.623}]
              },
         ]
     },
