@@ -11,12 +11,12 @@ winston_port = 16022
 duration = 600  # DON'T CHANGE THIS!
 latency = 30.0  # seconds between timestamps and end of data window
 taper_val = 5.0  # seconds to taper beginning and end of trace before filtering
-f1 = 0.5  # minimum frequency for bandpass filter
+f1 = 0.8  # minimum frequency for bandpass filter
 f2 = 5.0  # maximum frequency for bandpass filter
 window_length = 30   # window length for each calculation [seconds]
 overlap = .5   # percent
 min_chan = 3
-mcthresh = 0.5  # where to draw the threshold line in MCCM plot
+mcthresh = 0.6  # where to draw the threshold line in MCCM plot
 
 # Infrasound channels list
 arrays = [
