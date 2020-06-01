@@ -16,6 +16,7 @@ import lts_array
 # And the config file
 import config
 
+
 def get_volcano_backazimuth(latlist, lonlist, volcanoes):
     lon0 = np.mean(lonlist)
     lat0 = np.mean(latlist)
@@ -159,8 +160,6 @@ if __name__ == "__main__":
                                                         style='italic',
                                                         zorder=10))
 
-            # DEBUG
-            config.out_web_dir = '/tmp/web_out'
             # Generate the save path
             d2 = os.path.join(config.out_web_dir, NETDISP, STANAME, str(ENDTIME.year),
                               '{:03d}'.format(ENDTIME.julday))
