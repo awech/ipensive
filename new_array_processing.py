@@ -5,6 +5,7 @@ import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client, header
 from obspy.geodetics.base import gps2dist_azimuth
@@ -134,6 +135,10 @@ if __name__ == "__main__":
             backazimuth_axis = axs[2]
             velocity_axis = axs[1]
 
+            # Tweak the y axis tick marks for the velocity plot
+            v_ystart, v_yend = velocity_axis.get_ylim()
+            velocity_axis.yaxis.set_ticks(np.arange(v_ystart, v_yend + .05, 0.05))
+
             # Use thinner lines on the pressure graph
             for line in axs[0].lines:
                 line.set_linewidth(0.6)
@@ -146,6 +151,8 @@ if __name__ == "__main__":
                              horizontalalignment = 'center',
                              verticalalignment = 'top')
 
+            axs[-1].set_xlabel(f'UTC Time ({ENDTIME.strftime("%m/%d/%Y")})')
+            axs[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
             # Shade the background for the velocity area of interest
             max_vel = 0.45
             min_vel = 0.3
@@ -200,7 +207,7 @@ if __name__ == "__main__":
 
             # Remove the large white margin at the top
             plt.tight_layout()
-            plt.subplots_adjust(top = 0.97, right = .90, bottom = 0.12)
+            plt.subplots_adjust(top = 0.97, right = .90, bottom = 0.11)
 
             # Adjust the colorbar positions to not cut off
             # FIXME: This is ugly, but works because the two axes are always
@@ -228,6 +235,9 @@ if __name__ == "__main__":
                         pos[3] = .02
 
                     axis.set_position(pos)
+                else:
+                    # Move the x axis ticks inside the plot
+                    axis.tick_params(axis = 'x', direction = "in")
 
             # Finally, save the full size image
             fig.savefig(filename, dpi = 72, format = 'png')
