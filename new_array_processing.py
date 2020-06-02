@@ -130,41 +130,62 @@ if __name__ == "__main__":
                 print(f"Unable to generate plots for {STA}")
                 continue
 
+            # NOTE: these are implementation dependant, and could easily change.
+            backazimuth_axis = axs[2]
+            velocity_axis = axs[1]
+
+            # Replace the graph title
+            for txt in axs[0].texts:
+                txt.remove()
+
+            title = fig.text(.5, 0.99, f"{STANAME} Infrasound Array",
+                             horizontalalignment = 'center',
+                             verticalalignment = 'top')
+
+            # Shade the background for the velocity area of interest
+            max_vel = 0.45
+            min_vel = 0.3
+            velocity_axis.axhspan(min_vel, max_vel, color = "gray", zorder = -1,
+                                  alpha=0.25)
+
             # Add volcano azimuth lines to plots
             volcanoes = get_volcano_backazimuth(latlist, lonlist,
                                                 array['volcano'])
 
-            backazimuth_axis = axs[2]
-
-            # decide where to put the volcano labels
+            # decide where to put the volcano labels (horizontal position)
             # Probably overkill, I suspect we could just use start+fixed offset
             # But since I don't actually know how "long" these graphs are, I'll
             # calculate for now
             limits = backazimuth_axis.get_xlim()
-            label_left = limits[0] + (((limits[1] - limits[0]) / 100) * 3)  # three-One-hundredths
+            #  25 is completly arbitrary, but it seems to work nicely enough.
+            label_left = limits[0] + (((limits[1] - limits[0]) / 25))
 
-            volc_stuff = []
+            volc_azimuth_markers = []
             for volc in volcanoes:
-                volc_stuff.append(backazimuth_axis.axhline(volc['back_azimuth'],
-                                                           ls = '--',
-                                                           color = "gray",
-                                                           zorder = -1))
+                # Add the line
+                volc_azimuth_markers.append(backazimuth_axis.axhline(volc['back_azimuth'],
+                                                                     ls = '--',
+                                                                     color = "gray",
+                                                                     zorder = -1))
 
-                volc_stuff.append(backazimuth_axis.text(label_left,
-                                                        volc['back_azimuth'] - 6,
-                                                        volc['name'],
-                                                        bbox={'facecolor': 'white',
-                                                              'edgecolor': 'white',
-                                                              'pad': 0},
-                                                        fontsize=8,
-                                                        style='italic',
-                                                        zorder=10))
+                # And the name
+                volc_azimuth_markers.append(backazimuth_axis.text(label_left,
+                                                                  volc['back_azimuth'] - 6,
+                                                                  volc['name'],
+                                                                  bbox={'facecolor': 'white',
+                                                                        'edgecolor': 'white',
+                                                                        'pad': 0},
+                                                                  fontsize=8,
+                                                                  style='italic',
+                                                                  zorder=10))
 
             # Generate the save path
-            d2 = os.path.join(config.out_web_dir, NETDISP, STANAME, str(ENDTIME.year),
+            d2 = os.path.join(config.out_web_dir, NETDISP, STANAME,
+                              str(ENDTIME.year),
                               '{:03d}'.format(ENDTIME.julday))
 
-            # Just for good measure, make sure it is the "real" path
+            # Just for good measure, make sure it is the "real" path.
+            # Probably completly paranoid and unnecessary.
             d2 = os.path.realpath(d2)
 
             # Make sure directory exists
@@ -174,7 +195,7 @@ if __name__ == "__main__":
             thumbnail_name = os.path.join(d2, f"{STANAME}_{ENDTIME.strftime('%Y%m%d-%H%M')}_thumb.png")
 
             # Remove the large white margin at the top
-            plt.subplots_adjust(top = 0.98)
+            plt.subplots_adjust(top = 0.97)
 
             # Adjust the colorbar positions to not cut off
             # FIXME: This is ugly, but works because the two axes are always
@@ -201,13 +222,18 @@ if __name__ == "__main__":
 
                     axis.set_position(pos)
 
+            # Finally, save the full size image
             fig.savefig(filename, dpi = 72, format = 'png')
 
             # Reconfigure plots for thumbnails
             # Remove the volcano back-azimuth stuff
-            for volc in volc_stuff:
+            for volc in volc_azimuth_markers:
                 volc.remove()
 
+            # and the plot title
+            title.remove()
+
+            # Resize down to thumbnail size and spacing
             fig.set_size_inches(4.0, 5.5)
             plt.subplots_adjust(left=0, right=0.99, bottom= 0.01, top=1.0,
                                 wspace=0, hspace=0)
