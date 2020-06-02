@@ -134,6 +134,10 @@ if __name__ == "__main__":
             backazimuth_axis = axs[2]
             velocity_axis = axs[1]
 
+            # Use thinner lines on the pressure graph
+            for line in axs[0].lines:
+                line.set_linewidth(0.6)
+
             # Replace the graph title
             for txt in axs[0].texts:
                 txt.remove()
@@ -195,7 +199,8 @@ if __name__ == "__main__":
             thumbnail_name = os.path.join(d2, f"{STANAME}_{ENDTIME.strftime('%Y%m%d-%H%M')}_thumb.png")
 
             # Remove the large white margin at the top
-            plt.subplots_adjust(top = 0.97)
+            plt.tight_layout()
+            plt.subplots_adjust(top = 0.97, right = .90, bottom = 0.12)
 
             # Adjust the colorbar positions to not cut off
             # FIXME: This is ugly, but works because the two axes are always
@@ -212,12 +217,14 @@ if __name__ == "__main__":
                         # Vertical color bar. Move to the left.
                         found_first = True
                         pos[0] -= .03
+                        pos[1] += .01
                         pos[2] = .02
+                        pos[3] -= 0.05
                     else:
-                        pass
                         # This is the horizontal color bar. Nudge it up (and to the left).
-                        pos[0] -= .08
+                        pos[0] -= .02
                         pos[1] += .015
+                        pos[2] -= 0.1
                         pos[3] = .02
 
                     axis.set_position(pos)
