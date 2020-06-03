@@ -135,30 +135,29 @@ if __name__ == "__main__":
             backazimuth_axis = axs[2]
             velocity_axis = axs[1]
 
+            ################ Velocity Graph ##########################
             # Tweak the y axis tick marks for the velocity plot
             v_ystart, v_yend = velocity_axis.get_ylim()
-            velocity_axis.yaxis.set_ticks(np.arange(v_ystart, v_yend + .05, 0.05))
+            velocity_axis.yaxis.set_ticks(np.arange(v_ystart, 0.55, 0.05))
+            velocity_axis.set_ylim(top = 0.5)
 
-            # Use thinner lines on the pressure graph
-            for line in axs[0].lines:
-                line.set_linewidth(0.6)
-
-            # Replace the graph title
-            for txt in axs[0].texts:
-                txt.remove()
-
-            title = fig.text(.5, 0.99, f"{STANAME} Infrasound Array",
-                             horizontalalignment = 'center',
-                             verticalalignment = 'top')
-
-            axs[-1].set_xlabel(f'UTC Time ({ENDTIME.strftime("%m/%d/%Y")})')
-            axs[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
             # Shade the background for the velocity area of interest
             max_vel = 0.45
             min_vel = 0.3
             velocity_axis.axhspan(min_vel, max_vel, color = "gray", zorder = -1,
                                   alpha=0.25)
 
+            ##################### Pressure Graph ##################
+            # Use thinner lines on the pressure graph
+            for line in axs[0].lines:
+                line.set_linewidth(0.6)
+
+            ####################### X Axis Formatting #####################
+            # Format the date/time stuff
+            axs[-1].set_xlabel(f'UTC Time ({ENDTIME.strftime("%d %B %Y")})')
+            axs[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+            ######################### Backazimuth Plot #####################
             # Add volcano azimuth lines to plots
             volcanoes = get_volcano_backazimuth(latlist, lonlist,
                                                 array['volcano'])
@@ -190,6 +189,57 @@ if __name__ == "__main__":
                                                                   style='italic',
                                                                   zorder=10))
 
+            #################### Plot Layout ##################################
+            # Replace the graph title
+            for txt in axs[0].texts:
+                txt.remove()
+
+            title = fig.text(.5, 0.99, f"{STANAME} Infrasound Array",
+                             horizontalalignment = 'center',
+                             verticalalignment = 'top')
+
+            # Tighten up the layout
+            plt.tight_layout()
+            plt.subplots_adjust(top = 0.97, right = .90, bottom = 0.11)
+
+            # Adjust the colorbar positions to not cut off
+            # FIXME: This is ugly, but works because the two axes are always
+            # added in the same order.
+            # The first one is the vertical bar, the second the horizontal.
+            # Would be better if we had some positive indication of which was which.
+            vertical_colorbar = None
+            horizontal_bar = None
+
+            for axis in fig.axes:
+                if axis not in axs:
+                    # This is a colorbar
+                    pos = axis.get_position().get_points().flatten()
+                    if vertical_colorbar is None:
+                        # Vertical color bar. Move to the left.
+                        vertical_colorbar = axis
+                        pos[0] -= .03
+                        pos[1] += .01
+                        pos[2] = .02
+                        pos[3] -= 0.05
+                    else:
+                        # This is the horizontal color bar. Nudge it up (and to the left).
+                        horizontal_bar = axis
+                        pos[0] -= .02
+                        pos[1] += .015
+                        pos[2] -= 0.1
+                        pos[3] = .02
+
+                        # Make sure this one only has integer tick marks
+                        _, x_max = axis.get_xlim()
+                        axis.xaxis.set_ticks(np.arange(1, x_max))
+
+                    axis.set_position(pos)
+                else:
+                    # Move the x axis ticks inside the plot
+                    axis.tick_params(axis = 'x', direction = "in")
+
+            ###################################################################
+
             # Generate the save path
             d2 = os.path.join(config.out_web_dir, NETDISP, STANAME,
                               str(ENDTIME.year),
@@ -204,40 +254,6 @@ if __name__ == "__main__":
 
             filename = os.path.join(d2, f"{STANAME}_{ENDTIME.strftime('%Y%m%d-%H%M')}.png")
             thumbnail_name = os.path.join(d2, f"{STANAME}_{ENDTIME.strftime('%Y%m%d-%H%M')}_thumb.png")
-
-            # Remove the large white margin at the top
-            plt.tight_layout()
-            plt.subplots_adjust(top = 0.97, right = .90, bottom = 0.11)
-
-            # Adjust the colorbar positions to not cut off
-            # FIXME: This is ugly, but works because the two axes are always
-            # added in the same order.
-            # The first one is the vertical bar, the second the horizontal.
-            # Would be better if we had some positive indication of which was which.
-            found_first = False
-
-            for axis in fig.axes:
-                if axis not in axs:
-                    # This is a colorbar
-                    pos = axis.get_position().get_points().flatten()
-                    if not found_first:
-                        # Vertical color bar. Move to the left.
-                        found_first = True
-                        pos[0] -= .03
-                        pos[1] += .01
-                        pos[2] = .02
-                        pos[3] -= 0.05
-                    else:
-                        # This is the horizontal color bar. Nudge it up (and to the left).
-                        pos[0] -= .02
-                        pos[1] += .015
-                        pos[2] -= 0.1
-                        pos[3] = .02
-
-                    axis.set_position(pos)
-                else:
-                    # Move the x axis ticks inside the plot
-                    axis.tick_params(axis = 'x', direction = "in")
 
             # Finally, save the full size image
             fig.savefig(filename, dpi = 72, format = 'png')
