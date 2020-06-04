@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Use strftime so we always get a string out of here.
     # Default if no arguments given is current time
     parser.add_argument('T0', nargs='*',
-                        default=[UTCDateTime.utcnow().strftime('%Y-%m-%dT%H:%M:00Z'), ])
+                        default=[(UTCDateTime.utcnow() - 600).strftime('%Y-%m-%dT%H:%M:00Z'), ])
 
     args = parser.parse_args()
     if len(args.T0) > 2:

@@ -1,5 +1,5 @@
 out_web_dir = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'
-
+out_web_dir = '/tmp/infrasound'
 #######
 # TODO: Determine if we need these
 out_valve_dir = '/lamp/valve3/seismic/infrasound/raw'
