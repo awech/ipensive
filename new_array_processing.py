@@ -122,7 +122,11 @@ if __name__ == "__main__":
             rij = lts_array.getrij(latlist, lonlist)
 
             # %% Run LTS array processing
-            lts_vel, lts_baz, t, mdccm, stdict, sigma_tau = lts_array.ltsva(stf, rij, WINLEN, WINOVER, ALPHA)
+            try:
+                lts_vel, lts_baz, t, mdccm, stdict, sigma_tau = lts_array.ltsva(stf, rij, WINLEN, WINOVER, ALPHA)
+            except:
+                print("Error processing data. Moving on.")
+                continue
 
             # %% Plotting
             try:
