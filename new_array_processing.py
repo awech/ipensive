@@ -100,6 +100,7 @@ if __name__ == "__main__":
             st.remove_sensitivity()
 
             stf = st.copy()
+            stf.detrend('demean')
             stf.taper(max_percentage=None, max_length=config.taper_val)
             stf.filter("bandpass", freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
             st.trim(STARTTIME, ENDTIME, pad='true', fill_value=0)
