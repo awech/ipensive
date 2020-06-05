@@ -3,16 +3,15 @@ import argparse
 import os
 import warnings
 
-import numpy as np
-import matplotlib.pyplot as plt
+import jinja2
+# Import the package.
+import lts_array
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+import numpy as np
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client, header
 from obspy.geodetics.base import gps2dist_azimuth
-import jinja2
-
-# Import the package.
-import lts_array
 
 # And the config file
 import config
@@ -84,15 +83,16 @@ if __name__ == "__main__":
             print('Reading in data from IRIS')
             client = Client("IRIS")
             try:
-
                 st = client.get_waveforms(NET, STA, LOC, CHAN,
-                                          STARTTIME, ENDTIME, attach_response=True)
+                                          STARTTIME - 2 * config.taper_val,
+                                          ENDTIME + 2 * config.taper_val,
+                                          attach_response=True)
             except header.FDSNNoDataException:
                 print(f"No data retrieved for {STA}")
                 continue
 
             st.merge(fill_value='latest')
-            st.trim(STARTTIME, ENDTIME, pad='true', fill_value=0)
+            st.trim(STARTTIME - 2 * config.taper_val, ENDTIME + 2 * config.taper_val, pad='true', fill_value=0)
             st.sort()
             print(st)
 
@@ -100,8 +100,10 @@ if __name__ == "__main__":
             st.remove_sensitivity()
 
             stf = st.copy()
+            stf.detrend('demean')
+            stf.taper(max_percentage=None, max_length=config.taper_val)
             stf.filter("bandpass", freqmin=FMIN, freqmax=FMAX, corners=2, zerophase=True)
-            stf.taper(max_percentage=0.05)
+            st.trim(STARTTIME, ENDTIME, pad='true', fill_value=0)
 
             # %% Get inventory and lat/lon info
             inv = client.get_stations(network=NET, station=STA, channel=CHAN,
