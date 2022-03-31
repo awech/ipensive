@@ -3,4 +3,4 @@ __pycache__/
 *.pyc
 
 logs/**
-!logs/.gitkeep 
+!logs/.gitkeep
