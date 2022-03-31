@@ -20,9 +20,9 @@ Run on a cron every 10 minutes:<br>
 `\*/10 \* \* \* \* python /path_to_file/array_processing.py >> /dev/null 2>&1` <br>
 
 
-### webpage configuration
+### Webpage configuration
 The webpage is automatically generated each time using jinja2 to populate the <i>index.template</i> file with the network and array structure from the config file.
-(This method was adapted from a forked version of this code by Israel Brewster, and the html and javascript front-end was originally developed by Tom Parker)<br>
+(This method was adapted from a forked version of this code by Israel Brewster, and the html and javascript front-end was originally developed by Tom Parker)<br><br>
 Note that if you do not want to process a particular array (e.g. bad/no data), the array must remain defined in <i>config.py</i> in order to remain a viewing option on the webpage (for past data). In this case, you could just comment out the SCNL's for that particular array in <i>config.py</i> 
 
 ### Back populate data
