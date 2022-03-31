@@ -17,7 +17,7 @@ Edit <i>config.py</i>. There are<br>
 Note that each individual array can have its own unique parameters to selectively override the default (though this wouldn't work well for the output directories)<br>
 <br>
 Run on a cron every 10 minutes:<br>
-`\*/10 \* \* \* \* python /path_to_file/array_processing.py >> /dev/null 2>&1` <br>
+`\*/10 \* \* \* \* ./array_processing.py >> /dev/null 2>&1` <br>
 
 
 ### Webpage configuration
