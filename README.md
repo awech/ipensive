@@ -9,7 +9,7 @@ Tested on python 3.7<br>
 - jinja2<br>
 
 ### Usage
-Edit <i>config.py</i>. There are:<br>
+Edit <i>config.py</i>. There are<br>
 - system level parameters: controlling data source and output location<br>
 - processing parameters: controlling data processing details (filters, window length, etc.)<br>
 - plotting parameters: slight control on how a few things appear (mostly this allows for differentiating between acoustic and hydroacoustic velocities)<br>
