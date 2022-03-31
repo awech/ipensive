@@ -1,8 +1,8 @@
 # SYSTEM PARAMETERS
-HOSTNAME	  = '137.227.224.220'
-PORT		  = 16002
-OUT_WEB_DIR   = '/Users/awech-local/Desktop/web_out'	# html & image ouptut directory
-OUT_ASCII_DIR = '/Users/awech-local/Desktop/ascii_out'	# ascii output directory (delete if undesired)
+HOSTNAME	  = 'pubavo1.wr.usgs.gov'
+PORT		  = 16022
+OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image ouptut directory
+OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
 LOGS_DIR	  = './logs'
 
 # DEFAUlT PROCESSING PARAMETERS
