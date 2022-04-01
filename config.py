@@ -7,13 +7,13 @@ LOGS_DIR	  = ''
 
 # DEFAUlT PROCESSING PARAMETERS
 DURATION      = 600  # DON'T CHANGE THIS!
-LATENCY       = 30.0 # how long to pause and wait for data latency to catch up before processing (seconds)
-EXTRA_PAUSE   = 0 	 # extra pause in case some arrays are extra latent
+LATENCY       = 60	 # how long to pause and wait for data latency to catch up before processing (seconds)
+EXTRA_PAUSE   = 0 	 # extra pause in case some arrays are extra latent (Dillingham)
 FREQMIN		  = 0.8  # minimum frequency
 FREQMAX		  = 5.0  # maximum frequency
 TAPER	      = 5.0  # seconds to taper beginning and end of trace before filtering
 WINDOW_LENGTH = 30   # window length for each calculation [seconds]
-OVERLAP       = 15   # seconds
+OVERLAP       = 15   # amount of overlap between windos [seconds]
 MIN_CHAN      = 3	 # minimum number of channels needed to perform inversion
 
 # DEFAULT PLOTTING PARAMETERS
@@ -29,25 +29,6 @@ NETWORKS=[
 	{
 		'Name' : 'AVO',
 		'ARRAYS' : [
-
-			dict({'Name':'Amchitka',
-				  'SCNL':[
-							{'scnl':'AMKA.HDF.AV.01'	, 'sta_lat': 51.379130	, 'sta_lon': 179.30130},
-							{'scnl':'AMKA.HDF.AV.02'	, 'sta_lat': 51.378489	, 'sta_lon': 179.30183},
-							{'scnl':'AMKA.HDF.AV.03'	, 'sta_lat': 51.378105	, 'sta_lon': 179.301225},
-							{'scnl':'AMKA.HDF.AV.04'	, 'sta_lat': 51.37831	, 'sta_lon': 179.30028},
-							{'scnl':'AMKA.HDF.AV.05'	, 'sta_lat': 51.379055	, 'sta_lon': 179.30026},
-							{'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
-						],
-				'digouti': (1/400000)/0.0275,
-				'volcano':[
-			   			   {'name':	'Little Sitkin','v_lat': 51.95,	'v_lon': 178.543},
-						   {'name': 'Semisopochnoi','v_lat': 51.947,'v_lon': 179.623},
-						   {'name': 'Gareloi',	    'v_lat': 51.79,	'v_lon':-178.794},
-						 ],
-				'AZ_MIN': 270,
-				'AZ_MAX': 90,
-			}),
 
 			dict({'Name':'Kenai',
 				  'SCNL':[
@@ -70,6 +51,38 @@ NETWORKS=[
 				'AZ_MAX': 80
 			}),
 
+			dict({'Name':'Sand Point',
+				  'SCNL':[
+							{'scnl':'SDPI.HDF.AV.01'	, 'sta_lat': 55.34900	, 'sta_lon': -160.47640},
+							{'scnl':'SDPI.HDF.AV.02'	, 'sta_lat': 55.34870	, 'sta_lon': -160.47683},
+							{'scnl':'SDPI.HDF.AV.03'	, 'sta_lat': 55.34934	, 'sta_lon': -160.47732},
+							{'scnl':'SDPI.HDF.AV.04'	, 'sta_lat': 55.34952	, 'sta_lon': -160.47661},
+							{'scnl':'SDPI.HDF.AV.05'	, 'sta_lat': 55.34922	, 'sta_lon': -160.47650},
+							{'scnl':'SDPI.HDF.AV.06'	, 'sta_lat': 55.34919	, 'sta_lon': -160.47710},
+						 ],
+				'digouti': (1/419430.0)/0.0275,
+				'volcano':[
+			   				{'name': 'Pavlof',    'v_lat': 55.417622,'v_lon': -161.893669},
+			   				{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961}
+		   				  ],
+			}),
+
+			dict({'Name':'Akutan',
+		  		  'SCNL':[
+							{'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
+							{'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
+							{'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
+							{'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
+					     ],
+				'digouti': (1/419430.0)/0.05,
+				'volcano':[
+							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200},
+							{'name': 'Akutan',   'v_lat': 54.1300,   'v_lon': -165.9900},
+							{'name': 'Westdahl', 'v_lat': 54.5200,   'v_lon': -164.6500}
+						  ],
+			}),
+
 			dict({'Name':'Okmok',
 				  'SCNL':[
 							{'scnl':'OKIF.HDF.AV.01'	, 'sta_lat': 53.41083004	, 'sta_lon': -167.91426701},
@@ -88,21 +101,19 @@ NETWORKS=[
 						  ],
 			}),
 
-			dict({'Name':'Sand Point',
+			dict({'Name':'Cleveland',
 				  'SCNL':[
-							{'scnl':'SDPI.HDF.AV.01'	, 'sta_lat': 55.34900	, 'sta_lon': -160.47640},
-							{'scnl':'SDPI.HDF.AV.02'	, 'sta_lat': 55.34870	, 'sta_lon': -160.47683},
-							{'scnl':'SDPI.HDF.AV.03'	, 'sta_lat': 55.34934	, 'sta_lon': -160.47732},
-							{'scnl':'SDPI.HDF.AV.04'	, 'sta_lat': 55.34952	, 'sta_lon': -160.47661},
-							{'scnl':'SDPI.HDF.AV.05'	, 'sta_lat': 55.34922	, 'sta_lon': -160.47650},
-							{'scnl':'SDPI.HDF.AV.06'	, 'sta_lat': 55.34919	, 'sta_lon': -160.47710},
+							{'scnl':'CLCO1.BDF.AV.--'	, 'sta_lat': 52.7864125000	, 'sta_lon': -169.7229250000},
+							{'scnl':'CLCO2.BDF.AV.--'	, 'sta_lat': 52.7871866667	, 'sta_lon': -169.7244333330},
+							{'scnl':'CLCO3.BDF.AV.--'	, 'sta_lat': 52.7874600000	, 'sta_lon': -169.7210166667},
+							{'scnl':'CLCO4.BDF.AV.--'	, 'sta_lat': 52.7861266667	, 'sta_lon': -169.7203966667},
+							{'scnl':'CLCO5.BDF.AV.--'	, 'sta_lat': 52.7851866667	, 'sta_lon': -169.7250066667},
 						 ],
-				'digouti': (1/419430.0)/0.0275,
+				'digouti': (1/419430.0)/(1.62e-2),
 				'volcano':[
-			   				{'name': 'Pavlof',    'v_lat': 55.417622,'v_lon': -161.893669},
-			   				{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
-			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961}
-		   				  ],
+							{'name': 'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
+							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360}
+						  ],
 			}),
 
 			dict({'Name':'Adak',
@@ -122,19 +133,23 @@ NETWORKS=[
 						  ],
 			}),
 
-			dict({'Name':'Cleveland',
+			dict({'Name':'Amchitka',
 				  'SCNL':[
-							{'scnl':'CLCO1.BDF.AV.--'	, 'sta_lat': 52.7864125000	, 'sta_lon': -169.7229250000},
-							{'scnl':'CLCO2.BDF.AV.--'	, 'sta_lat': 52.7871866667	, 'sta_lon': -169.7244333330},
-							{'scnl':'CLCO3.BDF.AV.--'	, 'sta_lat': 52.7874600000	, 'sta_lon': -169.7210166667},
-							{'scnl':'CLCO4.BDF.AV.--'	, 'sta_lat': 52.7861266667	, 'sta_lon': -169.7203966667},
-							{'scnl':'CLCO5.BDF.AV.--'	, 'sta_lat': 52.7851866667	, 'sta_lon': -169.7250066667},
-						 ],
-				'digouti': (1/419430.0)/(1.62e-2),
+							{'scnl':'AMKA.HDF.AV.01'	, 'sta_lat': 51.379130	, 'sta_lon': 179.30130},
+							{'scnl':'AMKA.HDF.AV.02'	, 'sta_lat': 51.378489	, 'sta_lon': 179.30183},
+							{'scnl':'AMKA.HDF.AV.03'	, 'sta_lat': 51.378105	, 'sta_lon': 179.301225},
+							{'scnl':'AMKA.HDF.AV.04'	, 'sta_lat': 51.37831	, 'sta_lon': 179.30028},
+							{'scnl':'AMKA.HDF.AV.05'	, 'sta_lat': 51.379055	, 'sta_lon': 179.30026},
+							{'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
+						],
+				'digouti': (1/400000)/0.0275,
 				'volcano':[
-							{'name': 'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
-							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360}
-						  ],
+			   			   {'name':	'Little Sitkin','v_lat': 51.95,	'v_lon': 178.543},
+						   {'name': 'Semisopochnoi','v_lat': 51.947,'v_lon': 179.623},
+						   {'name': 'Gareloi',	    'v_lat': 51.79,	'v_lon':-178.794},
+						 ],
+				'AZ_MIN': 270,
+				'AZ_MAX': 90,
 			}),
 
 			dict({'Name':'Whittier',
@@ -152,21 +167,6 @@ NETWORKS=[
 			   			 ],
 			}),
 
-			dict({'Name':'Akutan',
-		  		  'SCNL':[
-							{'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
-							{'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
-							{'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
-							{'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
-					     ],
-				'digouti': (1/419430.0)/0.05,
-				'volcano':[
-							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200},
-							{'name': 'Akutan',   'v_lat': 54.1300,   'v_lon': -165.9900},
-							{'name': 'Westdahl', 'v_lat': 54.5200,   'v_lon': -164.6500}
-						  ],
-			}),
-
 			dict({'Name':'Dillingham',
 				  'SCNL':[
 							{'scnl':'DLL.HDF.AV.01'	, 'sta_lat': 59.13988781	, 'sta_lon': -158.6209290},
@@ -182,8 +182,8 @@ NETWORKS=[
 							{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
 							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623}
 						  ],
-				'EXTRA_PAUSE':20,
-			})
+				'EXTRA_PAUSE': 90,
+			}),			
 		]
 	},
 
@@ -226,32 +226,6 @@ NETWORKS=[
 						  ],
 			}),
 
-			dict({'Name':'Wake Island South',
-				  'SCNL':[
-							{'scnl':'H11S1.EDH.IM.--'	, 'sta_lat': 18.50827	, 'sta_lon':  166.700272},
-							{'scnl':'H11S2.EDH.IM.--'	, 'sta_lat': 18.49082	, 'sta_lon':  166.705002},
-							{'scnl':'H11S3.EDH.IM.--'	, 'sta_lat': 18.49568	, 'sta_lon':  166.686462},
-						 ],
-				'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-				'PORT' : 16011,
-				'digouti': 1/1860.86,
-				'volcano':[
-							{'name':	'Saipan',	'v_lat': 15.19,  'v_lon': 145.74},
-							{'name':	'Anatahan', 'v_lat': 16.35,  'v_lon': 145.67},
-							# {'name':	'Sarigan', 	'v_lat': 16.708, 'v_lon': 145.78},
-							{'name':	'Pagan', 	'v_lat': 18.13,  'v_lon': 145.80},
-							{'name':	'Ahyi', 	'v_lat': 20.42,  'v_lon': 145.03},
-							# {'name':	'FdP', 		'v_lat': 20.546, 'v_lon': 144.893}
-						  ],
-				'FREQMIN': 1,
-				'FREQMAX': 10,
-				'VEL_MIN': 1.4,
-				'VEL_MAX': 1.6,
-				'AZ_MIN' : 250,
-				'AZ_MAX' : 290,	
-				'ARRAY_LABEL' : 'Hydroacoustic'			
-			}),
-
 			dict({'Name':'Wake Island North',
 				  'SCNL':[
 							{'scnl':'H11N1.EDH.IM.--'	, 'sta_lat': 19.71356	, 'sta_lon':  166.891083},
@@ -276,6 +250,32 @@ NETWORKS=[
 				'AZ_MIN' : 250,
 				'AZ_MAX' : 290,
 				'ARRAY_LABEL' : 'Hydroacoustic'
+			}),
+
+			dict({'Name':'Wake Island South',
+				  'SCNL':[
+							{'scnl':'H11S1.EDH.IM.--'	, 'sta_lat': 18.50827	, 'sta_lon':  166.700272},
+							{'scnl':'H11S2.EDH.IM.--'	, 'sta_lat': 18.49082	, 'sta_lon':  166.705002},
+							{'scnl':'H11S3.EDH.IM.--'	, 'sta_lat': 18.49568	, 'sta_lon':  166.686462},
+						 ],
+				'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
+				'PORT' : 16011,
+				'digouti': 1/1860.86,
+				'volcano':[
+							{'name':	'Saipan',	'v_lat': 15.19,  'v_lon': 145.74},
+							{'name':	'Anatahan', 'v_lat': 16.35,  'v_lon': 145.67},
+							# {'name':	'Sarigan', 	'v_lat': 16.708, 'v_lon': 145.78},
+							{'name':	'Pagan', 	'v_lat': 18.13,  'v_lon': 145.80},
+							{'name':	'Ahyi', 	'v_lat': 20.42,  'v_lon': 145.03},
+							# {'name':	'FdP', 		'v_lat': 20.546, 'v_lon': 144.893}
+						  ],
+				'FREQMIN': 1,
+				'FREQMAX': 10,
+				'VEL_MIN': 1.4,
+				'VEL_MAX': 1.6,
+				'AZ_MIN' : 250,
+				'AZ_MAX' : 290,	
+				'ARRAY_LABEL' : 'Hydroacoustic'			
 			}),
 		]
 	}
