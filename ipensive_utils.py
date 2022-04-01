@@ -350,7 +350,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, array, network):
 	axs1.set_ylabel('Pressure [Pa]')
 	axs1b = axs1.twinx()
 	axs1b.set_yticks([])
-	axs1b.set_ylabel('{:.1f} - {:.1f} Hz'.format(params_tmp['FREQMIN'], params_tmp['FREQMAX']))
+	axs1b.set_ylabel('{:.1f} - {:.1f} Hz'.format(params_tmp['FREQMIN'], params_tmp['FREQMAX']), labelpad=6)
 	
 	axs2=plt.subplot(4,1,2)
 	sc=plt.scatter(t,mccm,c=mccm,edgecolors='k',lw=.3,cmap=cm)
