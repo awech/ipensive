@@ -1,9 +1,9 @@
 # SYSTEM PARAMETERS
-HOSTNAME	  = 'pubavo1.wr.usgs.gov'
-PORT		  = 16022
+HOSTNAME	  = '137.227.224.220'
+PORT		  = 16002
 OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image ouptut directory
 OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
-LOGS_DIR	  = './logs'
+LOGS_DIR	  = ''
 
 # DEFAUlT PROCESSING PARAMETERS
 DURATION      = 600  # DON'T CHANGE THIS!
