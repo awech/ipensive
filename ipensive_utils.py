@@ -24,13 +24,19 @@ rcParams.update({'font.size': fonts})
 
 
 def write_to_log(day):
+
+	if 'LOGS_DIR' in dir(config) and len(config.LOGS_DIR)>0:
+		LOGS_DIR = config.LOGS_DIR
+	else:
+		LOGS_DIR = os.path.dirname(__file__) + '/logs'
+
 	year=UTCDateTime(day).strftime('%Y')
 	month=UTCDateTime(day).strftime('%Y-%m')
-	if not os.path.exists(config.LOGS_DIR+'/'+year):
-		os.mkdir(config.LOGS_DIR+'/'+year)
-	if not os.path.exists(config.LOGS_DIR+'/'+year+'/'+month):
-		os.mkdir(config.LOGS_DIR+'/'+year+'/'+month)
-	file=config.LOGS_DIR+'/'+year+'/'+month+'/'+UTCDateTime(day).strftime('%Y-%m-%d')+'.log'
+	if not os.path.exists(LOGS_DIR+'/'+year):
+		os.mkdir(LOGS_DIR+'/'+year)
+	if not os.path.exists(LOGS_DIR+'/'+year+'/'+month):
+		os.mkdir(LOGS_DIR+'/'+year+'/'+month)
+	file=LOGS_DIR+'/'+year+'/'+month+'/'+UTCDateTime(day).strftime('%Y-%m-%d')+'.log'
 	os.system('touch {}'.format(file))
 	f=open(file,'a')
 	sys.stdout=sys.stderr=f
@@ -178,7 +184,8 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
 	for sta in scnl:
 		
 		try:
-			tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1], T1, T2, cleanup=True)
+			tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
+									T1, T2, cleanup=True)
 			if len(tr)>1:
 				if fill_value==0 or fill_value==None:
 					tr.detrend('demean')
@@ -194,6 +201,11 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
 						sub_trace.stats.sampling_rate=np.round(sub_trace.stats.sampling_rate)
 				print('Merging gappy data...')
 				tr.merge(fill_value=fill_value)
+
+			# deal where trace length is smaller than expected window length
+			if tr[0].stats.endtime - tr[0].stats.starttime < T2 - T1:
+				tr.detrend('demean')
+				tr.taper(max_percentage=0.01)
 		except:
 			tr=Stream()
 		# if no data, create a blank trace for that channel
