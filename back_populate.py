@@ -1,4 +1,4 @@
-#!/Users/awech-local/opt/miniconda3/envs/ipensive/bin/python
+#!/home/rtem/miniconda3/envs/ipensive/bin/python
 # -*- coding: utf-8 -*-
 """
 Created on 30-Mar-2022
