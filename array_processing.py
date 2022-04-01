@@ -47,8 +47,6 @@ def process_array(array, network, T0):
 	if len(scnl) < params['MIN_CHAN']:
 		print('Not enough channels defined.')
 		return
-	# st    = utils.grab_data(scnl['scnl'].tolist(),t1-params['LATENCY'],t2+params['LATENCY']+params['WINDOW_LENGTH'],
-	# 						hostname=params['HOSTNAME'],port=params['PORT'],fill_value=0)
 	st    = utils.grab_data(scnl['scnl'].tolist(), T1, T2,
 							hostname=params['HOSTNAME'], port=params['PORT'], fill_value=0)
 	st    = utils.add_coordinate_info(st,scnl)
