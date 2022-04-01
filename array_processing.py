@@ -1,4 +1,4 @@
-#!/Users/awech-local/opt/miniconda3/envs/ipensive/bin/python
+#!/home/rtem/miniconda3/envs/ipensive/bin/python
 # -*- coding: utf-8 -*-
 """
 Created on 24-Apr-2018
@@ -28,6 +28,9 @@ def process_array(array, network, T0):
 	t1 = T0 - config.DURATION
 	t2 = T0
 
+	T1 = t1 - config.TAPER
+	T2 = t2 + config.WINDOW_LENGTH + config.TAPER
+
 	# get default params from config
 	params={var:getattr(config,var) for var in dir(config) if var not in ['NETWORKS'] and '__' not in var}
 
@@ -44,8 +47,10 @@ def process_array(array, network, T0):
 	if len(scnl) < params['MIN_CHAN']:
 		print('Not enough channels defined.')
 		return
-	st    = utils.grab_data(scnl['scnl'].tolist(),t1-params['LATENCY'],t2+params['LATENCY']+params['WINDOW_LENGTH'],
-							hostname=params['HOSTNAME'],port=params['PORT'],fill_value=0)
+	# st    = utils.grab_data(scnl['scnl'].tolist(),t1-params['LATENCY'],t2+params['LATENCY']+params['WINDOW_LENGTH'],
+	# 						hostname=params['HOSTNAME'],port=params['PORT'],fill_value=0)
+	st    = utils.grab_data(scnl['scnl'].tolist(), T1, T2,
+							hostname=params['HOSTNAME'], port=params['PORT'], fill_value=0)
 	st    = utils.add_coordinate_info(st,scnl)
 	array = utils.get_volcano_backazimuth(st,array)
 	########################
@@ -70,9 +75,6 @@ def process_array(array, network, T0):
 
 	#### preprocess data ####
 	st.detrend('demean')
-	st.taper(max_percentage=None,max_length=params['TAPER'])
-	st.filter('bandpass',freqmin=params['FREQMIN'],freqmax=params['FREQMAX'],corners=2,zerophase=True)
-	st.trim(t1,t2+params['WINDOW_LENGTH']+1)
 	for tr in st:
 		if tr.stats['sampling_rate'] == 100:
 			tr.decimate(2)
@@ -80,6 +82,9 @@ def process_array(array, network, T0):
 			tr.resample(50.0)
 		if tr.stats['sampling_rate'] == 50:
 			tr.decimate(2)
+	st.taper(max_percentage=None,max_length=params['TAPER'])
+	st.filter('bandpass',freqmin=params['FREQMIN'],freqmax=params['FREQMAX'],corners=2,zerophase=True)
+	st.trim(t1,t2+params['WINDOW_LENGTH'])
 	########################
 
 	velocity = []
@@ -154,12 +159,15 @@ if __name__ == '__main__':
 
 	timer_start = time.time()
 	if len(sys.argv) == 1:                              # No time given. Run from cron. Use current time
+		
 		T0=UTCDateTime.utcnow()                         # get current timestamp
+		
 		# Set up logging
-		if 'LOGS_DIR' in dir(config):
-			utils.write_to_log(T0.strftime('%Y-%m-%d'))
+		utils.write_to_log(T0.strftime('%Y-%m-%d'))
+		
 		# round down to the nearest 10-minute
 		T0=UTCDateTime(T0.strftime('%Y-%m-%d %H:%M')[:-1]+'0')
+		
 		# Pause to allow for data latency to catch up
 		time.sleep(config.LATENCY+config.WINDOW_LENGTH)
 		timer_start = timer_start + config.LATENCY+config.WINDOW_LENGTH
@@ -173,7 +181,7 @@ if __name__ == '__main__':
 			warnings.warn('Needs end-time argument. eg: array_processing.py 201701020205')
 			sys.exit()
 
-	print('Timestamp: {}'.format(UTCDateTime.utcnow()))
+	print('Start time: {}'.format(UTCDateTime.utcnow()))
 	print('Processing {} - {}'.format((T0 - config.DURATION).strftime('%Y.%m.%d %H:%M'),T0.strftime('%Y.%m.%d %H:%M')))
 
 	all_nets=[]
@@ -196,3 +204,4 @@ if __name__ == '__main__':
 		f.write(html)
 
 	print('{:.1f} seconds to process all'.format(time.time() - timer_start))
+	print('Finish time: {}'.format(UTCDateTime.utcnow()))
