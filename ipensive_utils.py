@@ -364,7 +364,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, array, network):
 	axs2.xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
 	axs2.set_xticklabels([])
 	axs2.tick_params(direction='in',axis='x',top='on')
-	axs2.set_ylabel('MCCM')
+	axs2.set_ylabel(r'$M_{d}CCM$')
 	
 	axs3=plt.subplot(4,1,3)
 	rect=Rectangle((T1,params_tmp['VEL_MIN']),T2-T1,params_tmp['VEL_MAX'] - params_tmp['VEL_MIN'])
@@ -417,7 +417,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, array, network):
 	cbot=axs4.get_position().y0
 	cbaxes=fig1.add_axes([.91,cbot,.02,ctop-cbot])
 	hc=plt.colorbar(sc,cax=cbaxes)
-	hc.set_label('MCCM')
+	hc.set_label(r'$M_{d}CCM$')
 	
 	print(array['Name'])
 	d0=config.OUT_WEB_DIR+'/'+network+'/'+array['Name']+'/'+str(t2.year)
