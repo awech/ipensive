@@ -451,11 +451,14 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, array, network):
 	ax_2.set_yticks([])
 	
 	ax_3=plt.subplot(4,1,3)
-	rect=Rectangle((T1,0.25),T2-T1,params_tmp['VEL_MAX'] - params_tmp['VEL_MIN'])
+	rect=Rectangle((T1,params_tmp['VEL_MIN']),T2-T1,params_tmp['VEL_MAX'] - params_tmp['VEL_MIN'])
 	pc = PatchCollection([rect], facecolor='gray', alpha=0.25,edgecolor=None)
 	plt.gca().add_collection(pc)
 	sc=ax_3.scatter(t,velocity,s=8*np.ones_like(t),c=mccm,edgecolors='k',lw=.1,cmap=cm)
-	ax_3.set_ylim(.15,.6)
+	if params_tmp['ARRAY_LABEL'] == 'Hydroacoustic':
+		ax_3.set_ylim(1.2,1.8)
+	else:
+		ax_3.set_ylim(.15,.6)
 	ax_3.set_xlim(T1,T2)
 	sc.set_clim(cax)
 	ax_3.set_xticks([])
