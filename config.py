@@ -88,11 +88,11 @@ NETWORKS=[
 							{'scnl':'OKIF.HDF.AV.01'	, 'sta_lat': 53.41083004	, 'sta_lon': -167.91426701},
 							{'scnl':'OKIF.HDF.AV.02'	, 'sta_lat': 53.41001901	, 'sta_lon': -167.91366301},
 							{'scnl':'OKIF.HDF.AV.03'	, 'sta_lat': 53.40998297	, 'sta_lon': -167.91499598},
-							#{'scnl':'OKIF.HDF.AV.04'	, 'sta_lat': 53.41029796	, 'sta_lon': -167.91431696},
-							#{'scnl':'OKIF.HDF.AV.05'	, 'sta_lat': 53.41038496	, 'sta_lon': -167.91331901},
+							{'scnl':'OKIF.HDF.AV.04'	, 'sta_lat': 53.41029796	, 'sta_lon': -167.91431696},
+							{'scnl':'OKIF.HDF.AV.05'	, 'sta_lat': 53.41038496	, 'sta_lon': -167.91331901},
 							{'scnl':'OKIF.HDF.AV.06'	, 'sta_lat': 53.41045604	, 'sta_lon': -167.91544802},
 						],
-				'digouti': 1/(419430*.03),	# convert counts to Pressure in Pa (Q330 + Chaparral 64V)
+				'digouti': 1/(419430*.03),	# convert counts to Pressure in Pa (Q330 + Chaparral 64Vx original)
 				'volcano':[
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
 							{'name': 'Cleveland','v_lat': 52.8222,   'v_lon': -169.9464},
@@ -103,13 +103,14 @@ NETWORKS=[
 
 			dict({'Name':'Cleveland',
 				  'SCNL':[
-							{'scnl':'CLCO1.BDF.AV.--'	, 'sta_lat': 52.7864125000	, 'sta_lon': -169.7229250000},
-							{'scnl':'CLCO2.BDF.AV.--'	, 'sta_lat': 52.7871866667	, 'sta_lon': -169.7244333330},
-							{'scnl':'CLCO3.BDF.AV.--'	, 'sta_lat': 52.7874600000	, 'sta_lon': -169.7210166667},
-							{'scnl':'CLCO4.BDF.AV.--'	, 'sta_lat': 52.7861266667	, 'sta_lon': -169.7203966667},
-							{'scnl':'CLCO5.BDF.AV.--'	, 'sta_lat': 52.7851866667	, 'sta_lon': -169.7250066667},
+							{'scnl':'CLCO.BDF.AV.01'	, 'sta_lat': 52.7864125000	, 'sta_lon': -169.7229250000},
+							{'scnl':'CLCO.BDF.AV.02'	, 'sta_lat': 52.7871866667	, 'sta_lon': -169.7244333330},
+							{'scnl':'CLCO.BDF.AV.03'	, 'sta_lat': 52.7874600000	, 'sta_lon': -169.7210166667},
+							{'scnl':'CLCO.BDF.AV.04'	, 'sta_lat': 52.7861266667	, 'sta_lon': -169.7203966667},
+							{'scnl':'CLCO.BDF.AV.05'	, 'sta_lat': 52.7851866667	, 'sta_lon': -169.7250066667},
+							{'scnl':'CLCO.BDF.AV.06'	, 'sta_lat': 52.785861	, 'sta_lon': -169.723179},
 						 ],
-				'digouti': (1/419430.0)/(1.62e-2),
+				'digouti': (1/419430.0)/(0.0275),
 				'volcano':[
 							{'name': 'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360}
@@ -152,20 +153,20 @@ NETWORKS=[
 				'AZ_MAX': 90,
 			}),
 
-			dict({'Name':'Whittier',
-				  'SCNL':[
-							{'scnl':'WHTR.HDF.AV.01'	, 'sta_lat': 60.77968	, 'sta_lon': -148.72701},
-							# {'scnl':'WHTR.HDF.AV.02'	, 'sta_lat': 60.78018	, 'sta_lon': -148.72591},
-							# {'scnl':'WHTR.HDF.AV.03'	, 'sta_lat': 60.77974	, 'sta_lon': -148.72533},
-							# {'scnl':'WHTR.HDF.AV.04'	, 'sta_lat': 60.77910	, 'sta_lon': -148.72658},
-							{'scnl':'WHTR.HDF.AV.05'	, 'sta_lat': 60.77970	, 'sta_lon': -148.72858},
-							{'scnl':'WHTR.HDF.AV.06'	, 'sta_lat': 60.78020	, 'sta_lon': -148.72739},
-						 ],
-			   'digouti': (1/400000)/0.0275,
-			   'volcano':[
-			   				{'name': 'Barry Arm', 'v_lat': 61.1457,'v_lon': -148.14654},
-			   			 ],
-			}),
+			# dict({'Name':'Whittier',
+			# 	  'SCNL':[
+			# 				{'scnl':'WHTR.HDF.AV.01'	, 'sta_lat': 60.77968	, 'sta_lon': -148.72701},
+			# 				# {'scnl':'WHTR.HDF.AV.02'	, 'sta_lat': 60.78018	, 'sta_lon': -148.72591},
+			# 				# {'scnl':'WHTR.HDF.AV.03'	, 'sta_lat': 60.77974	, 'sta_lon': -148.72533},
+			# 				# {'scnl':'WHTR.HDF.AV.04'	, 'sta_lat': 60.77910	, 'sta_lon': -148.72658},
+			# 				{'scnl':'WHTR.HDF.AV.05'	, 'sta_lat': 60.77970	, 'sta_lon': -148.72858},
+			# 				{'scnl':'WHTR.HDF.AV.06'	, 'sta_lat': 60.78020	, 'sta_lon': -148.72739},
+			# 			 ],
+			#    'digouti': (1/400000)/0.0275,
+			#    'volcano':[
+			#    				{'name': 'Barry Arm', 'v_lat': 61.1457,'v_lon': -148.14654},
+			#    			 ],
+			# }),
 
 			dict({'Name':'Dillingham',
 				  'SCNL':[
