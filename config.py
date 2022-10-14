@@ -153,21 +153,6 @@ NETWORKS=[
 				'AZ_MAX': 90,
 			}),
 
-			# dict({'Name':'Whittier',
-			# 	  'SCNL':[
-			# 				{'scnl':'WHTR.HDF.AV.01'	, 'sta_lat': 60.77968	, 'sta_lon': -148.72701},
-			# 				# {'scnl':'WHTR.HDF.AV.02'	, 'sta_lat': 60.78018	, 'sta_lon': -148.72591},
-			# 				# {'scnl':'WHTR.HDF.AV.03'	, 'sta_lat': 60.77974	, 'sta_lon': -148.72533},
-			# 				# {'scnl':'WHTR.HDF.AV.04'	, 'sta_lat': 60.77910	, 'sta_lon': -148.72658},
-			# 				{'scnl':'WHTR.HDF.AV.05'	, 'sta_lat': 60.77970	, 'sta_lon': -148.72858},
-			# 				{'scnl':'WHTR.HDF.AV.06'	, 'sta_lat': 60.78020	, 'sta_lon': -148.72739},
-			# 			 ],
-			#    'digouti': (1/400000)/0.0275,
-			#    'volcano':[
-			#    				{'name': 'Barry Arm', 'v_lat': 61.1457,'v_lon': -148.14654},
-			#    			 ],
-			# }),
-
 			dict({'Name':'Dillingham',
 				  'SCNL':[
 							{'scnl':'DLL.HDF.AV.01'	, 'sta_lat': 59.13988781	, 'sta_lon': -158.6209290},
