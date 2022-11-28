@@ -1106,8 +1106,9 @@ function init() {
 	});
 
 	// fire subnet change trigger to get things rolling
-		$("#network").val("AVO").prop('selected', true);
-	$("#network").trigger("change");
+		// $("#network").val("AVO").prop('selected', true);
+	$("#network").prop("selectedIndex",0)
+  $("#network").trigger("change");
 	
 }
 
