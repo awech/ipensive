@@ -91,7 +91,7 @@ def process_array(array, network, T0):
 	t        = []
 	rms      = []
 	pressure = []
-	for st_win in st.slide(window_length=params['WINDOW_LENGTH'],step=params['OVERLAP']):
+	for st_win in st.slide(window_length=params['WINDOW_LENGTH'],step=params['WINDOW_LENGTH']-params['OVERLAP']):
 		try:
 			for tr in st_win:
 				tr.data = tr.data*array['digouti']
