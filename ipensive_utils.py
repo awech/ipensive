@@ -5,6 +5,7 @@ import pandas as pd
 from obspy.core import Stream, UTCDateTime
 from obspy.core.util import AttribDict
 from obspy.clients.earthworm import Client
+from obspy.clients.fdsn import Client as Client_IRIS
 from obspy.geodetics.base import gps2dist_azimuth
 from scipy.signal import correlate
 import config
@@ -179,12 +180,20 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
 	print('Grabbing data...')
 
 	st=Stream()
-	client = Client(hostname, int(port))
+
+	if hostname == 'IRIS':
+		client = Client_IRIS('IRIS')
+	else:
+		client = Client(hostname, int(port))
 
 	for sta in scnl:
 		
 		try:
-			tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
+			if hostname == 'IRIS':
+				tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
+									T1, T2)
+			else:
+				tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
 									T1, T2, cleanup=True)
 			if len(tr)>1:
 				if fill_value==0 or fill_value==None:
