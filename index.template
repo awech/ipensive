@@ -1107,7 +1107,10 @@ function init() {
 
 	// fire subnet change trigger to get things rolling
 		// $("#network").val("AVO").prop('selected', true);
-	$("#network").prop("selectedIndex",0)
+	param = getUrlParameter("network");
+  if (param == null) {
+    $("#network").prop("selectedIndex",0)
+  }
   $("#network").trigger("change");
 	
 }
