@@ -11,17 +11,19 @@ from obspy import UTCDateTime
 import config
 from array_processing import process_array
 
-T1='2022-03-30 12:00'
-T2='2022-03-30 15:00'
+T1='2022-11-01 00:00'
+T2='2022-12-20 01:00'
 OVERWRITE=False
 
 # ARRAYS=['Dillingham','Kenai','Sand Point','Akutan','Cleveland','Adak','Whittier']
 # specify ARRAYS if you want to just process specific arrays
+ARRAYS=['Wake Island South', 'Wake Island North']
 
 def run_backpopulate():
 
 	t1 = UTCDateTime(T1)+config.DURATION
 	for t in pd.date_range(T2, t1.strftime('%Y%m%d%H%M'), freq='-10min'):
+		print(t)
 		for network in config.NETWORKS:
 			for array in network['ARRAYS']:
 
@@ -44,8 +46,14 @@ def run_backpopulate():
 					if 'ARRAYS' in dir():
 						if array['Name'] in ARRAYS:
 							process_array(array, network, UTCDateTime(t))
+						else:
+							print('Array name not on do list. Skip ' + array['Name'])
 					else:
 						process_array(array, network, UTCDateTime(t))
+				else:
+					print('File exists. No overwrite. Skip ' + array['Name'])
+
+	return
 
 
 if __name__ == '__main__':
