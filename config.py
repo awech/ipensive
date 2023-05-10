@@ -87,7 +87,7 @@ NETWORKS=[
 				  'SCNL':[
 							{'scnl':'OKIF.HDF.AV.01'	, 'sta_lat': 53.41083004	, 'sta_lon': -167.91426701},
 							{'scnl':'OKIF.HDF.AV.02'	, 'sta_lat': 53.41001901	, 'sta_lon': -167.91366301},
-							# {'scnl':'OKIF.HDF.AV.03'	, 'sta_lat': 53.40998297	, 'sta_lon': -167.91499598},
+							{'scnl':'OKIF.HDF.AV.03'	, 'sta_lat': 53.40998297	, 'sta_lon': -167.91499598},
 							{'scnl':'OKIF.HDF.AV.04'	, 'sta_lat': 53.41029796	, 'sta_lon': -167.91431696},
 							{'scnl':'OKIF.HDF.AV.05'	, 'sta_lat': 53.41038496	, 'sta_lon': -167.91331901},
 							{'scnl':'OKIF.HDF.AV.06'	, 'sta_lat': 53.41045604	, 'sta_lon': -167.91544802},
@@ -218,10 +218,12 @@ NETWORKS=[
 							{'scnl':'H11N2.EDH.IM.--'	, 'sta_lat': 19.730801	, 'sta_lon':  166.897675},
 							{'scnl':'H11N3.EDH.IM.--'	, 'sta_lat': 19.71718	, 'sta_lon':  166.909988},
 						 ],
-				# 'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-				'HOSTNAME' : 'IRIS',
-				'PORT' : 16011,
-				'digouti': 1/1855.04,
+ 
+				 #'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
+				  'HOSTNAME' : 'IRIS',
+				 'PORT' : 16011,
+ 
+			 	'digouti': 1/1855.04,
 				'volcano':[
 							{'name':	'Saipan',	'v_lat': 15.19,  'v_lon': 145.74},
 							{'name':	'Anatahan', 'v_lat': 16.35,  'v_lon': 145.67},
@@ -245,8 +247,12 @@ NETWORKS=[
 							{'scnl':'H11S2.EDH.IM.--'	, 'sta_lat': 18.49082	, 'sta_lon':  166.705002},
 							{'scnl':'H11S3.EDH.IM.--'	, 'sta_lat': 18.49568	, 'sta_lon':  166.686462},
 						 ],
-				# 'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-				'HOSTNAME' : 'IRIS',
+ 
+			#  'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
+
+
+
+			 	'HOSTNAME' : 'IRIS',
 				'PORT' : 16011,
 				'digouti': 1/1860.86,
 				'volcano':[
