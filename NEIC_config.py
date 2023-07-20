@@ -55,7 +55,7 @@ NETWORKS=[
 				  'SCNL':[
 							{'scnl':'SDPI.HDF.AV.01'	, 'sta_lat': 55.34900	, 'sta_lon': -160.47640},
 							{'scnl':'SDPI.HDF.AV.02'	, 'sta_lat': 55.34870	, 'sta_lon': -160.47683},
-							{'scnl':'SDPI.HDF.AV.03'	, 'sta_lat': 55.34934	, 'sta_lon': -160.47732},
+							# {'scnl':'SDPI.HDF.AV.03'	, 'sta_lat': 55.34934	, 'sta_lon': -160.47732},
 							{'scnl':'SDPI.HDF.AV.04'	, 'sta_lat': 55.34952	, 'sta_lon': -160.47661},
 							{'scnl':'SDPI.HDF.AV.05'	, 'sta_lat': 55.34922	, 'sta_lon': -160.47650},
 							{'scnl':'SDPI.HDF.AV.06'	, 'sta_lat': 55.34919	, 'sta_lon': -160.47710},
@@ -64,23 +64,38 @@ NETWORKS=[
 				'volcano':[
 			   				{'name': 'Pavlof',    'v_lat': 55.417622,'v_lon': -161.893669},
 			   				{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
-			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961}
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
+			   				{'name': 'Trident',	 'v_lat': 58.234389,	'v_lon': -155.103988},
 		   				  ],
+		   		'AZ_MIN': 240,
+				'AZ_MAX': 60,
+				'FREQMIN': 1,
 			}),
 
 			dict({'Name':'Akutan',
-		  		  'SCNL':[
-							{'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
-							{'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
-							{'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
-							{'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
-					     ],
-				'digouti': (1/419430.0)/0.05,
+		  		 #  'SCNL':[
+							# {'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
+							# {'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
+							# {'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
+							# {'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
+					  #    ],
+				# 'digouti': (1/419430.0)/0.05,
+					 'SCNL':[
+								{'scnl':'AKS.HDF.AV.01'	, 'sta_lat': 54.11048	, 'sta_lon': -165.69774},
+								{'scnl':'AKS.HDF.AV.02'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69705},
+								{'scnl':'AKS.HDF.AV.03'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69616},
+								{'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69681},
+								# {'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69683},
+								{'scnl':'AKS.HDF.AV.06'	, 'sta_lat': 54.11005	, 'sta_lon': -165.69720},
+							],
+				'digouti': (1/400000)/0.0275,	# convert counts to Pressure in Pa (Centaur + Chaparral Vx2 mics)
 				'volcano':[
 							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200},
 							{'name': 'Akutan',   'v_lat': 54.1300,   'v_lon': -165.9900},
-							{'name': 'Westdahl', 'v_lat': 54.5200,   'v_lon': -164.6500}
+							# {'name': 'Westdahl', 'v_lat': 54.5200,   'v_lon': -164.6500}
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
+				'FREQMIN': 1,
 			}),
 
 			dict({'Name':'Okmok',
@@ -97,7 +112,9 @@ NETWORKS=[
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
 							{'name': 'Cleveland','v_lat': 52.8222,   'v_lon': -169.9464},
 							{'name': 'Okmok',	 'v_lat': 53.428865, 'v_lon': -168.131632},
-							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200}
+							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
+
 						  ],
 			}),
 
@@ -113,7 +130,8 @@ NETWORKS=[
 				'digouti': (1/419430.0)/(0.0275),
 				'volcano':[
 							{'name': 'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
-							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360}
+							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 			}),
 
@@ -130,7 +148,8 @@ NETWORKS=[
 							{'name':	'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
 							{'name':	'Great Sitkin','v_lat': 52.077282, 'v_lon': -176.131317},
 							{'name':	'Moffett',     'v_lat': 51.931876, 'v_lon': -176.740191},
-							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623}
+							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 			}),
 
@@ -141,7 +160,7 @@ NETWORKS=[
 							{'scnl':'AMKA.HDF.AV.03'	, 'sta_lat': 51.378105	, 'sta_lon': 179.301225},
 							{'scnl':'AMKA.HDF.AV.04'	, 'sta_lat': 51.37831	, 'sta_lon': 179.30028},
 							{'scnl':'AMKA.HDF.AV.05'	, 'sta_lat': 51.379055	, 'sta_lon': 179.30026},
-							{'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
+							# {'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
 						],
 				'digouti': (1/400000)/0.0275,
 				'volcano':[
@@ -166,11 +185,12 @@ NETWORKS=[
 				'volcano':[
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
 							{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
-							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623}
+							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623},
+							{'name': 'Trident',	 'v_lat': 58.234389,	'v_lon': -155.103988},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 				'EXTRA_PAUSE': 90,
 			}),			
 		]
 	},
-
 ]
