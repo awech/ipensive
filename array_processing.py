@@ -79,7 +79,9 @@ def process_array(array, network, T0):
 		if tr.stats['sampling_rate'] != 50:
 			tr.resample(50.0)
 		if tr.stats['sampling_rate'] == 50:
-			tr.decimate(2)
+			# Check that new nyquist is above high corner of filter
+			if float(params['FREQMAX']) < 50/4.0:
+				tr.decimate(2)
 	st.taper(max_percentage=None,max_length=params['TAPER'])
 	st.filter('bandpass',freqmin=params['FREQMIN'],freqmax=params['FREQMAX'],corners=2,zerophase=True)
 	st.trim(t1,t2+params['WINDOW_LENGTH'])
