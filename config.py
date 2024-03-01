@@ -1,6 +1,8 @@
 # SYSTEM PARAMETERS
-HOSTNAME	  = '137.227.224.220'
-PORT		  = 16002
+# HOSTNAME	  = '137.227.224.220'
+# PORT		  = 16002
+HOSTNAME	  = 'pubavo1.wr.usgs.gov'
+PORT		  = 16022
 OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image ouptut directory
 OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
 LOGS_DIR	  = ''
@@ -13,7 +15,7 @@ FREQMIN		  = 0.8  # minimum frequency
 FREQMAX		  = 5.0  # maximum frequency
 TAPER	      = 5.0  # seconds to taper beginning and end of trace before filtering
 WINDOW_LENGTH = 30   # window length for each calculation [seconds]
-OVERLAP       = 15   # amount of overlap between windos [seconds]
+OVERLAP       = 15   # amount of overlap between windows [seconds]
 MIN_CHAN      = 3	 # minimum number of channels needed to perform inversion
 
 # DEFAULT PLOTTING PARAMETERS
@@ -64,23 +66,38 @@ NETWORKS=[
 				'volcano':[
 			   				{'name': 'Pavlof',    'v_lat': 55.417622,'v_lon': -161.893669},
 			   				{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
-			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961}
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
+			   				{'name': 'Trident',	 'v_lat': 58.234389,	'v_lon': -155.103988},
 		   				  ],
+		   		'AZ_MIN': 240,
+				'AZ_MAX': 60,
+				'FREQMIN': 1,
 			}),
 
 			dict({'Name':'Akutan',
-		  		  'SCNL':[
-							{'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
-							{'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
-							{'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
-							{'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
-					     ],
-				'digouti': (1/419430.0)/0.05,
+		  		 #  'SCNL':[
+							# {'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
+							# {'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
+							# {'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
+							# {'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
+					  #    ],
+				# 'digouti': (1/419430.0)/0.05,
+					 'SCNL':[
+								{'scnl':'AKS.HDF.AV.01'	, 'sta_lat': 54.11048	, 'sta_lon': -165.69774},
+								{'scnl':'AKS.HDF.AV.02'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69705},
+								{'scnl':'AKS.HDF.AV.03'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69616},
+								{'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69681},
+								# {'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69683},
+								{'scnl':'AKS.HDF.AV.06'	, 'sta_lat': 54.11005	, 'sta_lon': -165.69720},
+							],
+				'digouti': (1/400000)/0.0275,	# convert counts to Pressure in Pa (Centaur + Chaparral Vx2 mics)
 				'volcano':[
 							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200},
 							{'name': 'Akutan',   'v_lat': 54.1300,   'v_lon': -165.9900},
-							{'name': 'Westdahl', 'v_lat': 54.5200,   'v_lon': -164.6500}
+							# {'name': 'Westdahl', 'v_lat': 54.5200,   'v_lon': -164.6500}
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
+				'FREQMIN': 1,
 			}),
 
 			dict({'Name':'Okmok',
@@ -97,7 +114,9 @@ NETWORKS=[
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
 							{'name': 'Cleveland','v_lat': 52.8222,   'v_lon': -169.9464},
 							{'name': 'Okmok',	 'v_lat': 53.428865, 'v_lon': -168.131632},
-							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200}
+							{'name': 'Makushin', 'v_lat': 53.8900,   'v_lon': -166.9200},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
+
 						  ],
 			}),
 
@@ -113,7 +132,8 @@ NETWORKS=[
 				'digouti': (1/419430.0)/(0.0275),
 				'volcano':[
 							{'name': 'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
-							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360}
+							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 			}),
 
@@ -130,7 +150,8 @@ NETWORKS=[
 							{'name':	'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
 							{'name':	'Great Sitkin','v_lat': 52.077282, 'v_lon': -176.131317},
 							{'name':	'Moffett',     'v_lat': 51.931876, 'v_lon': -176.740191},
-							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623}
+							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 			}),
 
@@ -166,7 +187,9 @@ NETWORKS=[
 				'volcano':[
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
 							{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
-							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623}
+							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623},
+							{'name': 'Trident',	 'v_lat': 58.234389,	'v_lon': -155.103988},
+			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 				'EXTRA_PAUSE': 90,
 			}),			
@@ -179,38 +202,39 @@ NETWORKS=[
 
 			dict({'Name':'Saipan',
 				  'SCNL':[
-							# {'scnl':'FLX2.BDF.MI.01'	, 'sta_lat': 15.23481	, 'sta_lon': 145.79219}, # dead channels. changed 01-Aug-2021
-							# {'scnl':'FLX2.BDF.MI.02'	, 'sta_lat': 15.23325	, 'sta_lon': 145.79242}, # dead channels. changed 23-Oct-2020
-							{'scnl':'FLX2.BDF.MI.03'	, 'sta_lat': 15.23461	, 'sta_lon': 145.79097},
-							# {'scnl':'FLX2.BDF.MI.04'	, 'sta_lat': 15.23206	, 'sta_lon': 145.79389}, # dead channels. changed 23-Oct-2020
-							{'scnl':'FLX2.BDF.MI.05'	, 'sta_lat': 15.23217	, 'sta_lon': 145.79119},
-							{'scnl':'FLX2.BDF.MI.06'	, 'sta_lat': 15.23650	, 'sta_lon': 145.79053},
-							# {'scnl':'DPS.BDF.MI.--'		, 'sta_lat': 15.24082	, 'sta_lon': 145.78909},
-							# {'scnl':'HTSP.BDF.MI.--'	, 'sta_lat': 15.23166	, 'sta_lon': 145.79851},
-							# {'scnl':'GOLF.BDF.MI.--'	, 'sta_lat': 15.22511	, 'sta_lon': 145.78625}, # still has IML sensor
-							# {'scnl':'FLX.BDF.MI.--'		, 'sta_lat': 15.23389	, 'sta_lon': 145.79172},
+							{'scnl':'FLX.HDF.MI.01'	, 'sta_lat': 15.23388	, 'sta_lon': 145.79172},
+							{'scnl':'FLX.HDF.MI.02'	, 'sta_lat': 15.23320	, 'sta_lon': 145.79234},
+							{'scnl':'FLX.HDF.MI.03'	, 'sta_lat': 15.23475	, 'sta_lon': 145.79216},
+							# {'scnl':'FLX.HDF.MI.04'	, 'sta_lat': 15.23206	, 'sta_lon': 145.79389},
+							{'scnl':'FLX.HDF.MI.05'	, 'sta_lat': 15.23215	, 'sta_lon': 145.79112},
+							{'scnl':'FLX.HDF.MI.06'	, 'sta_lat': 15.23647	, 'sta_lon': 145.79045},
 						 ],
-				'digouti': (1/419430.0)/(1e-2),
+				# 'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
+				# 'PORT' : 16011,
+				'digouti': (1/400000)/0.0275, #new sensors and locations installed Feb 20, 2024
 				'volcano':[
-							{'name': 'Anatahan?', 'v_lat': 18.141555, 'v_lon': 145.786260},
-						  ]
+							{'name': 'Anatahan', 'v_lat': 18.141555, 'v_lon': 145.786260},
+							{'name':	'Pagan', 'v_lat': 18.141555, 'v_lon': 145.786260},
+						  ],
+				'AZ_MIN' : 205,
+				'AZ_MAX' :   15,
 			}),
 
-			dict({'Name':'Sarigan',
-				  'SCNL':[
-							{'scnl':'SRN1.BDF.MI.--'	, 'sta_lat': 16.70035	, 'sta_lon': 145.77809},
-							{'scnl':'SRN2.BDF.MI.--'	, 'sta_lat': 16.69977	, 'sta_lon': 145.77798},
-							{'scnl':'SRN3.BDF.MI.--'	, 'sta_lat': 16.69960	, 'sta_lon': 145.77841},
-							{'scnl':'SRN4.BDF.MI.--'	, 'sta_lat': 16.69990	, 'sta_lon': 145.77876},
-							# {'scnl':'SRN5.BDF.MI.--'	, 'sta_lat': 16.70036	, 'sta_lon': 145.77872},
-							{'scnl':'SRN6.BDF.MI.--'	, 'sta_lat': 16.70003	, 'sta_lon': 145.77838},
-						 ],
-				'digouti': (1/419430.0)/(1e-2),
-				'volcano':[
-							{'name':	'Pagan?',   'v_lat': 18.141555,	'v_lon': 145.786260},
-							{'name':	'Anatahan?','v_lat': 16.351323,	'v_lon': 145.687602},
-						  ],
-			}),
+			# dict({'Name':'Sarigan',
+			# 	  'SCNL':[
+			# 				{'scnl':'SRN1.BDF.MI.--'	, 'sta_lat': 16.70035	, 'sta_lon': 145.77809},
+			# 				{'scnl':'SRN2.BDF.MI.--'	, 'sta_lat': 16.69977	, 'sta_lon': 145.77798},
+			# 				{'scnl':'SRN3.BDF.MI.--'	, 'sta_lat': 16.69960	, 'sta_lon': 145.77841},
+			# 				{'scnl':'SRN4.BDF.MI.--'	, 'sta_lat': 16.69990	, 'sta_lon': 145.77876},
+			# 				# {'scnl':'SRN5.BDF.MI.--'	, 'sta_lat': 16.70036	, 'sta_lon': 145.77872},
+			# 				{'scnl':'SRN6.BDF.MI.--'	, 'sta_lat': 16.70003	, 'sta_lon': 145.77838},
+			# 			 ],
+			# 	'digouti': (1/419430.0)/(1e-2),
+			# 	'volcano':[
+			# 				{'name':	'Pagan?',   'v_lat': 18.141555,	'v_lon': 145.786260},
+			# 				{'name':	'Anatahan?','v_lat': 16.351323,	'v_lon': 145.687602},
+			# 			  ],
+			# }),
 
 			dict({'Name':'Wake Island North',
 				  'SCNL':[
@@ -220,8 +244,8 @@ NETWORKS=[
 						 ],
  
 				 #'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-				  'HOSTNAME' : 'IRIS',
-				 'PORT' : 16011,
+				 #  'HOSTNAME' : 'IRIS',
+				 # 'PORT' : 16011,
  
 			 	'digouti': 1/1855.04,
 				'volcano':[
@@ -249,11 +273,8 @@ NETWORKS=[
 						 ],
  
 			#  'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-
-
-
-			 	'HOSTNAME' : 'IRIS',
-				'PORT' : 16011,
+			 # 	'HOSTNAME' : 'IRIS',
+				# 'PORT' : 16011,
 				'digouti': 1/1860.86,
 				'volcano':[
 							{'name':	'Saipan',	'v_lat': 15.19,  'v_lon': 145.74},
