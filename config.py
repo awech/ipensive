@@ -144,7 +144,8 @@ NETWORKS=[
 							{'scnl':'ADKI.HDF.AV.03'	, 'sta_lat': 51.86226962	, 'sta_lon': -176.6446503},
 							{'scnl':'ADKI.HDF.AV.04'	, 'sta_lat': 51.86246609	, 'sta_lon': -176.6457851},
 							{'scnl':'ADKI.HDF.AV.05'	, 'sta_lat': 51.86326916	, 'sta_lon': -176.6461231},
-							{'scnl':'ADKI.HDF.AV.06'	, 'sta_lat': 51.86157572	, 'sta_lon': -176.6469340}],
+							# {'scnl':'ADKI.HDF.AV.06'	, 'sta_lat': 51.86157572	, 'sta_lon': -176.6469340},
+						 ],
 				'digouti': (1/419430.0)/(0.05),
 				'volcano':[
 							{'name':	'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
