@@ -75,13 +75,6 @@ NETWORKS=[
 			}),
 
 			dict({'Name':'Akutan',
-		  		 #  'SCNL':[
-							# {'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
-							# {'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
-							# {'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
-							# {'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
-					  #    ],
-				# 'digouti': (1/419430.0)/0.05,
 					 'SCNL':[
 								{'scnl':'AKS.HDF.AV.01'	, 'sta_lat': 54.11048	, 'sta_lon': -165.69774},
 								{'scnl':'AKS.HDF.AV.02'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69705},
@@ -210,8 +203,6 @@ NETWORKS=[
 							{'scnl':'FLX.HDF.MI.05'	, 'sta_lat': 15.23215	, 'sta_lon': 145.79112},
 							{'scnl':'FLX.HDF.MI.06'	, 'sta_lat': 15.23647	, 'sta_lon': 145.79045},
 						 ],
-				# 'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-				# 'PORT' : 16011,
 				'digouti': (1/400000)/0.0275, #new sensors and locations installed Feb 20, 2024
 				'volcano':[
 							{'name': 'Anatahan', 'v_lat': 18.141555, 'v_lon': 145.786260},
@@ -243,11 +234,8 @@ NETWORKS=[
 							{'scnl':'H11N2.EDH.IM.--'	, 'sta_lat': 19.730801	, 'sta_lon':  166.897675},
 							{'scnl':'H11N3.EDH.IM.--'	, 'sta_lat': 19.71718	, 'sta_lon':  166.909988},
 						 ],
- 
-				 #'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-				 #  'HOSTNAME' : 'IRIS',
-				 # 'PORT' : 16011,
- 
+
+				'HOSTNAME' : 'IRIS',
 			 	'digouti': 1/1855.04,
 				'volcano':[
 							{'name':	'Saipan',	'v_lat': 15.19,  'v_lon': 145.74},
@@ -273,9 +261,7 @@ NETWORKS=[
 							{'scnl':'H11S3.EDH.IM.--'	, 'sta_lat': 18.49568	, 'sta_lon':  166.686462},
 						 ],
  
-			#  'HOSTNAME' : 'pubnmi1.wr.usgs.gov',
-			 # 	'HOSTNAME' : 'IRIS',
-				# 'PORT' : 16011,
+			 	'HOSTNAME' : 'IRIS',
 				'digouti': 1/1860.86,
 				'volcano':[
 							{'name':	'Saipan',	'v_lat': 15.19,  'v_lon': 145.74},
