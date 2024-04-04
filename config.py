@@ -156,7 +156,7 @@ NETWORKS=[
 							{'scnl':'AMKA.HDF.AV.03'	, 'sta_lat': 51.378105	, 'sta_lon': 179.301225},
 							{'scnl':'AMKA.HDF.AV.04'	, 'sta_lat': 51.37831	, 'sta_lon': 179.30028},
 							{'scnl':'AMKA.HDF.AV.05'	, 'sta_lat': 51.379055	, 'sta_lon': 179.30026},
-							# {'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
+							{'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
 						],
 				'digouti': (1/400000)/0.0275,
 				'volcano':[
