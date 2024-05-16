@@ -6,6 +6,14 @@ PORT		  = 16022
 OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image ouptut directory
 OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
 LOGS_DIR	  = ''
+EXTRA_LINKS = [
+    {
+        "Array Locations": "https://ds.iris.edu/gmap/#network=AV&location=01&channel=*DF&planet=earth"
+    },
+    {
+        "Travel Times": "https://avosouth.wr.usgs.gov/infrasound/infra_traveltimes.html"
+    },
+] # added links for reference one the main ipensive page. Variable can be deleted if desired.
 
 # DEFAUlT PROCESSING PARAMETERS
 DURATION      = 600  # DON'T CHANGE THIS!

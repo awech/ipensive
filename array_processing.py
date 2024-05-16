@@ -195,10 +195,12 @@ if __name__ == '__main__':
 			print('{:.1f} seconds to process {}'.format(time.time()-timer_tmp, array['Name']))
 
 	# Write out the new HTML file
+	if 'EXTRA_LINKS' not in dir(config):
+		config.EXTRA_LINKS = []
 	script_path = os.path.dirname(__file__)
 	with open(os.path.join(script_path, 'index.template'), 'r') as f:
 		template = jinja2.Template(f.read())
-	html = template.render(networks = all_nets, arrays = all_arrays)
+	html = template.render(networks=all_nets, arrays=all_arrays, extra_links=config.EXTRA_LINKS)
 	with open(os.path.join(config.OUT_WEB_DIR, 'index.html'), 'w') as f:
 		f.write(html)
 
