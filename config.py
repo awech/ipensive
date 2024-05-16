@@ -8,10 +8,16 @@ OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# asc
 LOGS_DIR	  = ''
 EXTRA_LINKS = [
     {
-        "Array Locations": "https://ds.iris.edu/gmap/#network=AV&location=01&channel=*DF&planet=earth"
+        "AK Array Locations": "https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth"
     },
     {
-        "Travel Times": "https://avosouth.wr.usgs.gov/infrasound/infra_traveltimes.html"
+        "AK Travel Times": "ak_traveltimes.html"
+    },
+	{
+        "CNMI Array Locations": "https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth"
+    },
+	{
+        "CNMI Travel Times": "cnmi_traveltimes.html"
     },
 ] # added links for reference one the main ipensive page. Variable can be deleted if desired.
 
