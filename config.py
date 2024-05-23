@@ -193,11 +193,12 @@ NETWORKS=[
 						 ],
 				'digouti': 1/33505.5968,   # convert counts to Pressure in Pa 01-Jun-2021
 				'volcano':[
+							{'name': 'Spurr',     'v_lat': 61.29897,  'v_lon': -152.25122},
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
 							{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
 							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623},
 							{'name': 'Trident',	 'v_lat': 58.234389,	'v_lon': -155.103988},
-			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
+							{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 				'EXTRA_PAUSE': 90,
 			}),			
