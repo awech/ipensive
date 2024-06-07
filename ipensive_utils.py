@@ -26,22 +26,34 @@ rcParams.update({'font.size': fonts})
 
 def write_to_log(day):
 
-	if 'LOGS_DIR' in dir(config) and len(config.LOGS_DIR)>0:
+	if 'LOGS_DIR' in dir(config) and len(config.LOGS_DIR) > 0:
 		LOGS_DIR = config.LOGS_DIR
 	else:
-		LOGS_DIR = os.path.dirname(__file__) + '/logs'
+		LOGS_DIR = os.path.join(os.path.dirname(__file__), 'logs')
 
-	year=UTCDateTime(day).strftime('%Y')
-	month=UTCDateTime(day).strftime('%Y-%m')
-	if not os.path.exists(LOGS_DIR+'/'+year):
-		os.mkdir(LOGS_DIR+'/'+year)
-	if not os.path.exists(LOGS_DIR+'/'+year+'/'+month):
-		os.mkdir(LOGS_DIR+'/'+year+'/'+month)
-	file=LOGS_DIR+'/'+year+'/'+month+'/'+UTCDateTime(day).strftime('%Y-%m-%d')+'.log'
-	os.system('touch {}'.format(file))
-	f=open(file,'a')
-	sys.stdout=sys.stderr=f
-	return
+	# Determine the year and month directories
+	year = UTCDateTime(day).strftime('%Y')
+	month = UTCDateTime(day).strftime('%Y-%m')
+
+	# Create directories if they don't exist
+	year_dir = os.path.join(LOGS_DIR, year)
+	month_dir = os.path.join(year_dir, month)
+	os.makedirs(month_dir, exist_ok=True)
+
+	# Define the log file path
+	file_path = os.path.join(month_dir, UTCDateTime(day).strftime('%Y-%m-%d') + '.log')
+
+	# Open the log file and redirect stdout and stderr
+	try:
+		with open(file_path, 'a') as f:
+			sys.stdout = sys.stderr = f
+			print("Done writing to logs. Return.")
+	except Exception as e:
+		print(f"Error while writing to log: {e}", file=sys.__stderr__)
+	finally:
+		# Reset stdout and stderr
+		sys.stdout = sys.__stdout__
+		sys.stderr = sys.__stderr__
 
 
 def add_coordinate_info(st, SCNL):
