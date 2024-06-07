@@ -168,8 +168,44 @@ def get_volcano_backazimuth(st, array):
 			volc['back_azimuth']=tmp[1]
 	return array
 
- 
-def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
+
+def create_client(client_type, client_definition, port):
+	"""Creates the correct ObsPy client depending on user input"""
+
+	hostname = client_definition  # rename to match old usage in grab_data
+
+	# Create an IRIS client if hostname is provided as IRIS (for backward compatability)
+	if hostname == 'IRIS':
+		from obspy.clients.fdsn import Client as Client_IRIS
+		client = Client_IRIS('IRIS')
+	elif client_type == "earthworm":
+		from obspy.clients.earthworm import Client
+		client = Client(hostname, int(port))
+	elif client_type == "fdsn":
+		from obspy.clients.fdsn import Client
+		client = Client(hostname)
+	elif client_type == "sds":
+		from obspy.clients.filesystem.sds import Client
+		client = Client(hostname)
+	elif client_type == "seedlink":
+		from obspy.clients.seedlink import Client
+	elif client_type == "neic":
+		from obspy.clients.neic import Client
+		client = Client(hostname)
+	elif client_type == "iris":
+		from obspy.clients.iris import Client
+		client = Client(hostname)
+	elif client_type == "msriterator":
+		from obspy.clients.filesystem.msriterator import Client
+		client = Client(hostname)
+	elif client_type == "tsindex":
+		from obspy.clients.filesystem.tsindex import Client
+		client = Client(hostname)
+
+	return client
+
+
+def grab_data(scnl, T1, T2, client_type, hostname, port, fill_value=0):
 	# scnl = list of station names (eg. ['PS4A.EHZ.AV.--','PVV.EHZ.AV.--','PS1A.EHZ.AV.--'])
 	# T1 and T2 are start/end obspy UTCDateTimes
 	# fill_value can be 0 (default), 'latest', or 'interpolate'
@@ -179,35 +215,37 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
 	# print('{} - {}'.format(T1.strftime('%Y.%m.%d %H:%M:%S'),T2.strftime('%Y.%m.%d %H:%M:%S')))
 	print('Grabbing data...')
 
-	st=Stream()
+	st = Stream()
 
-	if hostname == 'IRIS':
-		client = Client_IRIS('IRIS')
-	else:
-		client = Client(hostname, int(port))
+	# if hostname == 'IRIS':
+	# 	client = Client_IRIS('IRIS')
+	# else:
+	# 	client = Client(hostname, int(port))
+
+	client = create_client(client_type, hostname, port)
 
 	for sta in scnl:
-		
+
 		try:
 			if hostname == 'IRIS':
-				tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
-									T1, T2)
+				tr = client.get_waveforms(sta.split('.')[2], sta.split('.')[0], sta.split('.')[3], sta.split('.')[1],
+										  T1, T2)
 			else:
-				tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
-									T1, T2, cleanup=True)
-			if len(tr)>1:
-				if fill_value==0 or fill_value==None:
+				tr = client.get_waveforms(sta.split('.')[2], sta.split('.')[0], sta.split('.')[3], sta.split('.')[1],
+										  T1, T2, cleanup=True)
+			if len(tr) > 1:
+				if fill_value == 0 or fill_value == None:
 					tr.detrend('demean')
 					tr.taper(max_percentage=0.01)
 				for sub_trace in tr:
 					# deal with error when sub-traces have different dtypes
 					if sub_trace.data.dtype.name != 'int32':
-						sub_trace.data=sub_trace.data.astype('int32')
-					if sub_trace.data.dtype!=np.dtype('int32'):
-						sub_trace.data=sub_trace.data.astype('int32')
+						sub_trace.data = sub_trace.data.astype('int32')
+					if sub_trace.data.dtype != np.dtype('int32'):
+						sub_trace.data = sub_trace.data.astype('int32')
 					# deal with rare error when sub-traces have different sample rates
-					if sub_trace.stats.sampling_rate!=np.round(sub_trace.stats.sampling_rate):
-						sub_trace.stats.sampling_rate=np.round(sub_trace.stats.sampling_rate)
+					if sub_trace.stats.sampling_rate != np.round(sub_trace.stats.sampling_rate):
+						sub_trace.stats.sampling_rate = np.round(sub_trace.stats.sampling_rate)
 				print('Merging gappy data...')
 				tr.merge(fill_value=fill_value)
 
@@ -216,21 +254,21 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
 				tr.detrend('demean')
 				tr.taper(max_percentage=0.01)
 		except:
-			tr=Stream()
+			tr = Stream()
 		# if no data, create a blank trace for that channel
 		if not tr:
 			from obspy import Trace
 			from numpy import zeros
-			tr=Trace()
-			tr.stats['station']=sta.split('.')[0]
-			tr.stats['channel']=sta.split('.')[1]
-			tr.stats['network']=sta.split('.')[2]
-			tr.stats['location']=sta.split('.')[3]
-			tr.stats['sampling_rate']=100
-			tr.stats['starttime']=T1
-			tr.data=zeros(int((T2-T1)*tr.stats['sampling_rate']),dtype='int32')
-		st+=tr
-	st.trim(T1,T2,pad=True, fill_value=0)
+			tr = Trace()
+			tr.stats['station'] = sta.split('.')[0]
+			tr.stats['channel'] = sta.split('.')[1]
+			tr.stats['network'] = sta.split('.')[2]
+			tr.stats['location'] = sta.split('.')[3]
+			tr.stats['sampling_rate'] = 100
+			tr.stats['starttime'] = T1
+			tr.data = zeros(int((T2 - T1) * tr.stats['sampling_rate']), dtype='int32')
+		st += tr
+	st.trim(T1, T2, pad=True, fill_value=0)
 	print('Detrending data...')
 	st.detrend('demean')
 	return st

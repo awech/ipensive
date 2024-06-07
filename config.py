@@ -1,6 +1,7 @@
 # SYSTEM PARAMETERS
 # HOSTNAME	  = '137.227.224.220'
 # PORT		  = 16002
+CLIENT_TYPE   = 'earthworm'  # If not provided, will default to 'earthworm' for backward compatability
 HOSTNAME	  = 'pubavo1.wr.usgs.gov'
 PORT		  = 16022
 OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image ouptut directory
