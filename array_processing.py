@@ -161,9 +161,9 @@ def process_array(array, network, T0):
 if __name__ == '__main__':
 
 	print("::: iPensive :::")
-	print("CLIENT:HOSTNAME: {}:{}".format(config.CLIENT_TYPE, config.HOSTNAME))
-	print("OUT_WEB_DIR: {}".format(config.OUT_WEB_DIR))
-	print("LOGS_DIR: {}".format(config.LOGS_DIR))
+	print("- CLIENT:HOSTNAME: {}:{}".format(config.CLIENT_TYPE, config.HOSTNAME))
+	print("- OUT_WEB_DIR: {}".format(config.OUT_WEB_DIR))
+	print("- LOGS_DIR: {}".format(config.LOGS_DIR))
 	print()
 
 	timer_start = time.time()
@@ -178,8 +178,10 @@ if __name__ == '__main__':
 		T0=UTCDateTime(T0.strftime('%Y-%m-%d %H:%M')[:-1]+'0')
 
 		# Pause to allow for data latency to catch up
-		time.sleep(config.LATENCY+config.WINDOW_LENGTH)
-		timer_start = timer_start + config.LATENCY+config.WINDOW_LENGTH
+		pause_nsec = config.LATENCY+config.WINDOW_LENGTH
+		print("Pausing {} seconds to allow for data latency to catch up...".format(pause_nsec))
+		time.sleep(pause_nsec)
+		timer_start = timer_start + pause_nsec
 
 	elif len(sys.argv) == 2:                            # time given as single string YYYYMMDDhhmm (eg. 201705130301)
 
