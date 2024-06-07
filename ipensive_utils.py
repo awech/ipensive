@@ -287,69 +287,69 @@ def grab_data(scnl, T1, T2, client_type, hostname, port, fill_value=0):
 
 
 def web_folders(st, array, t2, network):
-	from shutil import copyfile
-	if not os.path.exists(config.OUT_WEB_DIR):
-		os.mkdir(config.OUT_WEB_DIR)
 
-	d0=config.OUT_WEB_DIR+'/'+network
-	if not os.path.exists(d0):
-		os.mkdir(d0)
-	d0=config.OUT_WEB_DIR+'/'+network+'/'+array['Name']
-	if not os.path.exists(d0):
-		os.mkdir(d0)
-	d0=config.OUT_WEB_DIR+'/'+network+'/'+array['Name']+'/'+str(t2.year)
-	if not os.path.exists(d0):
-		os.mkdir(d0)
-	d2=d0+'/'+'{:03d}'.format(t2.julday)
-	if not os.path.exists(d2):
-		os.mkdir(d2)
+	base_dir = config.OUT_WEB_DIR
+	os.makedirs(base_dir, exist_ok=True)
 
-	# copyfile('index.html',config.OUT_WEB_DIR+'/index.html')
-	return
+	network_dir = os.path.join(base_dir, network)
+	os.makedirs(network_dir, exist_ok=True)
+
+	name_dir = os.path.join(network_dir, array['Name'])
+	os.makedirs(name_dir, exist_ok=True)
+
+	year_dir = os.path.join(name_dir, str(t2.year))
+	os.makedirs(year_dir, exist_ok=True)
+
+	julian_day_dir = os.path.join(year_dir, '{:03d}'.format(t2.julday))
+	os.makedirs(julian_day_dir, exist_ok=True)
 
 
 def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
 
-	name=name.replace(' ','_')
+	name = name.replace(' ', '_')
 
-	t1=t2-config.DURATION
+	t1 = t2-config.DURATION
 
-	d0=config.OUT_ASCII_DIR+'/'+name
-	if not os.path.exists(d0):
-		os.mkdir(d0)
+	d0 = config.OUT_ASCII_DIR+'/'+name
+	os.makedirs(d0, exist_ok=True)
 
-	subfolder=d0+'/{}'.format(t1.strftime('%Y-%m'))
-	if not os.path.exists(subfolder):
-		os.mkdir(subfolder)
+	subfolder = os.path.join(d0, '{}'.format(t1.strftime('%Y-%m')))
+	os.makedirs(subfolder, exist_ok=True)
 
-	
-	filename=subfolder+'/'+name+'_'+t1.strftime('%Y-%m-%d')+'.txt'
+	filename = os.path.join(subfolder, '{}_{}.txt'.format(name, t1.strftime('%Y-%m-%d')))
 
-	azimuth[azimuth<0]+=360
+	azimuth[azimuth < 0] += 360
 
-	tmp=pd.DataFrame({'Time':t,
+	tmp = pd.DataFrame({'Time':t,
 				 'Array':name,
 				 'Azimuth':azimuth,
 				 'Velocity':velocity,
 				 'MCCM':mccm,
 				 'Pressure':pressure,
 				 'rms':rms})
-	tmp['Time']=pd.to_datetime(tmp['Time'])
-	tmp = tmp[tmp['Time']<=t2.strftime('%Y-%m-%d %H:%M:%S')]
-	tmp['Velocity']=1000*tmp['Velocity']
+	tmp['Time'] = pd.to_datetime(tmp['Time'])
+	tmp = tmp[tmp['Time'] <= t2.strftime('%Y-%m-%d %H:%M:%S')]
+	tmp['Velocity'] = 1000*tmp['Velocity']
 
-	if os.path.exists(filename):
+	# Ensure path to filename exists
+	if not os.path.exists(filename):
+		open(filename, 'w').close()
+
+	# Initialize DataFrame
+	if os.path.getsize(filename) > 0:  # Check if the file is not empty
 		df = pd.read_csv(filename, sep='\t', parse_dates=['Time'])
-		df = df[(df['Time'] <= t1.strftime('%Y-%m-%d %H:%M:%S')) | (df['Time'] > t2.strftime('%Y-%m-%d %H:%M:%S'))]
-		df = pd.concat([df,tmp])
-		df = df.sort_values('Time')
+		t1_str = t1.strftime('%Y-%m-%d %H:%M:%S')
+		t2_str = t2.strftime('%Y-%m-%d %H:%M:%S')
+		df = df[(df['Time'] <= t1_str) | (df['Time'] > t2_str)]
+		df = pd.concat([df, tmp])
 	else:
 		df = tmp
 
-	df = df.round({'Azimuth':1,'Velocity':1,'MCCM':2,'Pressure':3,'rms':1})
+	# Process DataFrame
+	df = df.sort_values('Time').round({'Azimuth': 1, 'Velocity': 1, 'MCCM': 2, 'Pressure': 3, 'rms': 1})
 
-	df.to_csv(filename,index=False,header=True,sep='\t')
-	return
+	# Save DataFrame to CSV
+	df.to_csv(filename, index=False, header=True, sep='\t')
 
 
 def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
