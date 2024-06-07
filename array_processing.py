@@ -162,8 +162,8 @@ if __name__ == '__main__':
 
 	print("::: iPensive :::")
 	print("- CLIENT:HOSTNAME: {}:{}".format(config.CLIENT_TYPE, config.HOSTNAME))
-	print("- OUT_WEB_DIR: {}".format(config.OUT_WEB_DIR))
-	print("- LOGS_DIR: {}".format(config.LOGS_DIR))
+	print("- OUT_WEB_DIR:     {}".format(config.OUT_WEB_DIR))
+	print("- LOGS_DIR:        {}".format(config.LOGS_DIR))
 	print()
 
 	timer_start = time.time()
