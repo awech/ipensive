@@ -25,19 +25,22 @@ Python 3.7
 conda env create -n ipensive python=3.7
 ```
 
-```
-conda config --add channels conda-forge
-conda install -c conda-forge obspy pandas jinja2
-```
-
-Finally, activate the environment:
+Activate the environment and install dependencies.
 ```
 conda activate ipensive
+conda config --add channels conda-forge
+conda install -c conda-forge obspy pandas jinja2
+conda deactivate
 ```
 
-Later, you will need to know the path to the Python executable for this
-environment. You can find it with the following command:
+Activate the ipensive environment before running iPensive. Alternatively,
+you can provide the full path to the Python executable to run iPensive
+outside of the environment. Git the full path to the Python executable
+by activating the environment and typing `which python` at the command
+line. You will need to know the path to the Python executable for the
+environment in order to set up iPensive with cron.
 ```
+conda activate ipensive
 which python
 ```
 
@@ -59,7 +62,10 @@ output directories)
 ## Usage
 
 iPensive can be run on the command line, or it can be set up as cronjob.
-This example shows how to set up iPensive as a cron every 10 minutes:
+Modify your cron file by typing `crontab -e` at the command line. Add the
+following lines to the file and save.  This example shows how to set up
+iPensive as a cron every 10 minutes (Visit [crontab guru](https://crontab.guru/)
+for more help):
 ```
-*/10 * * * * /path_to_file/array_processing.py >> /dev/null 2>&1
+*/10 * * * * /path/to/conda/env/bin/python /path/to/file/array_processing.py >> /dev/null 2>&1
 ```
