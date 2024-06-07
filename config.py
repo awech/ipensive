@@ -2,8 +2,8 @@
 # iPensive Configuration File
 # =============================
 # This file sets user-defined parameters for an iPensive instance.
-# If a variable is not specified here, a default value from ipensive_utils.default_config() will be used instead.
-# Explanations of each variable is also available in ipensive_utils.default_config()
+# If a variable is not specified here, a default value from ipensive_utils.defaults will be used instead.
+# Explanations of each variable is also available in ipensive_utils.defaults
 # All array definitions must be made in this file.
 # Processing and plotting parameters can be overwritten for specific arrays. See examples below.
 #
@@ -13,9 +13,9 @@
 CLIENT_TYPE   = 'earthworm'  # If not provided, will default to 'earthworm' for backward compatability
 HOSTNAME	  = 'pubavo1.wr.usgs.gov'
 PORT		  = 16022
-OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image ouptut directory
-OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
-LOGS_DIR	  = ''
+OUT_WEB_DIR   = '/home/jwellik/PROJECTS/ipensive-projects/ipensive-tonga/htdocs/infrasound'	# html & image ouptut directory
+OUT_ASCII_DIR = '/home/jwellik/PROJECTS/ipensive-projects/ipensive-tonga/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
+LOGS_DIR	  = '/home/jwellik/PROJECTS/ipensive-projects/ipensive-tonga/logs'
 EXTRA_LINKS = [
     {
         "AK Array Locations": "https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth"
@@ -32,6 +32,7 @@ EXTRA_LINKS = [
 ] # added links for reference one the main ipensive page. Variable can be deleted if desired.
 
 # DEFAUlT PROCESSING PARAMETERS
+DURATION      = 600  # DON'T CHANGE THIS!
 LATENCY       = 60	 # how long to pause and wait for data latency to catch up before processing (seconds)
 EXTRA_PAUSE   = 0 	 # extra pause in case some arrays are extra latent (Dillingham)
 FREQMIN		  = 0.8  # minimum frequency
