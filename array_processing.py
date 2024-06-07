@@ -15,7 +15,7 @@ from pandas import DataFrame
 from obspy.core import UTCDateTime
 from matplotlib import dates
 import time
-import config
+import config, defaults
 import ipensive_utils as utils
 import warnings
 from matplotlib.cbook import MatplotlibDeprecationWarning
@@ -31,14 +31,17 @@ def process_array(array, network, T0):
 	T1 = t1 - config.TAPER
 	T2 = t2 + config.WINDOW_LENGTH + config.TAPER
 
-	# get default params from config
+	# grab params from config.py
 	params={var:getattr(config,var) for var in dir(config) if var not in ['NETWORKS'] and '__' not in var}
+
+	# update default_config w user params
+	defaults.default_config().update(params)
 
 	# update params with array-specific values
 	for key in array.keys():
 		if key in params.keys():
 			params[key] = array[key]
-	
+
 	print('--- ' + array['Name'] + ' ---')
 	time.sleep(params['EXTRA_PAUSE'])
 
@@ -48,9 +51,9 @@ def process_array(array, network, T0):
 		print('Not enough channels defined.')
 		return
 	st    = utils.grab_data(scnl['scnl'].tolist(), T1, T2,
-							hostname=params['HOSTNAME'], port=params['PORT'], fill_value=0)
-	st    = utils.add_coordinate_info(st,scnl)
-	array = utils.get_volcano_backazimuth(st,array)
+							params["CLIENT_TYPE"], hostname=params['HOSTNAME'], port=params['PORT'], fill_value=0)
+	st    = utils.add_coordinate_info(st, scnl)
+	array = utils.get_volcano_backazimuth(st, array)
 	########################
 
 	#### check for enough data ####
@@ -141,7 +144,7 @@ def process_array(array, network, T0):
 
 	if 'OUT_ASCII_DIR' in dir(config):
 		try:
-			print('Writing csv file...')    
+			print('Writing csv file...')
 			t=np.array([UTCDateTime(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
 			name=array['Name']
 			utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name)
@@ -154,25 +157,33 @@ def process_array(array, network, T0):
 
 	return
 
+
 if __name__ == '__main__':
+
+	print("::: iPensive :::")
+	print("CLIENT:HOSTNAME: {}:{}".format(config.CLIENT_TYPE, config.HOSTNAME))
+	print("OUT_WEB_DIR: {}".format(config.OUT_WEB_DIR))
+	print("LOGS_DIR: {}".format(config.LOGS_DIR))
+	print()
 
 	timer_start = time.time()
 	if len(sys.argv) == 1:                              # No time given. Run from cron. Use current time
-		
-		T0=UTCDateTime.utcnow()                         # get current timestamp
-		
+
+		T0 = UTCDateTime.utcnow()                         # get current timestamp
+
 		# Set up logging
 		utils.write_to_log(T0.strftime('%Y-%m-%d'))
-		
+
 		# round down to the nearest 10-minute
 		T0=UTCDateTime(T0.strftime('%Y-%m-%d %H:%M')[:-1]+'0')
-		
+
 		# Pause to allow for data latency to catch up
 		time.sleep(config.LATENCY+config.WINDOW_LENGTH)
 		timer_start = timer_start + config.LATENCY+config.WINDOW_LENGTH
 
 	elif len(sys.argv) == 2:                            # time given as single string YYYYMMDDhhmm (eg. 201705130301)
-		T0 = sys.argv[1] 
+
+		T0 = sys.argv[1]
 		try:
 			T0 = UTCDateTime(T0)
 			T0 = UTCDateTime(T0.strftime('%Y-%m-%d %H:%M')[:-1]+'0') # round down to the nearest 10-minute
