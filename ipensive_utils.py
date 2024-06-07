@@ -26,22 +26,34 @@ rcParams.update({'font.size': fonts})
 
 def write_to_log(day):
 
-	if 'LOGS_DIR' in dir(config) and len(config.LOGS_DIR)>0:
+	if 'LOGS_DIR' in dir(config) and len(config.LOGS_DIR) > 0:
 		LOGS_DIR = config.LOGS_DIR
 	else:
-		LOGS_DIR = os.path.dirname(__file__) + '/logs'
+		LOGS_DIR = os.path.join(os.path.dirname(__file__), 'logs')
 
-	year=UTCDateTime(day).strftime('%Y')
-	month=UTCDateTime(day).strftime('%Y-%m')
-	if not os.path.exists(LOGS_DIR+'/'+year):
-		os.mkdir(LOGS_DIR+'/'+year)
-	if not os.path.exists(LOGS_DIR+'/'+year+'/'+month):
-		os.mkdir(LOGS_DIR+'/'+year+'/'+month)
-	file=LOGS_DIR+'/'+year+'/'+month+'/'+UTCDateTime(day).strftime('%Y-%m-%d')+'.log'
-	os.system('touch {}'.format(file))
-	f=open(file,'a')
-	sys.stdout=sys.stderr=f
-	return
+	# Determine the year and month directories
+	year = UTCDateTime(day).strftime('%Y')
+	month = UTCDateTime(day).strftime('%Y-%m')
+
+	# Create directories if they don't exist
+	year_dir = os.path.join(LOGS_DIR, year)
+	month_dir = os.path.join(year_dir, month)
+	os.makedirs(month_dir, exist_ok=True)
+
+	# Define the log file path
+	file_path = os.path.join(month_dir, UTCDateTime(day).strftime('%Y-%m-%d') + '.log')
+
+	# Open the log file and redirect stdout and stderr
+	try:
+		with open(file_path, 'a') as f:
+			sys.stdout = sys.stderr = f
+			print("Done writing to logs. Return.")
+	except Exception as e:
+		print(f"Error while writing to log: {e}", file=sys.__stderr__)
+	finally:
+		# Reset stdout and stderr
+		sys.stdout = sys.__stdout__
+		sys.stderr = sys.__stderr__
 
 
 def add_coordinate_info(st, SCNL):
@@ -168,8 +180,44 @@ def get_volcano_backazimuth(st, array):
 			volc['back_azimuth']=tmp[1]
 	return array
 
- 
-def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
+
+def create_client(client_type, client_definition, port):
+	"""Creates the correct ObsPy client depending on user input"""
+
+	hostname = client_definition  # rename to match old usage in grab_data
+
+	# Create an IRIS client if hostname is provided as IRIS (for backward compatability)
+	if hostname == 'IRIS':
+		from obspy.clients.fdsn import Client as Client_IRIS
+		client = Client_IRIS('IRIS')
+	elif client_type == "earthworm":
+		from obspy.clients.earthworm import Client
+		client = Client(hostname, int(port))
+	elif client_type == "fdsn":
+		from obspy.clients.fdsn import Client
+		client = Client(hostname)
+	elif client_type == "sds":
+		from obspy.clients.filesystem.sds import Client
+		client = Client(hostname)
+	elif client_type == "seedlink":
+		from obspy.clients.seedlink import Client
+	elif client_type == "neic":
+		from obspy.clients.neic import Client
+		client = Client(hostname)
+	elif client_type == "iris":
+		from obspy.clients.iris import Client
+		client = Client(hostname)
+	elif client_type == "msriterator":
+		from obspy.clients.filesystem.msriterator import Client
+		client = Client(hostname)
+	elif client_type == "tsindex":
+		from obspy.clients.filesystem.tsindex import Client
+		client = Client(hostname)
+
+	return client
+
+
+def grab_data(scnl, T1, T2, client_type, hostname, port, fill_value=0):
 	# scnl = list of station names (eg. ['PS4A.EHZ.AV.--','PVV.EHZ.AV.--','PS1A.EHZ.AV.--'])
 	# T1 and T2 are start/end obspy UTCDateTimes
 	# fill_value can be 0 (default), 'latest', or 'interpolate'
@@ -179,35 +227,37 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
 	# print('{} - {}'.format(T1.strftime('%Y.%m.%d %H:%M:%S'),T2.strftime('%Y.%m.%d %H:%M:%S')))
 	print('Grabbing data...')
 
-	st=Stream()
+	st = Stream()
 
-	if hostname == 'IRIS':
-		client = Client_IRIS('IRIS')
-	else:
-		client = Client(hostname, int(port))
+	# if hostname == 'IRIS':
+	# 	client = Client_IRIS('IRIS')
+	# else:
+	# 	client = Client(hostname, int(port))
+
+	client = create_client(client_type, hostname, port)
 
 	for sta in scnl:
-		
+
 		try:
 			if hostname == 'IRIS':
-				tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
-									T1, T2)
+				tr = client.get_waveforms(sta.split('.')[2], sta.split('.')[0], sta.split('.')[3], sta.split('.')[1],
+										  T1, T2)
 			else:
-				tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
-									T1, T2, cleanup=True)
-			if len(tr)>1:
-				if fill_value==0 or fill_value==None:
+				tr = client.get_waveforms(sta.split('.')[2], sta.split('.')[0], sta.split('.')[3], sta.split('.')[1],
+										  T1, T2, cleanup=True)
+			if len(tr) > 1:
+				if fill_value == 0 or fill_value == None:
 					tr.detrend('demean')
 					tr.taper(max_percentage=0.01)
 				for sub_trace in tr:
 					# deal with error when sub-traces have different dtypes
 					if sub_trace.data.dtype.name != 'int32':
-						sub_trace.data=sub_trace.data.astype('int32')
-					if sub_trace.data.dtype!=np.dtype('int32'):
-						sub_trace.data=sub_trace.data.astype('int32')
+						sub_trace.data = sub_trace.data.astype('int32')
+					if sub_trace.data.dtype != np.dtype('int32'):
+						sub_trace.data = sub_trace.data.astype('int32')
 					# deal with rare error when sub-traces have different sample rates
-					if sub_trace.stats.sampling_rate!=np.round(sub_trace.stats.sampling_rate):
-						sub_trace.stats.sampling_rate=np.round(sub_trace.stats.sampling_rate)
+					if sub_trace.stats.sampling_rate != np.round(sub_trace.stats.sampling_rate):
+						sub_trace.stats.sampling_rate = np.round(sub_trace.stats.sampling_rate)
 				print('Merging gappy data...')
 				tr.merge(fill_value=fill_value)
 
@@ -216,90 +266,90 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
 				tr.detrend('demean')
 				tr.taper(max_percentage=0.01)
 		except:
-			tr=Stream()
+			tr = Stream()
 		# if no data, create a blank trace for that channel
 		if not tr:
 			from obspy import Trace
 			from numpy import zeros
-			tr=Trace()
-			tr.stats['station']=sta.split('.')[0]
-			tr.stats['channel']=sta.split('.')[1]
-			tr.stats['network']=sta.split('.')[2]
-			tr.stats['location']=sta.split('.')[3]
-			tr.stats['sampling_rate']=100
-			tr.stats['starttime']=T1
-			tr.data=zeros(int((T2-T1)*tr.stats['sampling_rate']),dtype='int32')
-		st+=tr
-	st.trim(T1,T2,pad=True, fill_value=0)
+			tr = Trace()
+			tr.stats['station'] = sta.split('.')[0]
+			tr.stats['channel'] = sta.split('.')[1]
+			tr.stats['network'] = sta.split('.')[2]
+			tr.stats['location'] = sta.split('.')[3]
+			tr.stats['sampling_rate'] = 100
+			tr.stats['starttime'] = T1
+			tr.data = zeros(int((T2 - T1) * tr.stats['sampling_rate']), dtype='int32')
+		st += tr
+	st.trim(T1, T2, pad=True, fill_value=0)
 	print('Detrending data...')
 	st.detrend('demean')
 	return st
 
 
 def web_folders(st, array, t2, network):
-	from shutil import copyfile
-	if not os.path.exists(config.OUT_WEB_DIR):
-		os.mkdir(config.OUT_WEB_DIR)
 
-	d0=config.OUT_WEB_DIR+'/'+network
-	if not os.path.exists(d0):
-		os.mkdir(d0)
-	d0=config.OUT_WEB_DIR+'/'+network+'/'+array['Name']
-	if not os.path.exists(d0):
-		os.mkdir(d0)
-	d0=config.OUT_WEB_DIR+'/'+network+'/'+array['Name']+'/'+str(t2.year)
-	if not os.path.exists(d0):
-		os.mkdir(d0)
-	d2=d0+'/'+'{:03d}'.format(t2.julday)
-	if not os.path.exists(d2):
-		os.mkdir(d2)
+	base_dir = config.OUT_WEB_DIR
+	os.makedirs(base_dir, exist_ok=True)
 
-	# copyfile('index.html',config.OUT_WEB_DIR+'/index.html')
-	return
+	network_dir = os.path.join(base_dir, network)
+	os.makedirs(network_dir, exist_ok=True)
+
+	name_dir = os.path.join(network_dir, array['Name'])
+	os.makedirs(name_dir, exist_ok=True)
+
+	year_dir = os.path.join(name_dir, str(t2.year))
+	os.makedirs(year_dir, exist_ok=True)
+
+	julian_day_dir = os.path.join(year_dir, '{:03d}'.format(t2.julday))
+	os.makedirs(julian_day_dir, exist_ok=True)
 
 
 def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
 
-	name=name.replace(' ','_')
+	name = name.replace(' ', '_')
 
-	t1=t2-config.DURATION
+	t1 = t2-config.DURATION
 
-	d0=config.OUT_ASCII_DIR+'/'+name
-	if not os.path.exists(d0):
-		os.mkdir(d0)
+	d0 = config.OUT_ASCII_DIR+'/'+name
+	os.makedirs(d0, exist_ok=True)
 
-	subfolder=d0+'/{}'.format(t1.strftime('%Y-%m'))
-	if not os.path.exists(subfolder):
-		os.mkdir(subfolder)
+	subfolder = os.path.join(d0, '{}'.format(t1.strftime('%Y-%m')))
+	os.makedirs(subfolder, exist_ok=True)
 
-	
-	filename=subfolder+'/'+name+'_'+t1.strftime('%Y-%m-%d')+'.txt'
+	filename = os.path.join(subfolder, '{}_{}.txt'.format(name, t1.strftime('%Y-%m-%d')))
 
-	azimuth[azimuth<0]+=360
+	azimuth[azimuth < 0] += 360
 
-	tmp=pd.DataFrame({'Time':t,
+	tmp = pd.DataFrame({'Time':t,
 				 'Array':name,
 				 'Azimuth':azimuth,
 				 'Velocity':velocity,
 				 'MCCM':mccm,
 				 'Pressure':pressure,
 				 'rms':rms})
-	tmp['Time']=pd.to_datetime(tmp['Time'])
-	tmp = tmp[tmp['Time']<=t2.strftime('%Y-%m-%d %H:%M:%S')]
-	tmp['Velocity']=1000*tmp['Velocity']
+	tmp['Time'] = pd.to_datetime(tmp['Time'])
+	tmp = tmp[tmp['Time'] <= t2.strftime('%Y-%m-%d %H:%M:%S')]
+	tmp['Velocity'] = 1000*tmp['Velocity']
 
-	if os.path.exists(filename):
+	# Ensure path to filename exists
+	if not os.path.exists(filename):
+		open(filename, 'w').close()
+
+	# Initialize DataFrame
+	if os.path.getsize(filename) > 0:  # Check if the file is not empty
 		df = pd.read_csv(filename, sep='\t', parse_dates=['Time'])
-		df = df[(df['Time'] <= t1.strftime('%Y-%m-%d %H:%M:%S')) | (df['Time'] > t2.strftime('%Y-%m-%d %H:%M:%S'))]
-		df = pd.concat([df,tmp])
-		df = df.sort_values('Time')
+		t1_str = t1.strftime('%Y-%m-%d %H:%M:%S')
+		t2_str = t2.strftime('%Y-%m-%d %H:%M:%S')
+		df = df[(df['Time'] <= t1_str) | (df['Time'] > t2_str)]
+		df = pd.concat([df, tmp])
 	else:
 		df = tmp
 
-	df = df.round({'Azimuth':1,'Velocity':1,'MCCM':2,'Pressure':3,'rms':1})
+	# Process DataFrame
+	df = df.sort_values('Time').round({'Azimuth': 1, 'Velocity': 1, 'MCCM': 2, 'Pressure': 3, 'rms': 1})
 
-	df.to_csv(filename,index=False,header=True,sep='\t')
-	return
+	# Save DataFrame to CSV
+	df.to_csv(filename, index=False, header=True, sep='\t')
 
 
 def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
