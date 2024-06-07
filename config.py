@@ -1,6 +1,15 @@
+#
+# iPensive Configuration File
+# =============================
+# This file sets user-defined parameters for an iPensive instance.
+# If a variable is not specified here, a default value from ipensive_utils.default_config() will be used instead.
+# Explanations of each variable is also available in ipensive_utils.default_config()
+# All array definitions must be made in this file.
+# Processing and plotting parameters can be overwritten for specific arrays. See examples below.
+#
+
+
 # SYSTEM PARAMETERS
-# HOSTNAME	  = '137.227.224.220'
-# PORT		  = 16002
 CLIENT_TYPE   = 'earthworm'  # If not provided, will default to 'earthworm' for backward compatability
 HOSTNAME	  = 'pubavo1.wr.usgs.gov'
 PORT		  = 16022
@@ -23,7 +32,6 @@ EXTRA_LINKS = [
 ] # added links for reference one the main ipensive page. Variable can be deleted if desired.
 
 # DEFAUlT PROCESSING PARAMETERS
-DURATION      = 600  # DON'T CHANGE THIS!
 LATENCY       = 60	 # how long to pause and wait for data latency to catch up before processing (seconds)
 EXTRA_PAUSE   = 0 	 # extra pause in case some arrays are extra latent (Dillingham)
 FREQMIN		  = 0.8  # minimum frequency
