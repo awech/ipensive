@@ -94,7 +94,7 @@ NETWORKS=[
 								{'scnl':'AKS.HDF.AV.02'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69705},
 								{'scnl':'AKS.HDF.AV.03'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69616},
 								{'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69681},
-								# {'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69683},
+								{'scnl':'AKS.HDF.AV.05'	, 'sta_lat': 54.11098	, 'sta_lon': -165.69609},
 								{'scnl':'AKS.HDF.AV.06'	, 'sta_lat': 54.11005	, 'sta_lon': -165.69720},
 							],
 				'digouti': (1/400000)/0.0275,	# convert counts to Pressure in Pa (Centaur + Chaparral Vx2 mics)
@@ -216,7 +216,7 @@ NETWORKS=[
 							{'scnl':'FLX.HDF.MI.03'	, 'sta_lat': 15.23475	, 'sta_lon': 145.79216},
 							# {'scnl':'FLX.HDF.MI.04'	, 'sta_lat': 15.23206	, 'sta_lon': 145.79389},
 							{'scnl':'FLX.HDF.MI.05'	, 'sta_lat': 15.23215	, 'sta_lon': 145.79112},
-							{'scnl':'FLX.HDF.MI.06'	, 'sta_lat': 15.23647	, 'sta_lon': 145.79045},
+							#{'scnl':'FLX.HDF.MI.06'	, 'sta_lat': 15.23647	, 'sta_lon': 145.79045},
 						 ],
 				'digouti': (1/400000)/0.0275, #new sensors and locations installed Feb 20, 2024
 				'volcano':[
