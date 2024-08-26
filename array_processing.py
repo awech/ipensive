@@ -40,7 +40,8 @@ def process_array(array, network, T0):
 			params[key] = array[key]
 	
 	print('--- ' + array['Name'] + ' ---')
-	time.sleep(params['EXTRA_PAUSE'])
+	if os.getenv('FROMCRON') == 'yep':
+		time.sleep(params['EXTRA_PAUSE'])
 
 	#### download data ####
 	scnl  = DataFrame.from_dict(array['SCNL'])
