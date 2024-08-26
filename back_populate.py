@@ -11,15 +11,15 @@ from obspy import UTCDateTime
 import config
 from array_processing import process_array
 
-T1='2024-02-21 00:00'
-T2='2024-02-21 20:10'
-OVERWRITE = True
+T1='2024-08-23 13:50'
+T2='2024-08-24 16:40'
+OVERWRITE = False
 
 # ARRAYS=['Akutan']
 # specify ARRAYS if you want to just process specific arrays
 # ARRAYS=['Wake Island North', 'Wake Island South']
-ARRAYS = ['Kenai','Sand Point','Okmok','Cleveland','Adak','Amchitka','Dillingham']
-ARRAYS = ['Saipan']
+# ARRAYS = ['Kenai','Sand Point','Okmok','Cleveland','Adak','Amchitka','Dillingham']
+# ARRAYS = ['Saipan']
 
 
 def run_backpopulate():
