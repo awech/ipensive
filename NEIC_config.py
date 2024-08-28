@@ -1,8 +1,10 @@
 # SYSTEM PARAMETERS
-HOSTNAME	  = '137.227.224.220'
-PORT		  = 16002
+# HOSTNAME	  = '137.227.224.220'
+# PORT		  = 16002
+HOSTNAME	  = 'pubavo1.wr.usgs.gov'
+PORT		  = 16022
 OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image ouptut directory
-# OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
+OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
 LOGS_DIR	  = ''
 
 # DEFAUlT PROCESSING PARAMETERS
@@ -13,7 +15,7 @@ FREQMIN		  = 0.8  # minimum frequency
 FREQMAX		  = 5.0  # maximum frequency
 TAPER	      = 5.0  # seconds to taper beginning and end of trace before filtering
 WINDOW_LENGTH = 30   # window length for each calculation [seconds]
-OVERLAP       = 15   # amount of overlap between windos [seconds]
+OVERLAP       = 15   # amount of overlap between windows [seconds]
 MIN_CHAN      = 3	 # minimum number of channels needed to perform inversion
 
 # DEFAULT PLOTTING PARAMETERS
@@ -73,19 +75,12 @@ NETWORKS=[
 			}),
 
 			dict({'Name':'Akutan',
-		  		 #  'SCNL':[
-							# {'scnl':'AKS.BDF.AV.01'	, 'sta_lat': 54.11050	, 'sta_lon': -165.69773},
-							# {'scnl':'AKS.BDF.AV.02'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69618},
-							# {'scnl':'AKS.BDF.AV.03'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69700},
-							# {'scnl':'AKS.BDF.AV.04'	, 'sta_lat': 54.11053	, 'sta_lon': -165.69683},
-					  #    ],
-				# 'digouti': (1/419430.0)/0.05,
 					 'SCNL':[
 								{'scnl':'AKS.HDF.AV.01'	, 'sta_lat': 54.11048	, 'sta_lon': -165.69774},
 								{'scnl':'AKS.HDF.AV.02'	, 'sta_lat': 54.11105	, 'sta_lon': -165.69705},
 								{'scnl':'AKS.HDF.AV.03'	, 'sta_lat': 54.11028	, 'sta_lon': -165.69616},
 								{'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69681},
-								# {'scnl':'AKS.HDF.AV.04'	, 'sta_lat': 54.11051	, 'sta_lon': -165.69683},
+								{'scnl':'AKS.HDF.AV.05'	, 'sta_lat': 54.11098	, 'sta_lon': -165.69609},
 								{'scnl':'AKS.HDF.AV.06'	, 'sta_lat': 54.11005	, 'sta_lon': -165.69720},
 							],
 				'digouti': (1/400000)/0.0275,	# convert counts to Pressure in Pa (Centaur + Chaparral Vx2 mics)
@@ -102,7 +97,7 @@ NETWORKS=[
 				  'SCNL':[
 							{'scnl':'OKIF.HDF.AV.01'	, 'sta_lat': 53.41083004	, 'sta_lon': -167.91426701},
 							{'scnl':'OKIF.HDF.AV.02'	, 'sta_lat': 53.41001901	, 'sta_lon': -167.91366301},
-							{'scnl':'OKIF.HDF.AV.03'	, 'sta_lat': 53.40998297	, 'sta_lon': -167.91499598},
+							#{'scnl':'OKIF.HDF.AV.03'	, 'sta_lat': 53.40998297	, 'sta_lon': -167.91499598},
 							{'scnl':'OKIF.HDF.AV.04'	, 'sta_lat': 53.41029796	, 'sta_lon': -167.91431696},
 							{'scnl':'OKIF.HDF.AV.05'	, 'sta_lat': 53.41038496	, 'sta_lon': -167.91331901},
 							{'scnl':'OKIF.HDF.AV.06'	, 'sta_lat': 53.41045604	, 'sta_lon': -167.91544802},
@@ -142,7 +137,8 @@ NETWORKS=[
 							{'scnl':'ADKI.HDF.AV.03'	, 'sta_lat': 51.86226962	, 'sta_lon': -176.6446503},
 							{'scnl':'ADKI.HDF.AV.04'	, 'sta_lat': 51.86246609	, 'sta_lon': -176.6457851},
 							{'scnl':'ADKI.HDF.AV.05'	, 'sta_lat': 51.86326916	, 'sta_lon': -176.6461231},
-							{'scnl':'ADKI.HDF.AV.06'	, 'sta_lat': 51.86157572	, 'sta_lon': -176.6469340}],
+							# {'scnl':'ADKI.HDF.AV.06'	, 'sta_lat': 51.86157572	, 'sta_lon': -176.6469340},
+						 ],
 				'digouti': (1/419430.0)/(0.05),
 				'volcano':[
 							{'name':	'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
@@ -160,7 +156,7 @@ NETWORKS=[
 							{'scnl':'AMKA.HDF.AV.03'	, 'sta_lat': 51.378105	, 'sta_lon': 179.301225},
 							{'scnl':'AMKA.HDF.AV.04'	, 'sta_lat': 51.37831	, 'sta_lon': 179.30028},
 							{'scnl':'AMKA.HDF.AV.05'	, 'sta_lat': 51.379055	, 'sta_lon': 179.30026},
-							# {'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
+							{'scnl':'AMKA.HDF.AV.06'	, 'sta_lat': 51.37871	, 'sta_lon': 179.30093},
 						],
 				'digouti': (1/400000)/0.0275,
 				'volcano':[
@@ -183,14 +179,39 @@ NETWORKS=[
 						 ],
 				'digouti': 1/33505.5968,   # convert counts to Pressure in Pa 01-Jun-2021
 				'volcano':[
+							{'name': 'Spurr',     'v_lat': 61.29897,  'v_lon': -152.25122},
 							{'name': 'Bogoslof', 'v_lat': 53.9310,   'v_lon': -168.0360},
 							{'name': 'Veniaminof','v_lat': 56.195825,'v_lon': -159.389536},
 							{'name': 'Semisopochnoi',	 'v_lat': 51.947,	'v_lon': 179.623},
 							{'name': 'Trident',	 'v_lat': 58.234389,	'v_lon': -155.103988},
-			   				{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
+							{'name': 'Shishaldin','v_lat': 54.755856,'v_lon': -163.969961},
 						  ],
 				'EXTRA_PAUSE': 90,
 			}),			
 		]
 	},
+
+	{
+		'Name' : 'CNMI',
+		'ARRAYS' : [
+
+			dict({'Name':'Saipan',
+				  'SCNL':[
+							{'scnl':'FLX.HDF.MI.01'	, 'sta_lat': 15.23388	, 'sta_lon': 145.79172},
+							{'scnl':'FLX.HDF.MI.02'	, 'sta_lat': 15.23320	, 'sta_lon': 145.79234},
+							{'scnl':'FLX.HDF.MI.03'	, 'sta_lat': 15.23475	, 'sta_lon': 145.79216},
+							# {'scnl':'FLX.HDF.MI.04'	, 'sta_lat': 15.23206	, 'sta_lon': 145.79389},
+							{'scnl':'FLX.HDF.MI.05'	, 'sta_lat': 15.23215	, 'sta_lon': 145.79112},
+							#{'scnl':'FLX.HDF.MI.06'	, 'sta_lat': 15.23647	, 'sta_lon': 145.79045},
+						 ],
+				'digouti': (1/400000)/0.0275, #new sensors and locations installed Feb 20, 2024
+				'volcano':[
+							{'name': 'Anatahan', 'v_lat': 18.141555, 'v_lon': 145.786260},
+							{'name':	'Pagan', 'v_lat': 18.141555, 'v_lon': 145.786260},
+						  ],
+				'AZ_MIN' : 205,
+				'AZ_MAX' :   15,
+			}),
+		]
+	}
 ]
