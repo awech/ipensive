@@ -7,6 +7,9 @@ OUT_WEB_DIR   = '/www/avosouth.wr.usgs.gov/htdocs/infrasound'	# html & image oup
 OUT_ASCII_DIR = '/www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output'	# ascii output directory (delete if undesired)
 LOGS_DIR	  = ''
 EXTRA_LINKS = [
+	{
+		"Data Output": "https://avosouth.wr.usgs.gov/infrasound/ascii_output/"
+	},
     {
         "AK Array Locations": "https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth"
     },
