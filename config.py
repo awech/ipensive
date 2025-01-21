@@ -156,7 +156,7 @@ NETWORKS=[
 							{'scnl':'ADKI.HDF.AV.05'	, 'sta_lat': 51.86326916	, 'sta_lon': -176.6461231},
 							# {'scnl':'ADKI.HDF.AV.06'	, 'sta_lat': 51.86157572	, 'sta_lon': -176.6469340},
 						 ],
-				'digouti': (1/419430.0)/(0.05),
+				'digouti': 1/11541,
 				'volcano':[
 							{'name':	'Cleveland',   'v_lat': 52.8222,   'v_lon': -169.9464},
 							{'name':	'Great Sitkin','v_lat': 52.077282, 'v_lon': -176.131317},
