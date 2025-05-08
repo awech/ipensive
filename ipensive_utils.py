@@ -235,14 +235,13 @@ def web_folders(t2, config, params):
 
     return
 
+def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config):
 
-def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
 
-    name=name.replace(' ','_')
+    t1=t2-config[name]["DURATION"]
+    tmp_name=name.replace(' ','_')
 
-    t1=t2-config.DURATION
-
-    d0=config.OUT_ASCII_DIR+'/'+name
+    d0=config["OUT_ASCII_DIR"]+'/'+tmp_name
     if not os.path.exists(d0):
         os.mkdir(d0)
 
@@ -251,7 +250,7 @@ def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
         os.mkdir(subfolder)
 
     
-    filename=subfolder+'/'+name+'_'+t1.strftime('%Y-%m-%d')+'.txt'
+    filename=subfolder+'/'+tmp_name+'_'+t1.strftime('%Y-%m-%d')+'.txt'
 
     azimuth[azimuth<0]+=360
 
@@ -280,22 +279,21 @@ def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
     return
 
 
-def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
-    from pandas import DataFrame
+def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config):
 
-    A=DataFrame({'TIMESTAMP':t,
+    A=pd.DataFrame({'TIMESTAMP':t,
                  'CHANNEL':name,
                  'Azimuth':azimuth,
-                 'Velocity':velocity,
+                 'Velocity':1000*velocity,
                  'MCCM':mccm,
                  'Pressure':pressure,
                  'rms':rms})
 
-    A=A[['TIMESTAMP','CHANNEL','Azimuth','Velocity','MCCM','Pressure','rms']]
+    # A=A[['TIMESTAMP','CHANNEL','Azimuth','Velocity','MCCM','Pressure','rms']]
 
-    A['Velocity']=1000*A['Velocity']
+    # A['Velocity']=1000*A['Velocity']
 
-    filename=config.out_valve_dir+'/'+name+'_'+t2.strftime('%Y%m%d-%H%M')+'.txt'
+    filename=config["OUT_VALVE_DIR"]+'/'+name+'_'+t2.strftime('%Y%m%d-%H%M')+'.txt'
 
     A.to_csv(filename,index=False,header=True,sep=',',float_format='%.3f')
 

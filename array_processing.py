@@ -158,7 +158,7 @@ def process_array(config, array_name, T0):
         lat_list.append(tr.stats.coordinates.latitude)
         lon_list.append(tr.stats.coordinates.longitude)
     overlap_fraction = params["OVERLAP"] / params["WINDOW_LENGTH"]
-    velocity, azimuth, t, mccm, lts_dict, *_ = ltsva(st, lat_list, lon_list, params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA)
+    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(st, lat_list, lon_list, params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA)
     pressure = []
     for tr_win in st[0].slide(
         window_length=params["WINDOW_LENGTH"],
@@ -180,12 +180,12 @@ def process_array(config, array_name, T0):
         print("Something went wrong making the plot:")
         print(message)
 
-    if 'OUT_VALVE_DIR' in dir(config):
+    if 'OUT_VALVE_DIR' in config.keys():
         try:
             print('Writing csv file...')
             t=np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-            name=st[0].stats.station
-            utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name)
+            sta_name=st[0].stats.station
+            utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, sta_name, config)
         except:
             import traceback
             b=traceback.format_exc()
@@ -193,12 +193,11 @@ def process_array(config, array_name, T0):
             print('Something went wrong writing the csv file:')
             print(message)
 
-    if 'OUT_ASCII_DIR' in dir(config):
+    if 'OUT_ASCII_DIR' in config.keys():
         try:
             print('Writing csv file...')    
             t=np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-            name=array['Name']
-            utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name)
+            utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, array_name, config)
         except:
             import traceback
             b=traceback.format_exc()
