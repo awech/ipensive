@@ -138,11 +138,23 @@ def get_volcano_backazimuth(st, config, params):
     lon0=np.mean([tr.stats.coordinates.longitude for tr in st])
     lat0=np.mean([tr.stats.coordinates.latitude for tr in st])
     DF = pd.read_csv(config["TARGETS_FILE"])
+
+    tmp_targets = []
+    tmp_baz = []
     for target in params["TARGETS"]:
         if type(target) is str:
             df = DF[DF["Target"] == target]
             _, baz, _ = gps2dist_azimuth(lat0, lon0, df.iloc[0]["Latitude"], df.iloc[0]["Longitude"])
-            params[target] = baz
+            tmp_targets.append(target)
+            tmp_baz.append(baz)
+        elif type(target) is dict:
+            t_name = list(target.keys())[0]
+            tmp_targets.append(t_name)
+            tmp_baz.append(target[t_name])
+
+    for t, baz in zip(tmp_targets, tmp_baz):
+        params[t] = baz
+
     return params
 
 
@@ -234,6 +246,7 @@ def web_folders(t2, config, params):
         os.mkdir(d2)
 
     return
+
 
 def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config):
 
