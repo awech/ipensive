@@ -8,53 +8,63 @@ Created on 30-Mar-2022
 import os
 import pandas as pd
 from obspy import UTCDateTime
-import config
-from array_processing import process_array
+from array_processing import process_array, parse_args
+import ipensive_utils as utils
 
-T1='2025-01-01 00:00'
-T2='2025-01-02 21:10'
+T1='2025-05-07 00:00'
+T2='2025-05-07 22:20'
 OVERWRITE = False
 
-ARRAYS=['Akutan','Adak','Saipan']
+# ARRAYS=['Akutan','Adak','Saipan']
 # specify ARRAYS if you want to just process specific arrays
 # ARRAYS=['Wake Island North', 'Wake Island South']
 # ARRAYS = ['Kenai','Sand Point','Okmok','Cleveland','Adak','Amchitka','Dillingham']
 # ARRAYS = ['Saipan']
 
+args = parse_args()
+config = utils.load_config(args.config)
+
+
+def make_file_path(t, array_name, config):
+    year = "{:.0f}".format(t.year)
+    day = "{:03.0f}".format(t.dayofyear)
+    time = t.strftime("%Y%m%d-%H%M")
+    array_dict = config[array_name]
+    file = "{}/{}/{}/{}/{}/{}_{}.png".format(
+        config["OUT_WEB_DIR"],
+        array_dict["NETWORK_NAME"],
+        array_dict["ARRAY_NAME"],
+        year,
+        day,
+        array_dict["ARRAY_NAME"],
+        time,
+    )
+    return file
+
 
 def run_backpopulate():
 
-	t1 = UTCDateTime(T1)+config.DURATION
+	t1 = UTCDateTime(T1)+config["PARAMS"]["DURATION"]
 	for t in pd.date_range(T2, t1.strftime('%Y%m%d%H%M'), freq='-10min'):
 		print(t)
-		for network in config.NETWORKS:
-			for array in network['ARRAYS']:
 
-				# set up filename
-				year='{:.0f}'.format(t.year)
-				day='{:03.0f}'.format(t.dayofyear)
-				time=t.strftime('%Y%m%d-%H%M')
-				file='{}/{}/{}/{}/{}/{}_{}.png'.format(config.OUT_WEB_DIR,
-													   network['Name'],
-													   array['Name'],
-													   year,
-													   day,
-													   array['Name'],
-													   time)
+		for array_name in config['array_list']:
 
-				# check if you should process this time window
-				if not os.path.exists(file) or (os.path.exists(file) and OVERWRITE):
-					
-					# check if you should process this array
-					if 'ARRAYS' in dir():
-						if array['Name'] in ARRAYS:
-							process_array(array, network, UTCDateTime(t))
-						else:
-							print('Array name not on do list. Skip ' + array['Name'])
+			file = make_file_path(t, array_name, config)
+
+			# check if you should process this time window
+			if not os.path.exists(file) or (os.path.exists(file) and OVERWRITE):
+				
+				# check if you should process this array
+				if 'ARRAYS' in dir():
+					if array_name in ARRAYS:
+						process_array(config, array_name, UTCDateTime(t))
 					else:
-						process_array(array, network, UTCDateTime(t))
+						print('Array name not on do list. Skip ' + array_name)
 				else:
-					print('File exists. No overwrite. Skip ' + array['Name'])
+					process_array(config, array_name, UTCDateTime(t))
+			else:
+				print('File exists. No overwrite. Skip ' + array_name)
 
 	return
 
