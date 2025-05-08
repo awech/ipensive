@@ -16,7 +16,7 @@ from matplotlib import dates
 import time
 import ipensive_utils as utils
 import argparse
-
+from lts_array import ltsva
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -49,12 +49,13 @@ def get_starttime(config, args):
 
     date_fmt = "%Y-%m-%d %H:%M"
 
-    if args.time is None:
-        T0 = utc.utcnow()  # no time given, use current timestamp
-        delay = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
-    else:
+    if args.time:
         T0 = utc(args.time)
         delay = 0
+    else:
+        T0 = utc.utcnow()  # no time given, use current timestamp
+        delay = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
+        print(f"Waiting {delay:g} seconds")
 
     T0 = utc(T0.strftime(date_fmt)[:-1] + "0")  # round down to the nearest 10-minute
 
@@ -149,46 +150,28 @@ def process_array(config, array_name, T0):
     )
     st.trim(t1, t2 + params["WINDOW_LENGTH"])
     ########################
-
-    velocity = []
-    azimuth = []
-    mccm = []
-    t = []
-    rms = []
+    
+    lat_list = []
+    lon_list = []
+    ALPHA = params["LTS_ALPHA"] if len(st) > 3 else 1.0
+    for tr in st:
+        lat_list.append(tr.stats.coordinates.latitude)
+        lon_list.append(tr.stats.coordinates.longitude)
+    overlap_fraction = params["OVERLAP"] / params["WINDOW_LENGTH"]
+    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(st, lat_list, lon_list, params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA)
     pressure = []
-    for st_win in st.slide(
+    for tr_win in st[0].slide(
         window_length=params["WINDOW_LENGTH"],
         step=params["WINDOW_LENGTH"] - params["OVERLAP"],
     ):
-        try:
-            
-            vel, az, rms0, cmax, pk_press = utils.inversion(st_win)
-            velocity.append(vel)
-            azimuth.append(az)
-            mccm.append(np.median(cmax))
-            t.append(
-                dates.date2num(
-                    (st_win[0].stats.starttime + params["WINDOW_LENGTH"] / 2.0).datetime
-                )
-            )
-            rms.append(rms0)
-            pressure.append(pk_press)
-        except:
-            print("Something went wrong in the inversion...")
-            continue
-    t = np.array(t)
-    mccm = np.array(mccm)
-    velocity = np.array(velocity)
-    azimuth = np.array(azimuth)
-    rms = np.array(rms)
+        pressure.append(np.max(np.abs(tr.data)))
     pressure = np.array(pressure)
-
 
     try:
         print("Setting up web output folders")
         utils.web_folders(t2, config, params)
         print("Making plot...")
-        utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, config, params)
+        utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, params)
     except:
         import traceback
 
@@ -197,12 +180,12 @@ def process_array(config, array_name, T0):
         print("Something went wrong making the plot:")
         print(message)
 
-    if 'OUT_VALVE_DIR' in dir(config):
+    if 'OUT_VALVE_DIR' in config.keys():
         try:
             print('Writing csv file...')
             t=np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-            name=st[0].stats.station
-            utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name)
+            sta_name=st[0].stats.station
+            utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, sta_name, config)
         except:
             import traceback
             b=traceback.format_exc()
@@ -210,12 +193,11 @@ def process_array(config, array_name, T0):
             print('Something went wrong writing the csv file:')
             print(message)
 
-    if 'OUT_ASCII_DIR' in dir(config):
+    if 'OUT_ASCII_DIR' in config.keys():
         try:
             print('Writing csv file...')    
             t=np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-            name=array['Name']
-            utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name)
+            utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, array_name, config)
         except:
             import traceback
             b=traceback.format_exc()

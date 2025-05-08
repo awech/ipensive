@@ -1,6 +1,6 @@
 ---
 # SYSTEM PARAMETERS
-OUT_WEB_DIR: /Users/awech-local/Desktop/test_ipensive
+OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
 OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
 LOGS_DIR:
 STATION_XML: stations.xml
@@ -29,26 +29,16 @@ PARAMS: &defaults
   WINDOW_LENGTH : 30    # window length for each calculation [seconds]
   OVERLAP       : 15    # amount of overlap between windows [seconds]
   MIN_CHAN      : 3     # minimum number of channels needed to perform inversion
+  LTS_ALPHA     : 0.75  # decimal [0.50, 1.0] amount of data to keep in the subsets
 
   # PLOTTING PARAMETERS
+  PLOT_MCCM     : True  # make MdCCM scatter subplot
   MCTHRESH      : 0.6   # where to draw the threshold line in MCCM plot
   AZ_MIN        : 0     # minimum azimuth to plot
   AZ_MAX        : 360   # maximum azimuth to plot
   VEL_MIN       : 0.25  # minimum sound speed range
   VEL_MAX       : 0.45  # maximum sound speed range
   ARRAY_LABEL   : Infrasound
-########################################
-########################################
-
-############# bad channels #############
-########################################
-bad_channels:
-  - OKIF.HDF.AV.03
-  - ADKI.HDF.AV.06
-  - DLL.HDF.AV.06
-  - SDPI.HDF.AV.03
-  - FLX.HDF.MI.04
-  - FLX.HDF.MI.06
 ########################################
 ########################################
 
