@@ -1,0 +1,242 @@
+---
+# SYSTEM PARAMETERS
+OUT_WEB_DIR: /Users/awech-local/Desktop/test_ipensive
+OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
+LOGS_DIR:
+STATION_XML: stations.xml
+TARGETS_FILE: volcano_list.txt
+EXTRA_LINKS:
+  - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
+  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
+  - AK Travel Times: ak_traveltimes.html
+  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
+  - CNMI Travel Times: cnmi_traveltimes.html
+
+############### Defaults ###############
+########################################
+PARAMS: &defaults
+  # DATA SOURCE
+  HOSTNAME : pubavo1.wr.usgs.gov
+  PORT : 16022
+
+  # PROCESSING PARAMETERS
+  DURATION      : 600   # DON'T CHANGE THIS!
+  LATENCY       : 60    # how long to pause and wait for data latency to catch up before processing (seconds)
+  EXTRA_PAUSE   : 0     # extra pause in case some arrays are extra latent (Dillingham)
+  FREQMIN       : 0.8   # minimum frequency
+  FREQMAX       : 5.0   # maximum frequency
+  TAPER         : 5.0   # seconds to taper beginning and end of trace before filtering
+  WINDOW_LENGTH : 30    # window length for each calculation [seconds]
+  OVERLAP       : 15    # amount of overlap between windows [seconds]
+  MIN_CHAN      : 3     # minimum number of channels needed to perform inversion
+
+  # PLOTTING PARAMETERS
+  MCTHRESH      : 0.6   # where to draw the threshold line in MCCM plot
+  AZ_MIN        : 0     # minimum azimuth to plot
+  AZ_MAX        : 360   # maximum azimuth to plot
+  VEL_MIN       : 0.25  # minimum sound speed range
+  VEL_MAX       : 0.45  # maximum sound speed range
+  ARRAY_LABEL   : Infrasound
+########################################
+########################################
+
+############# bad channels #############
+########################################
+bad_channels:
+  - OKIF.HDF.AV.03
+  - ADKI.HDF.AV.06
+  - DLL.HDF.AV.06
+  - SDPI.HDF.AV.03
+  - FLX.HDF.MI.04
+  - FLX.HDF.MI.06
+########################################
+########################################
+
+
+# Define arrays to be processed
+NETWORKS:
+  AVO:
+    - Kenai
+    - Sand Point
+    - Akutan
+    - Okmok
+    - Cleveland
+    - Adak
+    - Amchitka
+    - Dillingham
+  CNMI:
+    - Saipan
+    - Wake Island North
+    - Wake Island South
+
+Kenai:
+  <<: *defaults
+  SCNL: 
+    - KENI.HDF.AV.01
+    - KENI.HDF.AV.02
+    - KENI.HDF.AV.03
+    - KENI.HDF.AV.04
+    - KENI.HDF.AV.05
+    - KENI.HDF.AV.06
+  TARGETS: 
+    - Wrangell
+    - Spurr
+    - Redoubt
+    - Iliamna
+    - Augustine
+  AZ_MIN: 200
+  AZ_MAX: 80
+
+Sand Point:
+  <<: *defaults
+  SCNL: 
+    - SDPI.HDF.AV.01
+    - SDPI.HDF.AV.02
+    - SDPI.HDF.AV.03
+    - SDPI.HDF.AV.04
+    - SDPI.HDF.AV.05
+    - SDPI.HDF.AV.06
+  TARGETS: 
+    - Pavlof
+    - Veniaminof
+    - Shishaldin
+    - Trident
+  AZ_MIN: 240
+  AZ_MAX: 60
+  FREQMIN: 1
+
+Akutan:
+  <<: *defaults
+  SCNL:
+    - AKS.HDF.AV.01
+    - AKS.HDF.AV.02
+    - AKS.HDF.AV.03
+    - AKS.HDF.AV.04
+    - AKS.HDF.AV.05
+    - AKS.HDF.AV.06
+  TARGETS: 
+    - Makushin
+    - Akutan
+    - Shishaldin
+  FREQMIN: 1
+
+Okmok:
+  <<: *defaults
+  SCNL: 
+    - OKIF.HDF.AV.01
+    - OKIF.HDF.AV.02
+    - OKIF.HDF.AV.03
+    - OKIF.HDF.AV.04
+    - OKIF.HDF.AV.05
+    - OKIF.HDF.AV.06
+  TARGETS:
+    - Bogoslof
+    - Cleveland
+    - Okmok
+    - Makushin
+    - Shishaldin
+
+Cleveland:
+  <<: *defaults
+  SCNL:
+    - CLCO.HDF.AV.01
+    - CLCO.HDF.AV.02
+    - CLCO.HDF.AV.03
+    - CLCO.HDF.AV.04
+    - CLCO.HDF.AV.05
+    - CLCO.HDF.AV.06
+  TARGETS:
+    - Cleveland
+    - Bogoslof
+    - Shishaldin
+
+Adak:
+  <<: *defaults
+  SCNL:
+    - ADKI.HDF.AV.01
+    - ADKI.HDF.AV.02
+    - ADKI.HDF.AV.03
+    - ADKI.HDF.AV.04
+    - ADKI.HDF.AV.05
+    - ADKI.HDF.AV.06
+  TARGETS:
+    - Cleveland
+    - Great Sitkin
+    - Moffett
+    - Semisopochnoi
+    - Shishaldin
+
+Amchitka:
+  <<: *defaults
+  SCNL:
+    - AMKA.HDF.AV.01
+    - AMKA.HDF.AV.02
+    - AMKA.HDF.AV.03
+    - AMKA.HDF.AV.04
+    - AMKA.HDF.AV.05
+    - AMKA.HDF.AV.06
+  TARGETS:
+    - Little Sitkin
+    - Semisopochnoi
+    - Gareloi
+  AZ_MIN: 270
+  AZ_MAX: 90
+
+Dillingham:
+  <<: *defaults
+  SCNL:
+    - DLL.HDF.AV.01
+    - DLL.HDF.AV.02
+    - DLL.HDF.AV.03
+    - DLL.HDF.AV.04
+    - DLL.HDF.AV.05
+    - DLL.HDF.AV.06
+  TARGETS:
+    - Spurr
+    - Bogoslof
+    - Veniaminof
+    - Semisopochnoi
+    - Trident
+    - Shishaldin
+  EXTRA_PAUSE: 90
+
+Saipan:
+  <<: *defaults
+  SCNL:
+    - FLX.HDF.MI.01
+    - FLX.HDF.MI.02
+    - FLX.HDF.MI.03
+    - FLX.HDF.MI.04
+    - FLX.HDF.MI.05
+    - FLX.HDF.MI.06
+  TARGETS:
+    - Anatahan
+    - Pagan
+  AZ_MIN: 205
+  AZ_MAX: 15
+
+Wake Island North: &hydro_defaults
+  <<: *defaults
+  SCNL:
+    - H11N1.EDH.IM.--
+    - H11N2.EDH.IM.--
+    - H11N3.EDH.IM.--
+  TARGETS:
+    - Saipan
+    - Anatahan
+    - Pagan
+    - Ahyi Seamount
+  FREQMIN: 1
+  FREQMAX: 10
+  VEL_MIN: 1.4
+  VEL_MAX: 1.6
+  AZ_MIN : 250
+  AZ_MAX : 290
+  ARRAY_LABEL: Hydroacoustic
+
+Wake Island South:
+  <<: *hydro_defaults
+  SCNL:
+    - H11S1.EDH.IM.--
+    - H11S2.EDH.IM.--
+    - H11S3.EDH.IM.--
