@@ -6,7 +6,6 @@ from obspy import Stream, UTCDateTime, read_inventory
 from obspy.clients.earthworm import Client
 from obspy.clients.fdsn import Client as FDSNClient
 from obspy.geodetics.base import gps2dist_azimuth
-from scipy.signal import correlate
 import yaml
 
 ####### plotting imports #######
@@ -15,6 +14,8 @@ m.use('Agg')
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
 from matplotlib import dates
+from copy import deepcopy
+from collections import Counter
 fonts=10
 rcParams.update({'font.size': fonts})
 ################################
@@ -130,102 +131,6 @@ def add_metadata(st, xml_file_name):
         tr.inventory = inv
 
     return st
-
-
-def setup_coordinate_system(st):
-    R = 6372.7976   # radius of the earth
-    lons  = np.array([tr.stats.coordinates.longitude for tr in st])
-    lats  = np.array([tr.stats.coordinates.latitude for tr in st])
-    lon0  = lons.mean()*np.pi/180.0
-    lat0  = lats.mean()*np.pi/180.0
-    yx    = R*np.array([ lats*np.pi/180.0-lat0, (lons*np.pi/180.0-lon0)*np.cos(lat0) ]).T
-    intsd = np.zeros([len(lons),len(lons)])
-    ints_az= np.zeros([len(lons),len(lons)])
-    for ii in range(len(st[:-1])):
-        for jj in range(ii+1,len(st)):
-            # intsd[i,j]=np.sqrt(np.square(yx[j][0]-yx[i][0])+np.square(yx[j][1]-yx[i][1]))
-            tmp=gps2dist_azimuth(lats[ii],lons[ii],lats[jj],lons[jj])
-            intsd[ii,jj]=tmp[0]
-            ints_az[ii,jj]=tmp[1]
-
-    return yx, intsd, ints_az
-
-
-def align_stack_stream(st, LAGS):
-
-    st_temp=st.copy()
-    group_streams = Stream()
-    T1 = st_temp[0].copy().stats.starttime
-    T2 = st_temp[0].copy().stats.endtime
-    for i, tr in enumerate(st_temp):
-        tr = tr.copy().trim(
-            tr.stats.starttime - LAGS[i],
-            tr.stats.endtime - LAGS[i],
-            pad=True,
-            fill_value=0,
-        )
-        tr.trim(tr.stats.starttime + 1, tr.stats.endtime - 1, pad=True, fill_value=0)
-        tr.stats.starttime = T1
-        group_streams += tr
-
-    ST = group_streams[0].copy()
-    for tr in group_streams[1:]:
-        ST.data = ST.data + tr.data
-    ST.data = ST.data / len(st_temp)
-    ST.trim(T1, T2)
-    return ST
-
-
-def inversion(st):
-    ## inversion originally written by M. Haney in matlab
-    ## modified and converted to Python by A. Wech
-    lags   = np.array([])
-    Cmax   = np.array([])
-
-    mlag = st[0].stats.npts
-    tC   = np.linspace(-mlag,mlag,2*mlag-1)/st[0].stats.sampling_rate
-    for ii in range(len(st[:-1])):
-        for jj in range(ii+1,len(st)):
-            scale=np.linalg.norm(st[ii].data)*np.linalg.norm(st[jj].data)
-            cc=correlate(st[ii],st[jj],mode='full')/float(scale)
-            Cmax = np.append(Cmax,cc.max())
-            lags = np.append(lags,tC[cc.argmax()])
-
-    # get interstation distance and azimuth vectors
-    yx, intsd, ints_az = setup_coordinate_system(st)
-    ds = intsd[np.triu_indices(len(st),1)]
-    az = ints_az[np.triu_indices(len(st),1)]
-
-    dt    = lags
-    Dm3   = np.array([ds*np.cos(az*(np.pi/180.0)) , ds*np.sin(az*(np.pi/180.0))]).T
-    Dm3   = Dm3/1000.0  # convert to kilometers
-
-    # generalized inverse of slowness matrix
-    Gmi = np.linalg.inv(np.matmul(Dm3.T,Dm3))
-    # slowness - least squares
-    sv = np.matmul(np.matmul(Gmi,Dm3.T),dt.T)
-    # velocity from slowness
-    velocity = 1/np.sqrt(np.square(sv[0])+np.square(sv[1]))
-    # cosine and sine for backazimuth
-    caz3 = velocity*sv[0]
-    saz3 = velocity*sv[1]
-    # 180 degree resolved backazimuth to source
-    azimuth = np.arctan2(saz3,caz3)*(180/np.pi)
-    if azimuth<0:
-        azimuth=azimuth+360
-    # rms
-    # rms = np.sqrt(np.mean(np.square(np.matmul(Dm3,sv)-dt.T)))
-
-    Dm3_new=np.array([ds*np.cos(az*(np.pi/180.0)) , ds*np.sin(az*(np.pi/180.0))]).T/1000
-    sv_new=np.array([np.cos(azimuth*np.pi/180)/velocity, np.sin(azimuth*np.pi/180)/velocity])
-    lags_new=np.matmul(Dm3_new,sv_new)
-    rms = np.sqrt(np.mean(np.square(lags_new-dt.T)))
-
-    LAGS=np.hstack((0,lags_new[:len(st)-1]))
-    ST_stack=align_stack_stream(st,LAGS)
-    pk_pressure=np.max(np.abs(ST_stack.data))
-
-    return velocity, azimuth, rms, Cmax, pk_pressure
 
 
 def get_volcano_backazimuth(st, config, params):
@@ -395,11 +300,11 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name):
     A.to_csv(filename,index=False,header=True,sep=',',float_format='%.3f')
 
 
-def plot_results(t1, t2, t, st, mccm, velocity, azimuth, config, params):
+def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, params):
 
     d0=config["OUT_WEB_DIR"]+'/'+params["NETWORK_NAME"]+'/'+params["ARRAY_NAME"]+'/'+str(t2.year)
     d2=d0+'/'+'{:03d}'.format(t2.julday)
-    
+
     tvec = np.linspace(
         dates.date2num(st[0].stats.starttime.datetime),
         dates.date2num(st[0].stats.endtime.datetime),
@@ -410,20 +315,31 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, config, params):
     cm = "RdYlBu_r"
     cax = 0.2, 1  # colorbar/y-axis for mccm
 
+    if params["PLOT_MCCM"]:
+        ax_list = [["wave"], ["cc"], ["vel"], ["baz"], ["stas"]]
+        hr_list = [1, 1, 1, 1, 0.66]
+    else:
+        ax_list = [["wave"], ["vel"], ["baz"], ["stas"]]
+        hr_list = [1, 1, 1, 0.66]
     size = (8, 10.5)
     trace_lw = 0.6
     scatter_lw = 0.3
+    s_dot = 36
     hline_lw = 1
+    wm_font = 18
     for plot_size in ["big", "small"]:
         if plot_size == "small":
             size = (2.1, 2.75)
             trace_lw = 0.1
             scatter_lw = 0.1
-            hline_lw = 0.5
+            hline_lw = 0.25
+            s_dot = 8
+            wm_font = 8
 
         fig, ax = plt.subplot_mosaic(
-            [["wave"], ["cc"], ["vel"], ["baz"]],
-            figsize=size
+            ax_list,
+            figsize=size,
+            height_ratios=hr_list
         )
 
         ############ Plot Waveforms ##############
@@ -455,25 +371,23 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, config, params):
 
         ############ Plot cc values ##############
         ##########################################
-        if plot_size == "big":
-            sc = ax["cc"].scatter(t, mccm, c=mccm, edgecolors="k", lw=scatter_lw, cmap=cm)
-        else:
-            sc = ax["cc"].scatter(t, mccm, s=8*np.ones_like(t), c=mccm, edgecolors="k", lw=scatter_lw, cmap=cm)
-        ax["cc"].axhline(params["MCTHRESH"], ls="--", lw=hline_lw, color="gray")
-        ax["cc"].axis("tight")
-        ax["cc"].set_xlim(T1, T2)
-        ax["cc"].set_ylim(cax)
-        sc.set_clim(cax)
-        if plot_size == "big":
-            ax["cc"].xaxis_date()
-            ax["cc"].fmt_xdata = dates.DateFormatter("%HH:%MM")
-            ax["cc"].xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
-            ax["cc"].set_xticklabels([])
-            ax["cc"].tick_params(direction="in", axis="x", top="on")
-            ax["cc"].set_ylabel(r"$M_{d}CCM$")
-        else:
-            ax["cc"].set_xticks([])
-            ax["cc"].set_yticks([])
+        if params["PLOT_MCCM"]:
+            sc = ax["cc"].scatter(t, mccm, c=mccm, s=s_dot, edgecolors="k", lw=scatter_lw, cmap=cm)
+            ax["cc"].axhline(params["MCTHRESH"], ls="--", lw=hline_lw, color="gray")
+            ax["cc"].axis("tight")
+            ax["cc"].set_xlim(T1, T2)
+            ax["cc"].set_ylim(cax)
+            sc.set_clim(cax)
+            if plot_size == "big":
+                ax["cc"].xaxis_date()
+                ax["cc"].fmt_xdata = dates.DateFormatter("%HH:%MM")
+                ax["cc"].xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
+                ax["cc"].set_xticklabels([])
+                ax["cc"].tick_params(direction="in", axis="x", top="on")
+                ax["cc"].set_ylabel(r"$M_{d}CCM$")
+            else:
+                ax["cc"].set_xticks([])
+                ax["cc"].set_yticks([])
         ##########################################
 
         ########## Plot Trace Velocities #########
@@ -485,10 +399,9 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, config, params):
             alpha=0.25,
             edgecolor=None,
         )
-        if plot_size == "big":
-            sc = ax["vel"].scatter(t, velocity, c=mccm, edgecolors="k", lw=scatter_lw, cmap=cm)
-        else:
-            sc = ax["vel"].scatter(t, velocity, c=mccm, s=8*np.ones_like(t), edgecolors="k", lw=scatter_lw, cmap=cm)
+
+        sc = ax["vel"].scatter(t, velocity, c=mccm, s=s_dot, edgecolors="k", lw=scatter_lw, cmap=cm)
+        
         if params["ARRAY_LABEL"] == "Hydroacoustic":
             ax["vel"].set_ylim(1.2, 1.8)
         else:
@@ -507,56 +420,111 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, config, params):
             ax["vel"].set_yticks([])
         ##########################################
 
-
         ########### Plot Back-azimuths ###########
         ##########################################
+        box_style = {'facecolor':'white','edgecolor':'white','pad':0}
+        az_min = deepcopy(params['AZ_MIN'])
+        az_max = deepcopy(params['AZ_MAX'])
+        tmp_azimuth = deepcopy(azimuth)
         if params['AZ_MAX'] < params['AZ_MIN']:
-            params['AZ_MIN'] = params['AZ_MIN']-360
+            az_min = az_min-360
             for target in params['TARGETS']:
                 baz = params[target]
                 if baz > 180:
-                    ax["baz"].axhline(baz-360,ls='--',lw=hline_lw, color='gray',zorder=-1)
+                    ax["baz"].axhline(baz-360, ls='--', lw=hline_lw, color='gray', zorder=-1)
                     if plot_size == "big":
-                        ax["baz"].text(t[1], baz-360, target,bbox={'facecolor':'white','edgecolor':'white','pad':0},fontsize=8,verticalalignment='center',style='italic',zorder=10)
+                        ax["baz"].text(t[1], baz-360, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
                 else:
-                    ax["baz"].axhline(baz,ls='--',lw=hline_lw, color='gray',zorder=-1)
+                    ax["baz"].axhline(baz, ls='--', lw=hline_lw, color='gray', zorder=-1)
                     if plot_size == "big":
-                        ax["baz"].text(t[1],baz,target,bbox={'facecolor':'white','edgecolor':'white','pad':0},fontsize=8,verticalalignment='center',style='italic',zorder=10)
-            azimuth[azimuth>180]+=-360
+                        ax["baz"].text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
+            tmp_azimuth[tmp_azimuth>180]+=-360
         else:
             for target in params['TARGETS']:
                 baz = params[target]
-                ax["baz"].axhline(baz,ls='--',lw=hline_lw, color='gray',zorder=-1)
+                ax["baz"].axhline(baz, ls='--', lw=hline_lw, color='gray', zorder=-1)
                 if plot_size == "big":
-                    ax["baz"].text(t[1],baz,target,bbox={'facecolor':'white','edgecolor':'white','pad':0},fontsize=8,verticalalignment='center',style='italic',zorder=10)
-        if plot_size == "big":
-            sc=ax["baz"].scatter(t,azimuth,c=mccm,edgecolors='k',lw=scatter_lw,cmap=cm,zorder=1000)
-        else:
-            sc=ax["baz"].scatter(t,azimuth,s=8*np.ones_like(t), c=mccm,edgecolors='k',lw=scatter_lw,cmap=cm,zorder=1000)
-        ax["baz"].set_ylim(params['AZ_MIN'], params['AZ_MAX'])
+                    ax["baz"].text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
+
+        sc=ax["baz"].scatter(t, tmp_azimuth, c=mccm, s=s_dot, edgecolors='k', lw=scatter_lw, cmap=cm, zorder=1000)
+        ax["baz"].set_ylim(az_min, az_max)
         ax["baz"].set_xlim(T1,T2)
         sc.set_clim(cax)
         if plot_size == "big":
-            ax["baz"].set_ylabel('Back-azimuth\n [deg]')
             ax["baz"].xaxis_date()
-            ax["baz"].tick_params(axis='x',labelbottom='on')
-            ax["baz"].fmt_xdata = dates.DateFormatter('%HH:%MM')
+            ax["baz"].fmt_xdata = dates.DateFormatter("%HH:%MM")
             ax["baz"].xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
-            ax["baz"].set_xlabel('UTC Time ['+t1.strftime('%Y-%b-%d')+']')
+            ax["baz"].set_xticklabels([])
+            ax["baz"].tick_params(direction="in", axis="x", top="on")
+            ax["baz"].set_ylabel("Trace Velocity\n [km/s]")
         else:
             ax["baz"].set_xticks([])
             ax["baz"].set_yticks([])
+
+        ########## Plot Dropped Channels #########
+        ##########################################
+        if len(lts_dict) == 0:
+            txt_str = "Not enough channels for LTS"
+            ax["stas"].text(0.5, 0.5, txt_str, transform=ax["stas"].transAxes, color='grey', alpha=0.7, fontsize=wm_font, va="center", ha="center")
+            n = len(st)
+        else:
+            ndict = deepcopy(lts_dict)
+            n = ndict['size']
+            ndict.pop('size', None)
+            tstamps = list(ndict.keys())
+            tstampsfloat = [float(ii) for ii in tstamps]
+            cm2 = plt.get_cmap('binary', (n-1))
+            for jj in range(len(tstamps)):
+                z = Counter(list(ndict[tstamps[jj]]))
+                keys, vals = z.keys(), z.values()
+                keys, vals = np.array(list(keys)), np.array(list(vals))
+                pts = np.tile(tstampsfloat[jj], len(keys))
+                sc_stas = ax["stas"].scatter(
+                    pts,
+                    keys,
+                    c=vals,
+                    s=s_dot,
+                    edgecolors="k",
+                    lw=scatter_lw,
+                    cmap=cm2,
+                    vmin=0.5,
+                    vmax=n - 0.5,
+                )
+        ax["stas"].set_ylim(0, n+1)
+        ax["stas"].invert_yaxis()
+        ax["stas"].set_yticks(np.arange(1, n+1))
+        ax["stas"].set_xlim(T1,T2)
+        if plot_size == "big":
+            ax["stas"].set_ylabel('Element [#]')
+            ax["stas"].xaxis_date()
+            ax["stas"].tick_params(axis='x',labelbottom='on')
+            ax["stas"].fmt_xdata = dates.DateFormatter('%HH:%MM')
+            ax["stas"].xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
+            ax["stas"].set_xlabel('UTC Time ['+t1.strftime('%Y-%b-%d')+']')
+        else:
+            ax["stas"].set_xticks([])
+            ax["stas"].set_yticks([])
         ##########################################
 
         ########## Adjust & Save Figure ##########
         ##########################################
         if plot_size == "big":
             plt.subplots_adjust(left=0.1, right=0.9, top=0.97, bottom=0.05, hspace=0.1)
-            ctop = ax["cc"].get_position().y1
+
+            ax_str = "cc" if params["PLOT_MCCM"] else "vel"
+            ctop = ax[ax_str].get_position().y1
             cbot = ax["baz"].get_position().y0
-            cbaxes = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
-            hc = plt.colorbar(sc, cax=cbaxes)
+            cbaxes_mccm = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
+            hc = plt.colorbar(sc, cax=cbaxes_mccm)
             hc.set_label(r'$M_{d}CCM$')
+            if n > 3 and params["LTS_ALPHA"] < 1:
+                ctop = ax["stas"].get_position().y1
+                cbot = ax["stas"].get_position().y0
+                cbaxes_stas = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
+                hc_stas = plt.colorbar(sc_stas, cax=cbaxes_stas)
+                hc_stas.set_label(r"# Dropped Pairs")
+                hc_stas.set_ticks(np.arange(1, n))
+            
             filename=d2+'/'+params["ARRAY_NAME"]+'_'+t2.strftime('%Y%m%d-%H%M')+'.png'
             fig.savefig(filename,dpi=72,format='png')
             plt.close("all")
