@@ -245,7 +245,9 @@ Wake Island South:
 #       lat: 51.86324162
 #       lon: -176.6435998
 #       gain: 11541.508142041417
-#     ...
+
+
+# Example of manual target backazimuth entry:
 #   TARGETS:
 #     - Cleveland
-#     - ...
+#     - Some Place: 240

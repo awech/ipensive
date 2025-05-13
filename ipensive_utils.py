@@ -171,7 +171,7 @@ def add_metadata(st, config, skip_chans=[]):
     return st
 
 
-def get_target_backazimuth(st, config, params):
+def get_target_backazimuth(st, config, array_params):
     # def get_volcano_backazimuth(st, array):
     lon0=np.mean([tr.stats.coordinates.longitude for tr in st])
     lat0=np.mean([tr.stats.coordinates.latitude for tr in st])
@@ -179,7 +179,7 @@ def get_target_backazimuth(st, config, params):
 
     tmp_targets = []
     tmp_baz = []
-    for target in params["TARGETS"]:
+    for target in array_params["TARGETS"]:
         if type(target) is str:
             df = DF[DF["Target"] == target]
             _, baz, _ = gps2dist_azimuth(lat0, lon0, df.iloc[0]["Latitude"], df.iloc[0]["Longitude"])
@@ -191,9 +191,9 @@ def get_target_backazimuth(st, config, params):
             tmp_baz.append(target[t_name])
 
     for t, baz in zip(tmp_targets, tmp_baz):
-        params[t] = baz
+        array_params[t] = baz
 
-    return params
+    return array_params
 
 
 def grab_data(NSLC, T1, T2, hostname, port, fill_value=0):
@@ -486,6 +486,8 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
         if array_params['AZ_MAX'] < array_params['AZ_MIN']:
             az_min = az_min-360
             for target in array_params['TARGETS']:
+                if isinstance(target, dict):
+                    target = list(target.keys())[0]
                 baz = array_params[target]
                 if baz > 180:
                     ax["baz"].axhline(baz-360, ls='--', lw=hline_lw, color='gray', zorder=-1)
