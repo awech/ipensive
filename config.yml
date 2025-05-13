@@ -1,8 +1,11 @@
 ---
 # SYSTEM PARAMETERS
-OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
-OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
+# OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
+# OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
+OUT_WEB_DIR: /Users/awech-local/Desktop/ipensive_test/web
+OUT_ASCII_DIR: /Users/awech-local/Desktop/ipensive_test/ascii
 LOGS_DIR:
+DATA_SOURCE: data_source.yml
 STATION_XML: stations.xml
 TARGETS_FILE: volcano_list.txt
 EXTRA_LINKS:
@@ -15,9 +18,6 @@ EXTRA_LINKS:
 ############### Defaults ###############
 ########################################
 PARAMS: &defaults
-  # DATA SOURCE
-  HOSTNAME : pubavo1.wr.usgs.gov
-  PORT : 16022
 
   # PROCESSING PARAMETERS
   DURATION      : 600   # DON'T CHANGE THIS!
@@ -61,13 +61,13 @@ NETWORKS:
 
 Kenai:
   <<: *defaults
-  SCNL: 
-    - KENI.HDF.AV.01
-    - KENI.HDF.AV.02
-    - KENI.HDF.AV.03
-    - KENI.HDF.AV.04
-    - KENI.HDF.AV.05
-    - KENI.HDF.AV.06
+  NSLC: 
+    - AV.KENI.01.HDF
+    - AV.KENI.02.HDF
+    - AV.KENI.03.HDF
+    - AV.KENI.04.HDF
+    - AV.KENI.05.HDF
+    - AV.KENI.06.HDF
   TARGETS: 
     - Wrangell
     - Spurr
@@ -79,13 +79,13 @@ Kenai:
 
 Sand Point:
   <<: *defaults
-  SCNL: 
-    - SDPI.HDF.AV.01
-    - SDPI.HDF.AV.02
-    - SDPI.HDF.AV.03
-    - SDPI.HDF.AV.04
-    - SDPI.HDF.AV.05
-    - SDPI.HDF.AV.06
+  NSLC: 
+    - AV.SDPI.01.HDF
+    - AV.SDPI.02.HDF
+    - AV.SDPI.03.HDF
+    - AV.SDPI.04.HDF
+    - AV.SDPI.05.HDF
+    - AV.SDPI.06.HDF
   TARGETS: 
     - Pavlof
     - Veniaminof
@@ -97,13 +97,13 @@ Sand Point:
 
 Akutan:
   <<: *defaults
-  SCNL:
-    - AKS.HDF.AV.01
-    - AKS.HDF.AV.02
-    - AKS.HDF.AV.03
-    - AKS.HDF.AV.04
-    - AKS.HDF.AV.05
-    - AKS.HDF.AV.06
+  NSLC:
+    - AV.AKS.01.HDF
+    - AV.AKS.02.HDF
+    - AV.AKS.03.HDF
+    - AV.AKS.04.HDF
+    - AV.AKS.05.HDF
+    - AV.AKS.06.HDF
   TARGETS: 
     - Makushin
     - Akutan
@@ -112,13 +112,13 @@ Akutan:
 
 Okmok:
   <<: *defaults
-  SCNL: 
-    - OKIF.HDF.AV.01
-    - OKIF.HDF.AV.02
-    - OKIF.HDF.AV.03
-    - OKIF.HDF.AV.04
-    - OKIF.HDF.AV.05
-    - OKIF.HDF.AV.06
+  NSLC: 
+    - AV.OKIF.01.HDF
+    - AV.OKIF.02.HDF
+    - AV.OKIF.03.HDF
+    - AV.OKIF.04.HDF
+    - AV.OKIF.05.HDF
+    - AV.OKIF.06.HDF
   TARGETS:
     - Bogoslof
     - Cleveland
@@ -128,13 +128,13 @@ Okmok:
 
 Cleveland:
   <<: *defaults
-  SCNL:
-    - CLCO.HDF.AV.01
-    - CLCO.HDF.AV.02
-    - CLCO.HDF.AV.03
-    - CLCO.HDF.AV.04
-    - CLCO.HDF.AV.05
-    - CLCO.HDF.AV.06
+  NSLC:
+    - AV.CLCO.01.HDF
+    - AV.CLCO.02.HDF
+    - AV.CLCO.03.HDF
+    - AV.CLCO.04.HDF
+    - AV.CLCO.05.HDF
+    - AV.CLCO.06.HDF
   TARGETS:
     - Cleveland
     - Bogoslof
@@ -142,13 +142,14 @@ Cleveland:
 
 Adak:
   <<: *defaults
-  SCNL:
-    - ADKI.HDF.AV.01
-    - ADKI.HDF.AV.02
-    - ADKI.HDF.AV.03
-    - ADKI.HDF.AV.04
-    - ADKI.HDF.AV.05
-    - ADKI.HDF.AV.06
+  NSLC:
+    - AV.ADKI.01.HDF
+    - AV.ADKI.02.HDF
+    - AV.ADKI.03.HDF
+    - AV.ADKI.04.HDF
+    - AV.ADKI.05.HDF
+    - AV.ADKI.06.HDF
+
   TARGETS:
     - Cleveland
     - Great Sitkin
@@ -158,13 +159,13 @@ Adak:
 
 Amchitka:
   <<: *defaults
-  SCNL:
-    - AMKA.HDF.AV.01
-    - AMKA.HDF.AV.02
-    - AMKA.HDF.AV.03
-    - AMKA.HDF.AV.04
-    - AMKA.HDF.AV.05
-    - AMKA.HDF.AV.06
+  NSLC:
+    - AV.AMKA.01.HDF
+    - AV.AMKA.02.HDF
+    - AV.AMKA.03.HDF
+    - AV.AMKA.04.HDF
+    - AV.AMKA.05.HDF
+    - AV.AMKA.06.HDF
   TARGETS:
     - Little Sitkin
     - Semisopochnoi
@@ -174,13 +175,13 @@ Amchitka:
 
 Dillingham:
   <<: *defaults
-  SCNL:
-    - DLL.HDF.AV.01
-    - DLL.HDF.AV.02
-    - DLL.HDF.AV.03
-    - DLL.HDF.AV.04
-    - DLL.HDF.AV.05
-    - DLL.HDF.AV.06
+  NSLC:
+    - AV.DLL.01.HDF
+    - AV.DLL.02.HDF
+    - AV.DLL.03.HDF
+    - AV.DLL.04.HDF
+    - AV.DLL.05.HDF
+    - AV.DLL.06.HDF
   TARGETS:
     - Spurr
     - Bogoslof
@@ -192,13 +193,13 @@ Dillingham:
 
 Saipan:
   <<: *defaults
-  SCNL:
-    - FLX.HDF.MI.01
-    - FLX.HDF.MI.02
-    - FLX.HDF.MI.03
-    - FLX.HDF.MI.04
-    - FLX.HDF.MI.05
-    - FLX.HDF.MI.06
+  NSLC:
+    - MI.FLX.01.HDF
+    - MI.FLX.02.HDF
+    - MI.FLX.03.HDF
+    - MI.FLX.04.HDF
+    - MI.FLX.05.HDF
+    - MI.FLX.06.HDF
   TARGETS:
     - Anatahan
     - Pagan
@@ -207,10 +208,10 @@ Saipan:
 
 Wake Island North: &hydro_defaults
   <<: *defaults
-  SCNL:
-    - H11N1.EDH.IM.--
-    - H11N2.EDH.IM.--
-    - H11N3.EDH.IM.--
+  NSLC:
+    - IM.H11N1.--.EDH
+    - IM.H11N2.--.EDH
+    - IM.H11N3.--.EDH
   TARGETS:
     - Saipan
     - Anatahan
@@ -226,7 +227,25 @@ Wake Island North: &hydro_defaults
 
 Wake Island South:
   <<: *hydro_defaults
-  SCNL:
-    - H11S1.EDH.IM.--
-    - H11S2.EDH.IM.--
-    - H11S3.EDH.IM.--
+  NSLC:
+    - IM.H11S1.--.EDH
+    - IM.H11S2.--.EDH
+    - IM.H11S3.--.EDH
+
+
+# Example of manual metadata entry:
+# Adak:
+#   <<: *defaults
+#   NSLC:
+#     AV.ADKI.01.HDF:
+#       lat: 51.86190727
+#       lon: -176.6438598
+#       gain: 11541.508142041417
+#     AV.ADKI.02.HDF:
+#       lat: 51.86324162
+#       lon: -176.6435998
+#       gain: 11541.508142041417
+#     ...
+#   TARGETS:
+#     - Cleveland
+#     - ...
