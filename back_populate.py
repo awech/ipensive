@@ -11,8 +11,8 @@ from obspy import UTCDateTime
 from array_processing import process_array, parse_args
 import ipensive_utils as utils
 
-T1='2025-05-07 00:00'
-T2='2025-05-07 22:20'
+T1 = "2025-05-12 00:00"
+T2 = "2025-05-13 00:00"
 OVERWRITE = False
 
 # ARRAYS=['Akutan','Adak','Saipan']
