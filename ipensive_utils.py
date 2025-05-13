@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import pandas as pd
 from obspy import Stream, UTCDateTime, read_inventory
-from obspy.clients.earthworm import Client
+from obspy.clients.earthworm import Client as EWClient
 from obspy.clients.fdsn import Client as FDSNClient
 from obspy.geodetics.base import gps2dist_azimuth
 import yaml
@@ -37,6 +37,20 @@ def load_config(config_file):
     config["network_list"] = all_nets
     config["array_list"] = array_list
 
+    # load datasource from separate .yml file
+    with open(config["DATA_SOURCE"], "r") as file:
+        data_source = yaml.safe_load(file)
+
+    HOST = data_source["HOSTNAME"]
+    PORT = data_source["PORT"]
+
+    # update host and port for each array if not set
+    for array in config["array_list"]:
+        if "HOSTNAME" not in config[array].keys():
+            config[array]["HOSTNAME"] = HOST
+        if "PORT" not in config[array].keys():
+            config[array]["PORT"] = PORT
+    
     return config
 
 
@@ -91,11 +105,29 @@ def check_FDSN(tr, client):
     return value
 
 
-def add_metadata(st, xml_file_name):
+def add_coordinate_info(st, config, array_name):
+    from obspy.core.util import AttribDict
+
+    array_params = config[array_name]
+    nslc_params = array_params["NSLC"]
+
+    for tr in st:
+        tmp_lat = nslc_params[tr.id.replace("--","")]["lat"]
+        tmp_lon = nslc_params[tr.id.replace("--","")]["lon"]
+        tr.stats.coordinates=AttribDict({
+                                'latitude': tmp_lat,
+                                'longitude': tmp_lon,
+                                'elevation': 0.0})
+    
+    return st
+
+
+def add_metadata(st, config):
     import warnings
 
     warnings.simplefilter("ignore", UserWarning, append=True)
-    inventory = read_inventory(xml_file_name)
+    if "STATION_XML" in config.keys():
+        inventory = read_inventory(config["STATION_XML"])
 
     for tr in st:
         print(f"Getting metadata for {tr.id}")
@@ -133,7 +165,7 @@ def add_metadata(st, xml_file_name):
     return st
 
 
-def get_volcano_backazimuth(st, config, params):
+def get_target_backazimuth(st, config, params):
     # def get_volcano_backazimuth(st, array):
     lon0=np.mean([tr.stats.coordinates.longitude for tr in st])
     lat0=np.mean([tr.stats.coordinates.latitude for tr in st])
@@ -158,46 +190,49 @@ def get_volcano_backazimuth(st, config, params):
     return params
 
 
-def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
-    # scnl = list of station names (eg. ['PS4A.EHZ.AV.--','PVV.EHZ.AV.--','PS1A.EHZ.AV.--'])
+def grab_data(NSLC, T1, T2, hostname, port, fill_value=0):
+    # nslc = list of station names (eg. ['AV.PS4A.--.EHZ','AV.PVV.--.EHZ','AV.PS1A.--.EHZ'])
     # T1 and T2 are start/end obspy UTCDateTimes
     # fill_value can be 0 (default), 'latest', or 'interpolate'
     #
     # returns stream of traces with gaps accounted for
-    #
-    # print('{} - {}'.format(T1.strftime('%Y.%m.%d %H:%M:%S'),T2.strftime('%Y.%m.%d %H:%M:%S')))
-    print('Grabbing data...')
 
-    st=Stream()
+    print(f"Grabbing data from {hostname}...")
+
+    st = Stream()
 
     if hostname == 'IRIS':
         client = FDSNClient('IRIS')
     else:
-        client = Client(hostname, int(port))
+        client = EWClient(hostname, int(port))
 
-    for sta in scnl:
-        
+    if isinstance(NSLC, dict):
+        NSLC = list(NSLC.keys())
+
+    for nslc in NSLC:
         try:
             if hostname == 'IRIS':
-                tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
-                                    T1, T2)
+                tr = client.get_waveforms(*nslc.split('.'), T1, T2)
             else:
-                tr=client.get_waveforms(sta.split('.')[2], sta.split('.')[0],sta.split('.')[3],sta.split('.')[1],
-                                    T1, T2, cleanup=True)
-            if len(tr)>1:
-                if fill_value==0 or fill_value==None:
-                    tr.detrend('demean')
+                tr = client.get_waveforms(*nslc.split('.'), T1, T2, cleanup=True)
+            if len(tr) > 1:
+                if fill_value == 0 or fill_value is None:
+                    tr.detrend("demean")
                     tr.taper(max_percentage=0.01)
                 for sub_trace in tr:
                     # deal with error when sub-traces have different dtypes
-                    if sub_trace.data.dtype.name != 'int32':
-                        sub_trace.data=sub_trace.data.astype('int32')
-                    if sub_trace.data.dtype!=np.dtype('int32'):
-                        sub_trace.data=sub_trace.data.astype('int32')
+                    if sub_trace.data.dtype.name != "int32":
+                        sub_trace.data = sub_trace.data.astype("int32")
+                    if sub_trace.data.dtype != np.dtype("int32"):
+                        sub_trace.data = sub_trace.data.astype("int32")
                     # deal with rare error when sub-traces have different sample rates
-                    if sub_trace.stats.sampling_rate!=np.round(sub_trace.stats.sampling_rate):
-                        sub_trace.stats.sampling_rate=np.round(sub_trace.stats.sampling_rate)
-                print('Merging gappy data...')
+                    if sub_trace.stats.sampling_rate != np.round(
+                        sub_trace.stats.sampling_rate
+                    ):
+                        sub_trace.stats.sampling_rate = np.round(
+                            sub_trace.stats.sampling_rate
+                        )
+                print("Merging gappy data...")
                 tr.merge(fill_value=fill_value)
 
             # deal where trace length is smaller than expected window length
@@ -205,23 +240,20 @@ def grab_data(scnl, T1, T2, hostname, port, fill_value=0):
                 tr.detrend('demean')
                 tr.taper(max_percentage=0.01)
         except:
-            tr=Stream()
+            tr = Stream()
         # if no data, create a blank trace for that channel
         if not tr:
             from obspy import Trace
             from numpy import zeros
-            tr=Trace()
-            tr.stats['station']=sta.split('.')[0]
-            tr.stats['channel']=sta.split('.')[1]
-            tr.stats['network']=sta.split('.')[2]
-            tr.stats['location']=sta.split('.')[3]
-            tr.stats['sampling_rate']=100
-            tr.stats['starttime']=T1
-            tr.data=zeros(int((T2-T1)*tr.stats['sampling_rate']),dtype='int32')
-        st+=tr
-    st.trim(T1,T2,pad=True, fill_value=0)
-    print('Detrending data...')
-    st.detrend('demean')
+            tr = Trace()
+            tr.id = nslc
+            tr.stats['sampling_rate'] = 100
+            tr.stats['starttime'] = T1
+            tr.data = zeros(int((T2 - T1) * tr.stats["sampling_rate"]), dtype="int32")
+        st += tr
+    st.trim(T1, T2, pad=True, fill_value=0)
+    print("Detrending data...")
+    st.detrend("demean")
     return st
 
 

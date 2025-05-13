@@ -79,42 +79,45 @@ def write_html(config):
 
 def process_array(config, array_name, T0):
 
-    params = config[array_name]
-    t1 = T0 - params["DURATION"]
+    array_params = config[array_name]
+    t1 = T0 - array_params["DURATION"]
     t2 = T0
     fmt = "%Y-%b-%d %H:%M"
     print(f"Processing {array_name}: {t1.strftime(fmt)} - {t2.strftime(fmt)}")
 
-    T1 = t1 - params["TAPER"]
-    T2 = t2 + params["WINDOW_LENGTH"] + params["TAPER"]
+    T1 = t1 - array_params["TAPER"]
+    T2 = t2 + array_params["WINDOW_LENGTH"] + array_params["TAPER"]
 
-    print("--- " + params["ARRAY_NAME"] + " ---")
+    print("--- " + array_params["ARRAY_NAME"] + " ---")
     if os.getenv("FROMCRON") == "yep":
-        time.sleep(params["EXTRA_PAUSE"])
+        time.sleep(array_params["EXTRA_PAUSE"])
 
     #### download data ####
-    if len(params["SCNL"]) < params["MIN_CHAN"]:
+    if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
         print("Not enough channels defined.")
         return
 
     st = utils.grab_data(
-        params["SCNL"],
+        array_params["NSLC"],
         T1,
         T2,
-        hostname=params["HOSTNAME"],
-        port=params["PORT"],
+        hostname=array_params["HOSTNAME"],
+        port=array_params["PORT"],
         fill_value=0,
     )
-    # st = utils.add_coordinate_info(st, scnl)
-    st = utils.add_metadata(st, config["STATION_XML"])
-    params = utils.get_volcano_backazimuth(st, config, params)
+
+    if isinstance(array_params["NSLC"], dict):
+        st = utils.add_coordinate_info(st, config, array_name)
+    else:
+        st = utils.add_metadata(st, config)
+    array_params = utils.get_target_backazimuth(st, config, array_params)
     ########################
 
     #### check for enough data ####
     for tr in st:
         if np.sum(np.abs(tr.data)) == 0:
             st.remove(tr)
-    if len(st) < params["MIN_CHAN"]:
+    if len(st) < array_params["MIN_CHAN"]:
         print("Too many blank traces. Skipping.")
         return
     ########################
@@ -123,14 +126,17 @@ def process_array(config, array_name, T0):
     for tr in st:
         if np.any([np.any(tr.data == 0)]):
             st.remove(tr)
-    if len(st) < params["MIN_CHAN"]:
+    if len(st) < array_params["MIN_CHAN"]:
         print("Too gappy. Skipping.")
         return
     ########################
 
     #### preprocess data ####
     for tr in st:
-        tr.remove_sensitivity(tr.inventory)
+        if isinstance(array_params["NSLC"], dict):
+            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
+        else:
+            tr.remove_sensitivity(tr.inventory)
     st.detrend("demean")
     for tr in st:
         if tr.stats["sampling_rate"] == 100.0:
@@ -138,40 +144,40 @@ def process_array(config, array_name, T0):
         if tr.stats["sampling_rate"] != 50.0:
             tr.resample(50.0)
         if tr.stats["sampling_rate"] == 50.0:
-            if float(params["FREQMAX"]) < 50 / 4.0:
+            if float(array_params["FREQMAX"]) < 50 / 4.0:
                 tr.decimate(2)
-    st.taper(max_percentage=None, max_length=params["TAPER"])
+    st.taper(max_percentage=None, max_length=array_params["TAPER"])
     st.filter(
         "bandpass",
-        freqmin=params["FREQMIN"],
-        freqmax=params["FREQMAX"],
+        freqmin=array_params["FREQMIN"],
+        freqmax=array_params["FREQMAX"],
         corners=2,
         zerophase=True,
     )
-    st.trim(t1, t2 + params["WINDOW_LENGTH"])
+    st.trim(t1, t2 + array_params["WINDOW_LENGTH"])
     ########################
     
     lat_list = []
     lon_list = []
-    ALPHA = params["LTS_ALPHA"] if len(st) > 3 else 1.0
     for tr in st:
         lat_list.append(tr.stats.coordinates.latitude)
         lon_list.append(tr.stats.coordinates.longitude)
-    overlap_fraction = params["OVERLAP"] / params["WINDOW_LENGTH"]
-    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(st, lat_list, lon_list, params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA)
+    overlap_fraction = array_params["OVERLAP"] / array_params["WINDOW_LENGTH"]
+    ALPHA = array_params["LTS_ALPHA"] if len(st) > 3 else 1.0
+    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(st, lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA)
     pressure = []
     for tr_win in st[0].slide(
-        window_length=params["WINDOW_LENGTH"],
-        step=params["WINDOW_LENGTH"] - params["OVERLAP"],
+        window_length=array_params["WINDOW_LENGTH"],
+        step=array_params["WINDOW_LENGTH"] - array_params["OVERLAP"],
     ):
-        pressure.append(np.max(np.abs(tr.data)))
+        pressure.append(np.max(np.abs(tr_win.data)))
     pressure = np.array(pressure)
 
     try:
         print("Setting up web output folders")
-        utils.web_folders(t2, config, params)
+        utils.web_folders(t2, config, array_params)
         print("Making plot...")
-        utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, params)
+        utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params)
     except:
         import traceback
 
