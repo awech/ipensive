@@ -6,6 +6,7 @@ from obspy import Stream, UTCDateTime, read_inventory
 from obspy.clients.earthworm import Client as EWClient
 from obspy.clients.fdsn import Client as FDSNClient
 from obspy.geodetics.base import gps2dist_azimuth
+from obspy.core.util import AttribDict
 import yaml
 
 ####### plotting imports #######
@@ -106,7 +107,6 @@ def check_FDSN(tr, client):
 
 
 def add_coordinate_info(st, config, array_name):
-    from obspy.core.util import AttribDict
 
     array_params = config[array_name]
     nslc_params = array_params["NSLC"]
@@ -114,15 +114,14 @@ def add_coordinate_info(st, config, array_name):
     for tr in st:
         tmp_lat = nslc_params[tr.id.replace("--","")]["lat"]
         tmp_lon = nslc_params[tr.id.replace("--","")]["lon"]
-        tr.stats.coordinates=AttribDict({
+        tr.stats.coordinates = AttribDict({
                                 'latitude': tmp_lat,
                                 'longitude': tmp_lon,
                                 'elevation': 0.0})
-    
     return st
 
 
-def add_metadata(st, config):
+def add_metadata(st, config, skip_chans=[]):
     import warnings
 
     warnings.simplefilter("ignore", UserWarning, append=True)
@@ -130,6 +129,13 @@ def add_metadata(st, config):
         inventory = read_inventory(config["STATION_XML"])
 
     for tr in st:
+        if tr.id in skip_chans:
+            print(f"Skipping metadata for {tr.id} due to missing data")
+            tr.stats.coordinates = AttribDict({
+                                'latitude': np.nan,
+                                'longitude': np.nan,
+                                'elevation': 0.0})
+            continue
         print(f"Getting metadata for {tr.id}")
         if check_inventory(tr, inventory):
             inv = inventory.select(
@@ -342,8 +348,16 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
 
     A.to_csv(filename,index=False,header=True,sep=',',float_format='%.3f')
 
+def missing_elements_adjust(st, skip_chans, array):
+    skip_chans.sort()
+    missing_inds = []
+    for chan in skip_chans:
+        ind = np.where(np.array([tr.id for tr in st]) == chan)[0]
+        array[array > ind] += 1
+        missing_inds.append(ind+1)
+    return array, missing_inds
 
-def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params):
+def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans):
 
     d0=config["OUT_WEB_DIR"]+'/'+array_params["NETWORK_NAME"]+'/'+array_params["ARRAY_NAME"]+'/'+str(t2.year)
     d2=d0+'/'+'{:03d}'.format(t2.julday)
@@ -375,7 +389,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
             size = (2.1, 2.75)
             trace_lw = 0.1
             scatter_lw = 0.1
-            hline_lw = 0.25
+            hline_lw = 0.4
             s_dot = 8
             wm_font = 8
 
@@ -510,9 +524,12 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
             txt_str = "Not enough channels for LTS"
             ax["stas"].text(0.5, 0.5, txt_str, transform=ax["stas"].transAxes, color='grey', alpha=0.7, fontsize=wm_font, va="center", ha="center")
             n = len(st)
+            missing_inds = []
+            for chan in skip_chans:
+                ind = np.where(np.array([tr.id for tr in st]) == chan)[0] + 1
+                missing_inds.append(ind)
         else:
             ndict = deepcopy(lts_dict)
-            print(ndict)
             n = ndict['size']
             ndict.pop('size', None)
             tstamps = list(ndict.keys())
@@ -523,6 +540,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
                 keys, vals = z.keys(), z.values()
                 keys, vals = np.array(list(keys)), np.array(list(vals))
                 pts = np.tile(tstampsfloat[jj], len(keys))
+                keys, missing_inds = missing_elements_adjust(st, skip_chans, keys)
                 sc_stas = ax["stas"].scatter(
                     pts,
                     keys,
@@ -534,12 +552,13 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
                     vmin=0.5,
                     vmax=n - 0.5,
                 )
-        ax["stas"].set_ylim(0, n+1)
-        ax["stas"].invert_yaxis()
-        ax["stas"].set_yticks(np.arange(1, n+1))
+        ax["stas"].set_ylim(0, len(st)+1)
+        ax["stas"].set_yticks(np.arange(1, len(st)+1))
+        ax["stas"].set_yticklabels([f"{tr.stats.station}.{tr.stats.location}" for tr in st], fontsize=8)
         ax["stas"].set_xlim(T1,T2)
         if plot_size == "big":
-            ax["stas"].set_ylabel('Element [#]')
+            for m_ind in missing_inds:
+                ax["stas"].scatter(t, m_ind*np.ones(t.shape[0]), marker=".", color="indianred", s=10)
             ax["stas"].xaxis_date()
             ax["stas"].tick_params(axis='x',labelbottom='on')
             ax["stas"].fmt_xdata = dates.DateFormatter('%HH:%MM')
@@ -548,6 +567,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
         else:
             ax["stas"].set_xticks([])
             ax["stas"].set_yticks([])
+        ax["stas"].invert_yaxis()
         ##########################################
 
         ########## Adjust & Save Figure ##########

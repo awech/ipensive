@@ -107,19 +107,22 @@ def process_array(config, array_name, T0):
     )
 
     #### check for enough data ####
-    for tr in st:
+    check_st = st.copy()
+    skip_chans = []
+    for tr in check_st:
         if np.sum(np.abs(tr.data)) == 0:
-            st.remove(tr)
-    if len(st) < array_params["MIN_CHAN"]:
+            skip_chans.append(tr.id)
+            check_st.remove(tr)
+    if len(check_st) < array_params["MIN_CHAN"]:
         print("Too many blank traces. Skipping.")
         return
     ########################
 
     #### check for gappy data ####
-    for tr in st:
+    for tr in check_st:
         if np.any([np.any(tr.data == 0)]):
-            st.remove(tr)
-    if len(st) < array_params["MIN_CHAN"]:
+            check_st.remove(tr)
+    if len(check_st) < array_params["MIN_CHAN"]:
         print("Too gappy. Skipping.")
         return
     ########################
@@ -128,12 +131,14 @@ def process_array(config, array_name, T0):
     if isinstance(array_params["NSLC"], dict):
         st = utils.add_coordinate_info(st, config, array_name)
     else:
-        st = utils.add_metadata(st, config)
+        st = utils.add_metadata(st, config, skip_chans)
     array_params = utils.get_target_backazimuth(st, config, array_params)
     ########################
 
     #### preprocess data ####
     for tr in st:
+        if tr.id in skip_chans:
+            continue
         if isinstance(array_params["NSLC"], dict):
             tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
         else:
@@ -165,7 +170,8 @@ def process_array(config, array_name, T0):
         lon_list.append(tr.stats.coordinates.longitude)
     overlap_fraction = array_params["OVERLAP"] / array_params["WINDOW_LENGTH"]
     ALPHA = array_params["LTS_ALPHA"] if len(st) > 3 else 1.0
-    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(st, lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA)
+    skip_inds = [i for i, tr in enumerate(st) if tr.id in skip_chans]
+    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(st.copy(), lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA, remove_elements=skip_inds)
     pressure = []
     for tr_win in st[0].slide(
         window_length=array_params["WINDOW_LENGTH"],
@@ -178,7 +184,7 @@ def process_array(config, array_name, T0):
         print("Setting up web output folders")
         utils.web_folders(t2, config, array_params)
         print("Making plot...")
-        utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params)
+        utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans)
     except:
         import traceback
 
