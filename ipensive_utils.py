@@ -343,9 +343,9 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
     A.to_csv(filename,index=False,header=True,sep=',',float_format='%.3f')
 
 
-def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, params):
+def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params):
 
-    d0=config["OUT_WEB_DIR"]+'/'+params["NETWORK_NAME"]+'/'+params["ARRAY_NAME"]+'/'+str(t2.year)
+    d0=config["OUT_WEB_DIR"]+'/'+array_params["NETWORK_NAME"]+'/'+array_params["ARRAY_NAME"]+'/'+str(t2.year)
     d2=d0+'/'+'{:03d}'.format(t2.julday)
 
     tvec = np.linspace(
@@ -358,7 +358,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
     cm = "RdYlBu_r"
     cax = 0.2, 1  # colorbar/y-axis for mccm
 
-    if params["PLOT_MCCM"]:
+    if array_params["PLOT_MCCM"]:
         ax_list = [["wave"], ["cc"], ["vel"], ["baz"], ["stas"]]
         hr_list = [1, 1, 1, 1, 0.66]
     else:
@@ -387,7 +387,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
 
         ############ Plot Waveforms ##############
         ##########################################
-        ax["wave"].set_title(params["ARRAY_NAME"] + " " + params["ARRAY_LABEL"] + " Array")
+        ax["wave"].set_title(array_params["ARRAY_NAME"] + " " + array_params["ARRAY_LABEL"] + " Array")
         ax["wave"].plot(tvec, st[0].data, "k", linewidth=trace_lw)
         ax["wave"].axis("tight")
         ax["wave"].set_xlim(T1, T2)
@@ -403,7 +403,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
             ax["wave2"] = ax["wave"].twinx()
             ax["wave2"].set_yticks([])
             ax["wave2"].set_ylabel(
-                f"{params["FREQMIN"]:.1f} - {params["FREQMAX"]:.1f} Hz",
+                f"{array_params["FREQMIN"]:.1f} - {array_params["FREQMAX"]:.1f} Hz",
                 labelpad=6,
             )
         else:
@@ -414,9 +414,9 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
 
         ############ Plot cc values ##############
         ##########################################
-        if params["PLOT_MCCM"]:
+        if array_params["PLOT_MCCM"]:
             sc = ax["cc"].scatter(t, mccm, c=mccm, s=s_dot, edgecolors="k", lw=scatter_lw, cmap=cm)
-            ax["cc"].axhline(params["MCTHRESH"], ls="--", lw=hline_lw, color="gray")
+            ax["cc"].axhline(array_params["MCTHRESH"], ls="--", lw=hline_lw, color="gray")
             ax["cc"].axis("tight")
             ax["cc"].set_xlim(T1, T2)
             ax["cc"].set_ylim(cax)
@@ -436,8 +436,8 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
         ########## Plot Trace Velocities #########
         ##########################################
         ax["vel"].axhspan(
-            params["VEL_MIN"],
-            params["VEL_MAX"],
+            array_params["VEL_MIN"],
+            array_params["VEL_MAX"],
             facecolor="gray",
             alpha=0.25,
             edgecolor=None,
@@ -445,7 +445,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
 
         sc = ax["vel"].scatter(t, velocity, c=mccm, s=s_dot, edgecolors="k", lw=scatter_lw, cmap=cm)
         
-        if params["ARRAY_LABEL"] == "Hydroacoustic":
+        if array_params["ARRAY_LABEL"] == "Hydroacoustic":
             ax["vel"].set_ylim(1.2, 1.8)
         else:
             ax["vel"].set_ylim(0.15, 0.6)
@@ -466,13 +466,13 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
         ########### Plot Back-azimuths ###########
         ##########################################
         box_style = {'facecolor':'white','edgecolor':'white','pad':0}
-        az_min = deepcopy(params['AZ_MIN'])
-        az_max = deepcopy(params['AZ_MAX'])
+        az_min = deepcopy(array_params['AZ_MIN'])
+        az_max = deepcopy(array_params['AZ_MAX'])
         tmp_azimuth = deepcopy(azimuth)
-        if params['AZ_MAX'] < params['AZ_MIN']:
+        if array_params['AZ_MAX'] < array_params['AZ_MIN']:
             az_min = az_min-360
-            for target in params['TARGETS']:
-                baz = params[target]
+            for target in array_params['TARGETS']:
+                baz = array_params[target]
                 if baz > 180:
                     ax["baz"].axhline(baz-360, ls='--', lw=hline_lw, color='gray', zorder=-1)
                     if plot_size == "big":
@@ -483,8 +483,8 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
                         ax["baz"].text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
             tmp_azimuth[tmp_azimuth>180]+=-360
         else:
-            for target in params['TARGETS']:
-                baz = params[target]
+            for target in array_params['TARGETS']:
+                baz = array_params[target]
                 ax["baz"].axhline(baz, ls='--', lw=hline_lw, color='gray', zorder=-1)
                 if plot_size == "big":
                     ax["baz"].text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
@@ -512,6 +512,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
             n = len(st)
         else:
             ndict = deepcopy(lts_dict)
+            print(ndict)
             n = ndict['size']
             ndict.pop('size', None)
             tstamps = list(ndict.keys())
@@ -554,13 +555,13 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
         if plot_size == "big":
             plt.subplots_adjust(left=0.1, right=0.9, top=0.97, bottom=0.05, hspace=0.1)
 
-            ax_str = "cc" if params["PLOT_MCCM"] else "vel"
+            ax_str = "cc" if array_params["PLOT_MCCM"] else "vel"
             ctop = ax[ax_str].get_position().y1
             cbot = ax["baz"].get_position().y0
             cbaxes_mccm = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
             hc = plt.colorbar(sc, cax=cbaxes_mccm)
             hc.set_label(r'$M_{d}CCM$')
-            if n > 3 and params["LTS_ALPHA"] < 1:
+            if n > 3 and array_params["LTS_ALPHA"] < 1:
                 ctop = ax["stas"].get_position().y1
                 cbot = ax["stas"].get_position().y0
                 cbaxes_stas = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
@@ -568,11 +569,11 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, param
                 hc_stas.set_label(r"# Dropped Pairs")
                 hc_stas.set_ticks(np.arange(1, n))
             
-            filename=d2+'/'+params["ARRAY_NAME"]+'_'+t2.strftime('%Y%m%d-%H%M')+'.png'
+            filename=d2+'/'+array_params["ARRAY_NAME"]+'_'+t2.strftime('%Y%m%d-%H%M')+'.png'
             fig.savefig(filename,dpi=72,format='png')
             plt.close("all")
         else:
             plt.subplots_adjust(left=0,right=1,top=0.99,bottom=0.01,hspace=0.03)
-            filename=d2+'/'+params["ARRAY_NAME"]+'_'+t2.strftime('%Y%m%d-%H%M')+'_thumb.png'
+            filename=d2+'/'+array_params["ARRAY_NAME"]+'_'+t2.strftime('%Y%m%d-%H%M')+'_thumb.png'
             fig.savefig(filename,format='png',pad_inches=0,dpi=72)
             plt.close('all')
