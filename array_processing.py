@@ -106,13 +106,6 @@ def process_array(config, array_name, T0):
         fill_value=0,
     )
 
-    if isinstance(array_params["NSLC"], dict):
-        st = utils.add_coordinate_info(st, config, array_name)
-    else:
-        st = utils.add_metadata(st, config)
-    array_params = utils.get_target_backazimuth(st, config, array_params)
-    ########################
-
     #### check for enough data ####
     for tr in st:
         if np.sum(np.abs(tr.data)) == 0:
@@ -129,6 +122,14 @@ def process_array(config, array_name, T0):
     if len(st) < array_params["MIN_CHAN"]:
         print("Too gappy. Skipping.")
         return
+    ########################
+
+
+    if isinstance(array_params["NSLC"], dict):
+        st = utils.add_coordinate_info(st, config, array_name)
+    else:
+        st = utils.add_metadata(st, config)
+    array_params = utils.get_target_backazimuth(st, config, array_params)
     ########################
 
     #### preprocess data ####
