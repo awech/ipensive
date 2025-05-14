@@ -17,6 +17,8 @@ import time
 import ipensive_utils as utils
 import argparse
 from lts_array import ltsva
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning, append=True)
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -98,12 +100,10 @@ def process_array(config, array_name, T0):
         return
 
     st = utils.grab_data(
+        array_params["CLIENT"],
         array_params["NSLC"],
         T1,
         T2,
-        hostname=array_params["HOSTNAME"],
-        port=array_params["PORT"],
-        fill_value=0,
     )
 
     #### check for enough data ####
@@ -249,7 +249,7 @@ if __name__ == "__main__":
             timer_tmp = time.time()
             process_array(config, array_name, T0)
             dt = time.time() - timer_tmp
-            print(f"{dt:.1f} seconds to process {array_name}")
+            print(f"{dt:.1f} seconds to process {array_name}\n\n")
 
     # Write out the new HTML file
     write_html(config)

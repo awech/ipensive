@@ -5,6 +5,7 @@ import pandas as pd
 from obspy import Stream, UTCDateTime, read_inventory
 from obspy.clients.earthworm import Client as EWClient
 from obspy.clients.fdsn import Client as FDSNClient
+from obspy.clients.filesystem.sds import Client as SDSClient
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.core.util import AttribDict
 import yaml
@@ -42,17 +43,39 @@ def load_config(config_file):
     with open(config["DATA_SOURCE"], "r") as file:
         data_source = yaml.safe_load(file)
 
-    HOST = data_source["HOSTNAME"]
-    PORT = data_source["PORT"]
-
-    # update host and port for each array if not set
-    for array in config["array_list"]:
-        if "HOSTNAME" not in config[array].keys():
-            config[array]["HOSTNAME"] = HOST
-        if "PORT" not in config[array].keys():
-            config[array]["PORT"] = PORT
+    client = get_obspy_client(data_source)
     
+    # update obspy client for each array if not set
+    for array in config["array_list"]:
+        if "CLIENT_TYPE" not in config[array].keys():
+            config[array]["CLIENT"] = client
+        else:
+            config[array]["CLIENT"] = get_obspy_client(config[array])
+
     return config
+
+
+def get_obspy_client(config):
+
+    if config["CLIENT_TYPE"].lower() == "fdsn":
+        client = FDSNClient(config["HOSTNAME"])
+        client.name = config["HOSTNAME"]
+
+    elif config["CLIENT_TYPE"].lower() == "local_fdsn":
+        client = FDSNClient("IRIS", service_mappings={"dataselect": config["LOCAL_FDSN"]})
+        client.name = config["LOCAL_FDSN"]
+
+    elif config["CLIENT_TYPE"].lower() == "sds":
+        client = SDSClient(config["DIRECTORY"])
+        if "FMT" in list(config.keys()):
+            client.FMTSTR = config["FMT"]
+        client.name = config["DIRECTORY"]
+
+    elif config["CLIENT_TYPE"].lower() == "earthworm":
+        client = EWClient(config["HOSTNAME"], config["PORT"])
+        client.name = config["HOSTNAME"]
+
+    return client
 
 
 def write_to_log(day, config):
@@ -196,31 +219,24 @@ def get_target_backazimuth(st, config, array_params):
     return array_params
 
 
-def grab_data(NSLC, T1, T2, hostname, port, fill_value=0):
+def grab_data(client, NSLC, T1, T2, fill_value=0):
     # nslc = list of station names (eg. ['AV.PS4A.--.EHZ','AV.PVV.--.EHZ','AV.PS1A.--.EHZ'])
     # T1 and T2 are start/end obspy UTCDateTimes
     # fill_value can be 0 (default), 'latest', or 'interpolate'
     #
     # returns stream of traces with gaps accounted for
 
-    print(f"Grabbing data from {hostname}...")
+    print(f"Grabbing data from {client.name}...")
 
     st = Stream()
-
-    if hostname == 'IRIS':
-        client = FDSNClient('IRIS')
-    else:
-        client = EWClient(hostname, int(port))
 
     if isinstance(NSLC, dict):
         NSLC = list(NSLC.keys())
 
     for nslc in NSLC:
+        nslc = nslc.replace("--", "")
         try:
-            if hostname == 'IRIS':
-                tr = client.get_waveforms(*nslc.split('.'), T1, T2)
-            else:
-                tr = client.get_waveforms(*nslc.split('.'), T1, T2, cleanup=True)
+            tr = client.get_waveforms(*nslc.split('.'), T1, T2)
             if len(tr) > 1:
                 if fill_value == 0 or fill_value is None:
                     tr.detrend("demean")
@@ -348,6 +364,7 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
 
     A.to_csv(filename,index=False,header=True,sep=',',float_format='%.3f')
 
+
 def missing_elements_adjust(st, skip_chans, array):
     skip_chans.sort()
     missing_inds = []
@@ -356,6 +373,7 @@ def missing_elements_adjust(st, skip_chans, array):
         array[array > ind] += 1
         missing_inds.append(ind+1)
     return array, missing_inds
+
 
 def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans):
 
@@ -558,9 +576,11 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
         ax["stas"].set_yticks(np.arange(1, len(st)+1))
         ax["stas"].set_yticklabels([f"{tr.stats.station}.{tr.stats.location}" for tr in st], fontsize=8)
         ax["stas"].set_xlim(T1,T2)
+
         if plot_size == "big":
-            for m_ind in missing_inds:
-                ax["stas"].scatter(t, m_ind*np.ones(t.shape[0]), marker=".", color="indianred", s=10)
+            if n > 3 and ndict:
+                for m_ind in missing_inds:
+                    ax["stas"].scatter(t, m_ind*np.ones(t.shape[0]), marker=".", color="indianred", s=10)
             ax["stas"].xaxis_date()
             ax["stas"].tick_params(axis='x',labelbottom='on')
             ax["stas"].fmt_xdata = dates.DateFormatter('%HH:%MM')
@@ -586,10 +606,14 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
             if n > 3 and array_params["LTS_ALPHA"] < 1:
                 ctop = ax["stas"].get_position().y1
                 cbot = ax["stas"].get_position().y0
-                cbaxes_stas = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
-                hc_stas = plt.colorbar(sc_stas, cax=cbaxes_stas)
-                hc_stas.set_label(r"# Dropped Pairs")
-                hc_stas.set_ticks(np.arange(1, n))
+                if ndict:
+                    cbaxes_stas = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
+                    hc_stas = plt.colorbar(sc_stas, cax=cbaxes_stas)
+                    hc_stas.set_label(r"# Dropped Pairs")
+                    hc_stas.set_ticks(np.arange(1, n))
+                else:
+                    txt_str = "No dropped channels"
+                    ax["stas"].text(0.5, 0.5, txt_str, transform=ax["stas"].transAxes, color='grey', alpha=0.7, fontsize=wm_font, va="center", ha="center")
             
             filename=d2+'/'+array_params["ARRAY_NAME"]+'_'+t2.strftime('%Y%m%d-%H%M')+'.png'
             fig.savefig(filename,dpi=72,format='png')
