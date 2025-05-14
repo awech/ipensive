@@ -6,6 +6,7 @@ from obspy import Stream, UTCDateTime, read_inventory
 from obspy.clients.earthworm import Client as EWClient
 from obspy.clients.fdsn import Client as FDSNClient
 from obspy.clients.filesystem.sds import Client as SDSClient
+from obspy.clients.seedlink import Client as SLClient
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.core.util import AttribDict
 import yaml
@@ -18,8 +19,7 @@ import matplotlib.pyplot as plt
 from matplotlib import dates
 from copy import deepcopy
 from collections import Counter
-fonts=10
-rcParams.update({'font.size': fonts})
+rcParams.update({'font.size': 10})
 ################################
 
 
@@ -74,6 +74,13 @@ def get_obspy_client(config):
     elif config["CLIENT_TYPE"].lower() == "earthworm":
         client = EWClient(config["HOSTNAME"], config["PORT"])
         client.name = config["HOSTNAME"]
+
+    elif config["CLIENT_TYPE"].lower() == "seedlink":
+        if "PORT" in list(config.keys()):
+            client = SLClient(config["HOSTNAME"], config["PORT"])
+        else:
+            client = SLClient(config["HOSTNAME"])
+        
 
     return client
 
