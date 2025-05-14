@@ -21,6 +21,7 @@ ARRAYS = []
 
 args = parse_args()
 config = utils.load_config(args.config)
+config["plot"] = False
 
 def make_file_path(t, array_name, config):
     year = "{:.0f}".format(t.year)
