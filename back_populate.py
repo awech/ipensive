@@ -54,6 +54,7 @@ def run_backpopulate():
             file = make_file_path(t, array_name, config)
             if not os.path.exists(file) or OVERWRITE:
                 process_array(config, array_name, UTCDateTime(t))
+                print("\n")
             else:
                 print("File exists. No overwrite. Skip " + array_name)
     return
