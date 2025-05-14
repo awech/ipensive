@@ -43,6 +43,11 @@ def parse_args():
         type=str,
         help="Array name if you want process single array. (Use _ instead of spaces, if necessary)",
     )
+    parser.add_argument(
+        "--no-plot",
+        action="store_true",
+        help="Disable plotting of results",
+    )
 
     return parser.parse_args()
 
@@ -84,13 +89,12 @@ def process_array(config, array_name, T0):
     array_params = config[array_name]
     t1 = T0 - array_params["DURATION"]
     t2 = T0
-    fmt = "%Y-%b-%d %H:%M"
-    print(f"Processing {array_name}: {t1.strftime(fmt)} - {t2.strftime(fmt)}")
 
     T1 = t1 - array_params["TAPER"]
     T2 = t2 + array_params["WINDOW_LENGTH"] + array_params["TAPER"]
 
     print("--- " + array_params["ARRAY_NAME"] + " ---")
+    print(f"{t1.strftime("%Y-%b-%d %H:%M")} - {t2.strftime("%H:%M")}")
     if os.getenv("FROMCRON") == "yep":
         time.sleep(array_params["EXTRA_PAUSE"])
 
@@ -180,18 +184,19 @@ def process_array(config, array_name, T0):
         pressure.append(np.max(np.abs(tr_win.data)))
     pressure = np.array(pressure)
 
-    try:
-        print("Setting up web output folders")
-        utils.web_folders(t2, config, array_params)
-        print("Making plot...")
-        utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans)
-    except:
-        import traceback
+    if config["plot"]:
+        try:
+            print("Setting up web output folders")
+            utils.web_folders(t2, config, array_params)
+            print("Making plot...")
+            utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans)
+        except:
+            import traceback
 
-        b = traceback.format_exc()
-        message = "".join(f"{a}\n" for a in b.splitlines())
-        print("Something went wrong making the plot:")
-        print(message)
+            b = traceback.format_exc()
+            message = "".join(f"{a}\n" for a in b.splitlines())
+            print("Something went wrong making the plot:")
+            print(message)
 
     if 'OUT_VALVE_DIR' in config.keys():
         try:
@@ -228,6 +233,9 @@ if __name__ == "__main__":
     args = parse_args()
     config_file = args.config
     config = utils.load_config(config_file)
+
+    config["plot"] = False if args.no_plot else True
+
     T0, delay = get_starttime(config, args)
 
     if os.getenv("FROMCRON") == "yep":
