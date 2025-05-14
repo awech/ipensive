@@ -12,18 +12,15 @@ from array_processing import process_array, parse_args
 import ipensive_utils as utils
 
 T1 = "2025-05-12 00:00"
-T2 = "2025-05-14 20:00"
+T2 = "2025-05-14 21:50"
 OVERWRITE = True
 
-# ARRAYS=['Akutan','Adak','Saipan']
 # specify ARRAYS if you want to just process specific arrays
-# ARRAYS=['Wake Island North', 'Wake Island South']
-# ARRAYS = ['Kenai','Sand Point','Okmok','Cleveland','Adak','Amchitka','Dillingham']
-# ARRAYS = ['Saipan']
+ARRAYS = []
+# ARRAYS = ["Wake Island North", "Wake Island South"]
 
 args = parse_args()
 config = utils.load_config(args.config)
-
 
 def make_file_path(t, array_name, config):
     year = "{:.0f}".format(t.year)
@@ -44,31 +41,23 @@ def make_file_path(t, array_name, config):
 
 def run_backpopulate():
 
-	t1 = UTCDateTime(T1)+config["PARAMS"]["DURATION"]
-	for t in pd.date_range(T2, t1.strftime('%Y%m%d%H%M'), freq='-10min'):
-		print(t)
+    t1 = UTCDateTime(T1) + config["PARAMS"]["DURATION"]
+    for t in pd.date_range(T2, t1.strftime("%Y%m%d%H%M"), freq="-10min"):
+        print(t)
 
-		for array_name in config['array_list']:
-
-			file = make_file_path(t, array_name, config)
-
-			# check if you should process this time window
-			if not os.path.exists(file) or (os.path.exists(file) and OVERWRITE):
-				
-				# check if you should process this array
-				if 'ARRAYS' in dir():
-					if array_name in ARRAYS:
-						process_array(config, array_name, UTCDateTime(t))
-					else:
-						print('Array name not on do list. Skip ' + array_name)
-				else:
-					process_array(config, array_name, UTCDateTime(t))
-			else:
-				print('File exists. No overwrite. Skip ' + array_name)
-
-	return
+        if len(ARRAYS) > 0:
+            array_list = ARRAYS
+        else:
+            array_list = config["array_list"]
+        for array_name in array_list:
+            # check if you should process this time window
+            file = make_file_path(t, array_name, config)
+            if not os.path.exists(file) or OVERWRITE:
+                process_array(config, array_name, UTCDateTime(t))
+            else:
+                print("File exists. No overwrite. Skip " + array_name)
+    return
 
 
 if __name__ == '__main__':
-
-	run_backpopulate()
+    run_backpopulate()
