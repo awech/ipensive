@@ -30,16 +30,16 @@ Tested on Python 3.12
     pip install -r requirements.txt
     ```
 
-    This will also install [lts_array](http://_vscodecontentref_/1) directly from GitHub.
+    This will also install [lts_array](https://github.com/uafgeotools/lts_array) directly from GitHub.
 
 ### Configuration
-Edit [data_source.yml](http://_vscodecontentref_/2) with the obspy client type (e.g., *earthworm, fdsn, sds, local_fdsn*) and relevant parameters (e.g., *HOSTNAME, PORT, DIRECTORY, etc.*). 
+Edit [data_source.yml](data_source.yml) with the obspy client type (e.g., *earthworm, fdsn, sds, local_fdsn*) and relevant parameters (e.g., *HOSTNAME, PORT, DIRECTORY, etc.*).
 
-Edit [config.yml](http://_vscodecontentref_/2). 
+Edit [config.yml](config.yml). 
 1. **system  parameters**: defines input files
-    - DATA_SOURCE: [data_source.yml](http://_vscodecontentref_/2) - data source parameters
-    - STATION_XML: [station.xml](http://_vscodecontentref_/2) - station metadata
-    - TARGETS_FILE: [volcano_list.txt](http://_vscodecontentref_/2) - csv file of locations with backazimuths of interest (Target,Longitude,Latitude)
+    - DATA_SOURCE: [data_source.yml](data_source.yml) - data source parameters
+    - STATION_XML: [station.xml](station.xml) - station metadata
+    - TARGETS_FILE: [volcano_list.txt](volcano_list.txt) - csv file of locations with backazimuths of interest (Target,Longitude,Latitude)
     - OUT_WEB_DIR - location to write out html and images
     - OUT_ASCII_DIR - location to write results output in ascii format
     - LOGS_DIR - location of log output when run as a cron
@@ -60,14 +60,14 @@ Edit [config.yml](http://_vscodecontentref_/2).
     ```*/10 * * * * /path_to_file/array_processing.py >> /dev/null 2>&1```
 2. **Manually**
 
-    ```python array_processing.py -c <config_file> -t <timestamp>```
+    ```python array_processing.py -c <config_file> -t <yyyymmddHHMM>```
 
     see ```python array_processing.py -h``` for more options. In particular, the ```-a``` option is useful for processing a single array if more than one are defined in the config file.
 
 
 ### Webpage configuration
-The webpage is automatically generated each time using jinja2 to populate the [index.template](http://_vscodecontentref_/3) file with the network and array structure from the config file.
+The webpage is automatically generated each time using jinja2 to populate the [index.template](index.template) file with the network and array structure from the config file.
 (This method was adapted from a forked version of this code by Israel Brewster, and the html and javascript front-end was originally developed by Tom Parker.)
 
 ### Back populate data
-Modify T1 and T2 in [back_populate.py](http://_vscodecontentref_/6) and run this script to generate images between time T1 and T2. There are options to overwrite existing files (or not) or only process a subset of arrays.
+Modify T1 and T2 in [back_populate.py](back_populate.py) and run this script to generate images between time T1 and T2. There are options to overwrite existing files (or not) or only process a subset of arrays.
