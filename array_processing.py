@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 Created on 24-Apr-2018
-Modified on 30-Mar-2022
+Modified on 15-May-2025
 @author: awech
 """
 
 import os
 import sys
-sys.dont_write_bytecode = True  # don't write .pyc files (probably slightly faster without this, but more cluttered)
+sys.dont_write_bytecode = True  # Prevent Python from creating .pyc files (avoids clutter)
 import numpy as np
 import jinja2
 from obspy.core import UTCDateTime as utc
@@ -21,6 +21,12 @@ import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning, append=True)
 
 def parse_args():
+    """
+    Parse command-line arguments for the script.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser(
         epilog="e.g.: python array_processing.py -c <filename.yml>"
     )
@@ -35,13 +41,13 @@ def parse_args():
         "-t",
         "--time",
         type=str,
-        help="utc time stamp:YYYYMMDDHHMM (optional, otherwise grabs current utc time)",
+        help="UTC time stamp: YYYYMMDDHHMM (optional, otherwise grabs current UTC time)",
     )
     parser.add_argument(
         "-a",
         "--array",
         type=str,
-        help="Array name if you want process single array. (Use _ instead of spaces, if necessary)",
+        help="Array name if you want to process a single array. (Use _ instead of spaces, if necessary)",
     )
     parser.add_argument(
         "--no-plot",
@@ -53,23 +59,44 @@ def parse_args():
 
 
 def get_starttime(config, args):
+    """
+    Determine the start time for processing based on arguments or current time.
 
+    Args:
+        config (dict): Configuration dictionary.
+        args (argparse.Namespace): Parsed command-line arguments.
+
+    Returns:
+        tuple: Start time (UTCDateTime) and delay (int).
+    """
     date_fmt = "%Y-%m-%d %H:%M"
 
     if args.time:
+        # Use the provided time argument
         T0 = utc(args.time)
         delay = 0
     else:
-        T0 = utc.utcnow()  # no time given, use current timestamp
+        # Use the current UTC time and add latency and window length
+        T0 = utc.utcnow()
         delay = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
         print(f"Waiting {delay:g} seconds")
 
-    T0 = utc(T0.strftime(date_fmt)[:-1] + "0")  # round down to the nearest 10-minute
+    # Round down to the nearest 10-minute interval
+    T0 = utc(T0.strftime(date_fmt)[:-1] + "0")
 
     return T0, delay
 
 
 def write_html(config):
+    """
+    Generate an HTML file for web output.
+
+    Args:
+        config (dict): Configuration dictionary.
+
+    Returns:
+        None
+    """
     if "EXTRA_LINKS" not in config.keys():
         config["EXTRA_LINKS"] = []
     script_path = os.path.dirname(__file__)
@@ -85,20 +112,30 @@ def write_html(config):
 
 
 def process_array(config, array_name, T0):
+    """
+    Process a single array for the specified time window.
 
+    Args:
+        config (dict): Configuration dictionary.
+        array_name (str): Name of the array to process.
+        T0 (UTCDateTime): End time of the processing window.
+
+    Returns:
+        None
+    """
     array_params = config[array_name]
-    t1 = T0 - array_params["DURATION"]
-    t2 = T0
+    t1 = T0 - array_params["DURATION"]  # Start time of the processing window
+    t2 = T0  # End time of the processing window
 
-    T1 = t1 - array_params["TAPER"]
-    T2 = t2 + array_params["WINDOW_LENGTH"] + array_params["TAPER"]
+    T1 = t1 - array_params["TAPER"]  # Extended start time for tapering
+    T2 = t2 + array_params["WINDOW_LENGTH"] + array_params["TAPER"]  # Extended end time
 
     print("--- " + array_params["ARRAY_NAME"] + " ---")
-    print(f"{t1.strftime("%Y-%b-%d %H:%M")} - {t2.strftime("%H:%M")}")
+    print(f"{t1.strftime('%Y-%b-%d %H:%M')} - {t2.strftime('%H:%M')}")
     if os.getenv("FROMCRON") == "yep":
-        time.sleep(array_params["EXTRA_PAUSE"])
+        time.sleep(array_params["EXTRA_PAUSE"])  # Pause if running from a cron job
 
-    #### download data ####
+    #### Download data ####
     if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
         print("Not enough channels defined.")
         return
@@ -110,11 +147,11 @@ def process_array(config, array_name, T0):
         T2,
     )
 
-    #### check for enough data ####
+    #### Check for enough data ####
     check_st = st.copy()
     skip_chans = []
     for tr in check_st:
-        if np.sum(np.abs(tr.data)) == 0:
+        if np.sum(np.abs(tr.data)) == 0:  # Check for blank traces
             skip_chans.append(tr.id)
             check_st.remove(tr)
     if len(check_st) < array_params["MIN_CHAN"]:
@@ -122,16 +159,16 @@ def process_array(config, array_name, T0):
         return
     ########################
 
-    #### check for gappy data ####
+    #### Check for gappy data ####
     for tr in check_st:
-        if np.any([np.any(tr.data == 0)]):
+        if np.any([np.any(tr.data == 0)]):  # Check for gaps in data
             check_st.remove(tr)
     if len(check_st) < array_params["MIN_CHAN"]:
         print("Too gappy. Skipping.")
         return
     ########################
 
-
+    #### Add metadata or coordinates ####
     if isinstance(array_params["NSLC"], dict):
         st = utils.add_coordinate_info(st, config, array_name)
     else:
@@ -139,7 +176,7 @@ def process_array(config, array_name, T0):
     array_params = utils.get_target_backazimuth(st, config, array_params)
     ########################
 
-    #### preprocess data ####
+    #### Preprocess data ####
     for tr in st:
         if tr.id in skip_chans:
             continue
@@ -166,7 +203,8 @@ def process_array(config, array_name, T0):
     )
     st.trim(t1, t2 + array_params["WINDOW_LENGTH"])
     ########################
-    
+
+    #### Perform array processing ####
     lat_list = []
     lon_list = []
     for tr in st:
@@ -175,7 +213,9 @@ def process_array(config, array_name, T0):
     overlap_fraction = array_params["OVERLAP"] / array_params["WINDOW_LENGTH"]
     ALPHA = array_params["LTS_ALPHA"] if len(st) > 3 else 1.0
     skip_inds = [i for i, tr in enumerate(st) if tr.id in skip_chans]
-    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(st.copy(), lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA, remove_elements=skip_inds)
+    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(
+        st.copy(), lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA, remove_elements=skip_inds
+    )
     pressure = []
     for tr_win in st[0].slide(
         window_length=array_params["WINDOW_LENGTH"],
@@ -184,6 +224,7 @@ def process_array(config, array_name, T0):
         pressure.append(np.max(np.abs(tr_win.data)))
     pressure = np.array(pressure)
 
+    #### Generate plots ####
     if config["plot"]:
         try:
             print("Setting up web output folders")
@@ -192,54 +233,51 @@ def process_array(config, array_name, T0):
             utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans)
         except:
             import traceback
-
-            b = traceback.format_exc()
-            message = "".join(f"{a}\n" for a in b.splitlines())
             print("Something went wrong making the plot:")
-            print(message)
+            print(traceback.format_exc())
 
+    #### Write output files ####
     if 'OUT_VALVE_DIR' in config.keys():
         try:
-            print('Writing csv file...')
-            t=np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-            sta_name=st[0].stats.station
+            print('Writing CSV file...')
+            t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
+            sta_name = st[0].stats.station
             utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, sta_name, config)
         except:
             import traceback
-            b=traceback.format_exc()
-            message = ''.join('{}\n'.format(a) for a in b.splitlines())
-            print('Something went wrong writing the csv file:')
-            print(message)
+            print('Something went wrong writing the CSV file:')
+            print(traceback.format_exc())
 
     if 'OUT_ASCII_DIR' in config.keys():
         try:
-            print('Writing csv file...')    
-            t=np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
+            print('Writing ASCII file...')
+            t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
             utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, array_name, config)
         except:
             import traceback
-            b=traceback.format_exc()
-            message = ''.join('{}\n'.format(a) for a in b.splitlines())
-            print('Something went wrong writing the csv file:')
-            print(message)
+            print('Something went wrong writing the ASCII file:')
+            print(traceback.format_exc())
 
     return
 
 
 if __name__ == "__main__":
-
+    """
+    Main entry point for the script. Handles argument parsing, configuration loading,
+    and processing of arrays.
+    """
     timer_0 = time.time()
 
-    args = parse_args()
+    args = parse_args()  # Parse command-line arguments
     config_file = args.config
-    config = utils.load_config(config_file)
+    config = utils.load_config(config_file)  # Load configuration
 
     config["plot"] = False if args.no_plot else True
 
-    T0, delay = get_starttime(config, args)
+    T0, delay = get_starttime(config, args)  # Determine start time and delay
 
     if os.getenv("FROMCRON") == "yep":
-        # Set up logging
+        # Set up logging if running from a cron job
         utils.write_to_log(T0.strftime("%Y-%m-%d"), config)
 
     time.sleep(delay)  # Pause to allow for data latency to catch up
@@ -248,11 +286,13 @@ if __name__ == "__main__":
     print(f"Start time: {utc.utcnow()}")
 
     if args.array:
+        # Process a single array if specified
         timer_tmp = time.time()
         process_array(config, args.array.replace("_", " "), T0)
         dt = time.time() - timer_tmp
-        print(f"{dt:.1f} seconds to process {args.array.replace("_", " ")}")
+        print(f"{dt:.1f} seconds to process {args.array.replace('_', ' ')}")
     else:
+        # Process all arrays in the configuration
         for array_name in config["array_list"]:
             timer_tmp = time.time()
             process_array(config, array_name, T0)
