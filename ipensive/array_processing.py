@@ -1,5 +1,3 @@
-#!/home/rtem/miniconda3/envs/ipensive/bin/python
-# -*- coding: utf-8 -*-
 """
 Created on 24-Apr-2018
 Modified on 15-May-2025
@@ -7,18 +5,21 @@ Modified on 15-May-2025
 """
 
 import os
-import sys
-sys.dont_write_bytecode = True  # Prevent Python from creating .pyc files (avoids clutter)
 import numpy as np
+from pathlib import Path
+import time
 import jinja2
 from obspy.core import UTCDateTime as utc
 from matplotlib import dates
-import time
-import ipensive_utils as utils
+from . import ipensive_utils as utils
+from .plotting import plot_results
 import argparse
+import logging
 from lts_array import ltsva
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning, append=True)
+
+my_log = logging.getLogger(__name__)
 
 def parse_args():
     """
@@ -30,12 +31,13 @@ def parse_args():
     parser = argparse.ArgumentParser(
         epilog="e.g.: python array_processing.py -c <filename.yml>"
     )
+    default_config = Path(__file__).parent.parent / "config" / "config.yml"
     parser.add_argument(
         "-c",
         "--config",
         type=str,
         help="Name of the config file (yml)",
-        default="config.yml",
+        default=default_config,
     )
     parser.add_argument(
         "-t",
@@ -79,7 +81,7 @@ def get_starttime(config, args):
         # Use the current UTC time and add latency and window length
         T0 = utc.utcnow()
         delay = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
-        print(f"Waiting {delay:g} seconds")
+        my_log.info(f"Waiting {delay:g} seconds")
 
     # Round down to the nearest 10-minute interval
     T0 = utc(T0.strftime(date_fmt)[:-1] + "0")
@@ -99,15 +101,16 @@ def write_html(config):
     """
     if "EXTRA_LINKS" not in config.keys():
         config["EXTRA_LINKS"] = []
-    script_path = os.path.dirname(__file__)
-    with open(os.path.join(script_path, "index.template"), "r") as f:
+    template_file = Path(__file__).parent.parent / "templates" / "index.template"
+    with open(template_file, "r") as f:
         template = jinja2.Template(f.read())
     html = template.render(
         networks=config["network_list"],
         arrays=config["NETWORKS"],
         extra_links=config["EXTRA_LINKS"],
     )
-    with open(os.path.join(config["OUT_WEB_DIR"], "index.html"), "w") as f:
+    out_file = Path(config["OUT_WEB_DIR"]) / "index.html"
+    with open(out_file, "w") as f:
         f.write(html)
 
 
@@ -130,14 +133,14 @@ def process_array(config, array_name, T0):
     T1 = t1 - array_params["TAPER"]  # Extended start time for tapering
     T2 = t2 + array_params["WINDOW_LENGTH"] + array_params["TAPER"]  # Extended end time
 
-    print("--- " + array_params["ARRAY_NAME"] + " ---")
-    print(f"{t1.strftime('%Y-%b-%d %H:%M')} - {t2.strftime('%H:%M')}")
+    my_log.info("--- " + array_params["ARRAY_NAME"] + " ---")
+    my_log.info(f"{t1.strftime('%Y-%b-%d %H:%M')} - {t2.strftime('%H:%M')}")
     if os.getenv("FROMCRON") == "yep":
         time.sleep(array_params["EXTRA_PAUSE"])  # Pause if running from a cron job
 
     #### Download data ####
     if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
-        print("Not enough channels defined.")
+        my_log.warning("Not enough channels defined.")
         return
 
     st = utils.grab_data(
@@ -155,7 +158,7 @@ def process_array(config, array_name, T0):
             skip_chans.append(tr.id)
             check_st.remove(tr)
     if len(check_st) < array_params["MIN_CHAN"]:
-        print("Too many blank traces. Skipping.")
+        my_log.warning("Too many blank traces. Skipping.")
         return
     ########################
 
@@ -164,7 +167,7 @@ def process_array(config, array_name, T0):
         if np.any([np.any(tr.data == 0)]):  # Check for gaps in data
             check_st.remove(tr)
     if len(check_st) < array_params["MIN_CHAN"]:
-        print("Too gappy. Skipping.")
+        my_log.warning("Too gappy. Skipping.")
         return
     ########################
 
@@ -227,80 +230,36 @@ def process_array(config, array_name, T0):
     #### Generate plots ####
     if config["plot"]:
         try:
-            print("Setting up web output folders")
+            my_log.info("Setting up web output folders")
             utils.web_folders(t2, config, array_params)
-            print("Making plot...")
-            utils.plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans)
+            my_log.info("Making plot...")
+            for plotsize in ["big", "small"]:
+                plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans, plotsize)
         except:
             import traceback
-            print("Something went wrong making the plot:")
-            print(traceback.format_exc())
+            my_log.error("Something went wrong making the plot:")
+            my_log.error(traceback.format_exc())
 
     #### Write output files ####
     if 'OUT_VALVE_DIR' in config.keys():
         try:
-            print('Writing CSV file...')
+            my_log.info('Writing CSV file...')
             t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
             sta_name = st[0].stats.station
             utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, sta_name, config)
         except:
             import traceback
-            print('Something went wrong writing the CSV file:')
-            print(traceback.format_exc())
+            my_log.error('Something went wrong writing the CSV file:')
+            my_log.error(traceback.format_exc())
 
     if 'OUT_ASCII_DIR' in config.keys():
         try:
-            print('Writing ASCII file...')
+            my_log.info('Writing ASCII file...')
             t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
             utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, array_name, config)
         except:
             import traceback
-            print('Something went wrong writing the ASCII file:')
-            print(traceback.format_exc())
+            my_log.error('Something went wrong writing the ASCII file:')
+            my_log.error(traceback.format_exc())
 
     return
-
-
-if __name__ == "__main__":
-    """
-    Main entry point for the script. Handles argument parsing, configuration loading,
-    and processing of arrays.
-    """
-    timer_0 = time.time()
-
-    args = parse_args()  # Parse command-line arguments
-    config_file = args.config
-    config = utils.load_config(config_file)  # Load configuration
-
-    config["plot"] = False if args.no_plot else True
-
-    T0, delay = get_starttime(config, args)  # Determine start time and delay
-
-    if os.getenv("FROMCRON") == "yep":
-        # Set up logging if running from a cron job
-        utils.write_to_log(T0.strftime("%Y-%m-%d"), config)
-
-    time.sleep(delay)  # Pause to allow for data latency to catch up
-    timer_0 += delay
-
-    print(f"Start time: {utc.utcnow()}")
-
-    if args.array:
-        # Process a single array if specified
-        timer_tmp = time.time()
-        process_array(config, args.array.replace("_", " "), T0)
-        dt = time.time() - timer_tmp
-        print(f"{dt:.1f} seconds to process {args.array.replace('_', ' ')}")
-    else:
-        # Process all arrays in the configuration
-        for array_name in config["array_list"]:
-            timer_tmp = time.time()
-            process_array(config, array_name, T0)
-            dt = time.time() - timer_tmp
-            print(f"{dt:.1f} seconds to process {array_name}\n\n")
-
-    # Write out the new HTML file
-    write_html(config)
-
-    print(f"{time.time()-timer_0:.1f} seconds to process all")
-    print(f"Finish time: {utc.utcnow()}")

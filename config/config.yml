@@ -4,10 +4,10 @@
 # OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
 OUT_WEB_DIR: /Users/awech-local/Desktop/ipensive_test/web
 OUT_ASCII_DIR: /Users/awech-local/Desktop/ipensive_test/ascii
-LOGS_DIR:
-DATA_SOURCE: data_source.yml
-STATION_XML: stations.xml
-TARGETS_FILE: volcano_list.txt
+LOGS_DIR: /Users/awech-local/Desktop/ipensive_test/logs
+DATA_SOURCE: ../config/data_source.yml
+STATION_XML: ../data/stations.xml
+TARGETS_FILE: ../data/volcano_list.txt
 EXTRA_LINKS:
   - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
   - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth

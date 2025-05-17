@@ -1,6 +1,11 @@
-.DS_Store
 __pycache__/
 *.pyc
-
-logs/**
-!logs/.gitkeep
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+.env
+.venv
+*.egg-info/
+build/
+dist/
+logs/

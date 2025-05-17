@@ -1,38 +1,38 @@
 from obspy.core.inventory.inventory import Inventory
 from obspy.clients.fdsn import Client
 from obspy import UTCDateTime as utc
-from ipensive_utils import write_to_log
+from .ipensive_utils import write_to_log
 import os
-import argparse
 from time import sleep
-import yaml
 
+import logging
+my_log = logging.getLogger(__name__)
 
 def get_stations(config):
 
-    SCNL = []
+    NSLC = []
     for net in list(config["NETWORKS"].keys()):
         for array in config["NETWORKS"][net]:
-            SCNL += config[array]["SCNL"]
+            NSLC += config[array]["NSLC"]
 
-    return SCNL
+    return NSLC
 
 
 def update_stationXML(config):
 
     if os.getenv("FROMCRON") == "yep":
         write_to_log(utc.utcnow(), config)
-
+    
     client_iris = Client("IRIS")
-    SCNL = get_stations(config)
+    NSLC = get_stations(config)
     print("______ Begin Updating Metadata ______")
     print("______ " + utc.utcnow().strftime("%Y-%m-%d %H:%M:%S") + " ______")
 
     inventory = Inventory()
-    for scnl in SCNL:
+    for nslc in NSLC:
 
-        print(scnl)
-        sta, chan, net, loc = scnl.split(".")
+        print(nslc)
+        net, sta, loc, chan = nslc.split(".")
         client = client_iris
         attempts = 0
         while attempts < 4:
@@ -56,21 +56,3 @@ def update_stationXML(config):
 
     print("^^^^^^ Finished Updating Metadata ^^^^^^")
     return
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        epilog="e.g.: python update_metadata.py -c <filename.yml>"
-    )
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        help="Name of the config file (yml)",
-        default="config.yml",
-    )
-    args = parser.parse_args()
-    config_file = args.config
-    with open(config_file, "r") as file:
-        config = yaml.safe_load(file)
-    update_stationXML(config)
