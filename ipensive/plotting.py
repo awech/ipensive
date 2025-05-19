@@ -35,7 +35,20 @@ def missing_elements_adjust(st, skip_chans, array):
     return array, missing_inds
 
 
-def ticks_and_axes(ax, ylabel):
+def update_axes_and_ticks(ax, ylabel):
+    """
+    Update the x-axis of a matplotlib Axes object to display date-formatted ticks and set the y-axis label.
+
+    Parameters:
+        ax (matplotlib.axes.Axes): The axes object to update.
+        ylabel (str): The label to set for the y-axis.
+
+    Effects:
+        - Formats the x-axis to display dates in "%H:%M" format.
+        - Removes x-axis tick labels.
+        - Sets the direction of x-axis ticks to "in" and enables ticks on the top of the axis.
+        - Sets the y-axis label to the provided string.
+    """
     ax.xaxis_date()
     ax.fmt_xdata = dates.DateFormatter("%HH:%MM")
     ax.xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
@@ -70,7 +83,7 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_size, trace_lw):
     ymax = np.abs(list(ax.get_ylim())).max()
     ax.set_ylim(-ymax, ymax)
     if plot_size == "big":
-        ticks_and_axes(ax, "Pressure [Pa]")
+        update_axes_and_ticks(ax, "Pressure [Pa]")
         ax2 = ax.twinx()
         ax2.set_yticks([])
         ax2.set_ylabel(
@@ -116,7 +129,7 @@ def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_size, scatter_lw, s_d
     sc.set_clim(cax)
     # Configure axis labels and formatting for larger plots
     if plot_size == "big":
-        ticks_and_axes(ax, r"$M_{d}CCM$")
+        update_axes_and_ticks(ax, r"$M_{d}CCM$")
     else:
         # Remove ticks and labels for smaller plots
         ax.set_xticks([])
@@ -170,7 +183,7 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_size
     sc.set_clim(cax)
     # Configure axis labels and formatting for larger plots
     if plot_size == "big":
-        ticks_and_axes(ax, "Trace Velocity\n [km/s]")
+        update_axes_and_ticks(ax, "Trace Velocity\n [km/s]")
     else:
         # Remove ticks and labels for smaller plots
         ax.set_xticks([])
@@ -246,7 +259,7 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_size, sc
 
     if plot_size == "big":
         # Configure x-axis for larger plots
-        ticks_and_axes(ax, "Back-Azimuth\n [deg]")
+        update_axes_and_ticks(ax, "Back-Azimuth\n [deg]")
     else:
         # Remove ticks for smaller plots
         ax.set_xticks([])
@@ -333,7 +346,7 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_size
                 ax.scatter(t, m_ind * np.ones(t.shape[0]), marker=".", color="indianred", s=10)
 
         # Configure x-axis for larger plots
-        ticks_and_axes(ax, "")
+        update_axes_and_ticks(ax, "")
 
     else:
         # Remove ticks for smaller plots
