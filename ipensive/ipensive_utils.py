@@ -188,50 +188,6 @@ def setup_logging(day, config, arg_opt=None):
     sys.stderr = StreamToLogger(my_log, logging.ERROR)
     
 
-# def write_to_log(day, config):
-#     """
-#     Write logs to a file for a specific day.
-
-#     Args:
-#         day (str): Date string in UTC.
-#         config (dict): Configuration dictionary.
-#     """
-#     # Determine the logs directory
-#     if 'LOGS_DIR' in config:
-#         if config["LOGS_DIR"] is not None:
-#             logs_dir = Path(config["LOGS_DIR"])
-#         else:
-#             logs_dir = None
-#     else:
-#         logs_dir = Path(__file__).parent / 'logs'
-
-#     if logs_dir is not None:
-#         # Create year and month directories if they don't exist
-#         year = UTCDateTime(day).strftime('%Y')
-#         month = UTCDateTime(day).strftime('%Y-%m')
-#         year_dir = logs_dir / year
-#         month_dir = year_dir / month
-
-#         year_dir.mkdir(parents=True, exist_ok=True)
-#         month_dir.mkdir(parents=True, exist_ok=True)
-
-#         # Create the log file
-#         log_file = month_dir / f"{UTCDateTime(day).strftime('%Y-%m-%d')}.log"
-#         logging.basicConfig(
-#             filename=log_file,
-#             filemode="a",
-#             level=logging.INFO,
-#             format="%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
-#             datefmt="%Y-%m-%d %H:%M:%S"
-#         )
-#     else:
-#         logging.basicConfig(
-#             level=logging.INFO,
-#             format="%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
-#             datefmt="%Y-%m-%d %H:%M:%S"
-#         )
-
-
 def check_inventory(tr, inv):
     """
     Check if a trace exists in the inventory.
@@ -384,8 +340,8 @@ def get_target_backazimuth(st, config, array_params):
         dict: Updated array parameters with backazimuths for each target.
     """
     # Calculate the average latitude and longitude of the array
-    lon0 = np.mean([tr.stats.coordinates.longitude for tr in st])
-    lat0 = np.mean([tr.stats.coordinates.latitude for tr in st])
+    lon0 = np.nanmean([tr.stats.coordinates.longitude for tr in st])
+    lat0 = np.nanmean([tr.stats.coordinates.latitude for tr in st])
     DF = pd.read_csv(config["TARGETS_FILE"])  # Load target locations from a CSV file
 
     tmp_targets = []
