@@ -1,11 +1,10 @@
+import logging
+from time import sleep
 from obspy.core.inventory.inventory import Inventory
 from obspy.clients.fdsn import Client
 from obspy import UTCDateTime as utc
-from .ipensive_utils import write_to_log
-import os
-from time import sleep
 
-import logging
+
 my_log = logging.getLogger(__name__)
 
 def get_stations(config):
@@ -20,18 +19,15 @@ def get_stations(config):
 
 def update_stationXML(config):
 
-    if os.getenv("FROMCRON") == "yep":
-        write_to_log(utc.utcnow(), config)
-    
     client_iris = Client("IRIS")
     NSLC = get_stations(config)
-    print("______ Begin Updating Metadata ______")
-    print("______ " + utc.utcnow().strftime("%Y-%m-%d %H:%M:%S") + " ______")
+    my_log.info("______ Begin Updating Metadata ______")
+    my_log.info("______ " + utc.utcnow().strftime("%Y-%m-%d %H:%M:%S") + " ______")
 
     inventory = Inventory()
     for nslc in NSLC:
 
-        print(nslc)
+        my_log.info(f"Updating metadata for {nslc}")
         net, sta, loc, chan = nslc.split(".")
         client = client_iris
         attempts = 0
@@ -49,10 +45,10 @@ def update_stationXML(config):
             except Exception as ex:
                 sleep(1)
                 attempts += 1
-                print(f"Error on attempt number {attempts:g}:")
-                print(f"\t{ex}")
+                my_log.warning(f"Error on attempt number {attempts:g}:")
+                my_log.error(f"\t{ex}")
 
     inventory.write(config["STATION_XML"], format="STATIONXML")
 
-    print("^^^^^^ Finished Updating Metadata ^^^^^^")
+    my_log.info("^^^^^^ Finished Updating Metadata ^^^^^^\n")
     return

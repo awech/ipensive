@@ -1,6 +1,8 @@
 import argparse
 import yaml
 from pathlib import Path
+from obspy import UTCDateTime as utc
+from ipensive.ipensive_utils import setup_logging
 from ipensive.metadata import update_stationXML
 
 if __name__ == "__main__":
@@ -22,4 +24,5 @@ if __name__ == "__main__":
     with open(config_file, "r") as file:
         config = yaml.safe_load(file)
 
+    setup_logging(utc.utcnow(), config)
     update_stationXML(config)

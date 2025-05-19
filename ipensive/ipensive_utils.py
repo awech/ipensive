@@ -1,7 +1,10 @@
+import os
+import sys
+import logging
+from pathlib import Path
+import yaml
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import logging
 from obspy import Stream, UTCDateTime, read_inventory
 from obspy.clients.earthworm import Client as EWClient
 from obspy.clients.fdsn import Client as FDSNClient
@@ -9,9 +12,25 @@ from obspy.clients.filesystem.sds import Client as SDSClient
 from obspy.clients.seedlink import Client as SLClient
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.core.util import AttribDict
-import yaml
 
 my_log = logging.getLogger(__name__)
+
+
+class StreamToLogger(object):
+    """
+    Fake file-like stream object that redirects writes to a logger instance.
+    """
+    def __init__(self, logger, log_level=logging.INFO):
+        self.logger = logger
+        self.log_level = log_level
+        self.linebuf = ''
+
+    def write(self, buf):
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.log_level, line.rstrip())
+
+    def flush(self):
+        pass
 
 
 def load_config(config_file):
@@ -38,6 +57,13 @@ def load_config(config_file):
 
     config["network_list"] = all_nets
     config["array_list"] = array_list
+
+    # Load data output configuration
+    with open(config["DATA_OUT"], "r") as file:
+        data_out = yaml.safe_load(file)
+    config["OUT_WEB_DIR"] = data_out["OUT_WEB_DIR"]
+    config["OUT_ASCII_DIR"] = data_out["OUT_ASCII_DIR"]
+    config["LOGS_DIR"] = data_out["LOGS_DIR"]
 
     # Load data source configuration
     with open(config["DATA_SOURCE"], "r") as file:
@@ -107,7 +133,7 @@ def get_file_path(t, array_name, config):
     return file
 
 
-def write_to_log(day, config):
+def setup_logging(day, config, arg_opt=None):
     """
     Write logs to a file for a specific day.
 
@@ -115,34 +141,95 @@ def write_to_log(day, config):
         day (str): Date string in UTC.
         config (dict): Configuration dictionary.
     """
+
     # Determine the logs directory
-    if 'LOGS_DIR' in config and len(config["LOGS_DIR"]) > 0:
-        logs_dir = Path(config["LOGS_DIR"])
+    if 'LOGS_DIR' in config:
+        if config["LOGS_DIR"] is not None:
+            logs_dir = Path(config["LOGS_DIR"])
+        else:
+            logs_dir = None
     else:
         logs_dir = Path(__file__).parent / 'logs'
 
-    # Create year and month directories if they don't exist
-    year = UTCDateTime(day).strftime('%Y')
-    month = UTCDateTime(day).strftime('%Y-%m')
-    year_dir = logs_dir / year
-    month_dir = year_dir / month
+    if logs_dir is not None and os.getenv("FROMCRON") == "yep":
+        # Create year and month directories if they don't exist
+        year = UTCDateTime(day).strftime('%Y')
+        month = UTCDateTime(day).strftime('%Y-%m')
+        year_dir = logs_dir / year
+        month_dir = year_dir / month
 
-    year_dir.mkdir(parents=True, exist_ok=True)
-    month_dir.mkdir(parents=True, exist_ok=True)
+        year_dir.mkdir(parents=True, exist_ok=True)
+        month_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create the log file
-    log_file = month_dir / f"{UTCDateTime(day).strftime('%Y-%m-%d')}.log"
-    logging.basicConfig(
-        filename=log_file,
-        filemode="a",
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-    # with log_file.open("a") as f:
-    #     sys.stdout = sys.stderr = f
+        # Create the log file
+        log_file = month_dir / f"{UTCDateTime(day).strftime('%Y-%m-%d')}.log"
+    elif arg_opt:
+        log_file = arg_opt
+    else:
+        log_file = None
 
-    return logging
+
+    if log_file:
+        logging.basicConfig(
+            filename=log_file,
+            filemode="a",
+            level=logging.INFO,
+            format="%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S"
+        )
+    else:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S"
+        )
+    my_log = logging.getLogger(__name__)
+    sys.stdout = StreamToLogger(my_log, logging.INFO)
+    sys.stderr = StreamToLogger(my_log, logging.ERROR)
+    
+
+# def write_to_log(day, config):
+#     """
+#     Write logs to a file for a specific day.
+
+#     Args:
+#         day (str): Date string in UTC.
+#         config (dict): Configuration dictionary.
+#     """
+#     # Determine the logs directory
+#     if 'LOGS_DIR' in config:
+#         if config["LOGS_DIR"] is not None:
+#             logs_dir = Path(config["LOGS_DIR"])
+#         else:
+#             logs_dir = None
+#     else:
+#         logs_dir = Path(__file__).parent / 'logs'
+
+#     if logs_dir is not None:
+#         # Create year and month directories if they don't exist
+#         year = UTCDateTime(day).strftime('%Y')
+#         month = UTCDateTime(day).strftime('%Y-%m')
+#         year_dir = logs_dir / year
+#         month_dir = year_dir / month
+
+#         year_dir.mkdir(parents=True, exist_ok=True)
+#         month_dir.mkdir(parents=True, exist_ok=True)
+
+#         # Create the log file
+#         log_file = month_dir / f"{UTCDateTime(day).strftime('%Y-%m-%d')}.log"
+#         logging.basicConfig(
+#             filename=log_file,
+#             filemode="a",
+#             level=logging.INFO,
+#             format="%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
+#             datefmt="%Y-%m-%d %H:%M:%S"
+#         )
+#     else:
+#         logging.basicConfig(
+#             level=logging.INFO,
+#             format="%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s",
+#             datefmt="%Y-%m-%d %H:%M:%S"
+#         )
 
 
 def check_inventory(tr, inv):

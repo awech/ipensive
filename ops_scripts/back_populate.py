@@ -3,8 +3,9 @@ Created on 30-Mar-2022
 @author: awech
 """
 
+import logging
 import pandas as pd
-from obspy import UTCDateTime
+from obspy import UTCDateTime as utc
 from ipensive.array_processing import process_array, parse_args
 from ipensive import ipensive_utils as utils
 
@@ -22,10 +23,13 @@ args = parse_args()
 config = utils.load_config(args.config)
 config["plot"] = PLOT
 
+utils.setup_logging(utc.utcnow(), config, arg_opt=args.log)
+my_log = logging.getLogger(__name__)
+
 def run_backpopulate():
-    t1 = UTCDateTime(T1) + config["PARAMS"]["DURATION"]
+    t1 = utc(T1) + config["PARAMS"]["DURATION"]
     for t in pd.date_range(T2, t1.strftime("%Y%m%d%H%M"), freq="-10min"):
-        print(t)
+        my_log.info(t)
 
         if len(ARRAYS) > 0:
             array_list = ARRAYS
@@ -35,10 +39,10 @@ def run_backpopulate():
             # check if you should process this time window
             file = utils.get_file_path(t, array_name, config)
             if not file.exists() or OVERWRITE:
-                process_array(config, array_name, UTCDateTime(t))
-                print("\n")
+                process_array(config, array_name, utc(t))
+                my_log.info("\n")
             else:
-                print("File exists. No overwrite. Skip " + array_name)
+                my_log.info("File exists. No overwrite. Skip " + array_name)
 
 
 if __name__ == '__main__':

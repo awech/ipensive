@@ -56,6 +56,12 @@ def parse_args():
         action="store_true",
         help="Disable plotting of results",
     )
+    parser.add_argument(
+        "-l",
+        "--log",
+        type=str,
+        help="Log file name (optional)",
+    )
 
     return parser.parse_args()
 
