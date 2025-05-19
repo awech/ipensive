@@ -1,11 +1,7 @@
 ---
 # SYSTEM PARAMETERS
-# OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
-# OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
-OUT_WEB_DIR: /Users/awech-local/Desktop/ipensive_test/web
-OUT_ASCII_DIR: /Users/awech-local/Desktop/ipensive_test/ascii
-LOGS_DIR: /Users/awech-local/Desktop/ipensive_test/logs
-DATA_SOURCE: ../config/data_source.yml
+DATA_OUT: ../config/output_config.yml
+DATA_SOURCE: ../config/data_src_config.yml
 STATION_XML: ../data/stations.xml
 TARGETS_FILE: ../data/volcano_list.txt
 EXTRA_LINKS:
