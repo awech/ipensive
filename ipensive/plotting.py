@@ -214,6 +214,7 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_size, sc
     Returns:
         matplotlib.collections.PathCollection: The scatter plot object for further customization or colorbar attachment.
     """
+
     
     # Configure the style for the text boxes
     box_style = {'facecolor': 'white', 'edgecolor': 'white', 'pad': 0}
