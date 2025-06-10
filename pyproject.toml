@@ -1,0 +1,37 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ipensive"
+dynamic = ["version"]
+authors = [{name = "Aaron Wech", email = "awech@usgs.gov"}]
+description = "Infrasound array processing for volcano monitoring."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+classifiers = [
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 4 - Beta",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+]
+keywords = ["infrasound", "volcano", "array processing", "monitoring"]
+
+[tool.setuptools.dynamic]
+version = {attr = "ipensive.__version__"}
+dependencies = {file = ["requirements.txt"]}
+
+
+[tool.setuptools.packages]
+find = {}
+
+[project.urls]

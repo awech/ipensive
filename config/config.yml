@@ -1,0 +1,13 @@
+---
+# SYSTEM PARAMETERS
+ARRAYS_CONFIG: ../config/arrays_config.yml
+DATA_SOURCE: ../config/data_src_config.yml
+DATA_OUT: ../config/output_config.yml
+STATION_XML: ../data/stations.xml
+TARGETS_FILE: ../data/volcano_list.txt
+EXTRA_LINKS:
+  - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
+  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
+  - AK Travel Times: ak_traveltimes.html
+  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
+  - CNMI Travel Times: cnmi_traveltimes.html

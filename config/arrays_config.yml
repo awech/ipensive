@@ -1,20 +1,3 @@
----
-# SYSTEM PARAMETERS
-# OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
-# OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
-OUT_WEB_DIR: /Users/awech-local/Desktop/ipensive_test/web
-OUT_ASCII_DIR: /Users/awech-local/Desktop/ipensive_test/ascii
-LOGS_DIR:
-DATA_SOURCE: data_source.yml
-STATION_XML: stations.xml
-TARGETS_FILE: volcano_list.txt
-EXTRA_LINKS:
-  - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
-  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
-  - AK Travel Times: ak_traveltimes.html
-  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
-  - CNMI Travel Times: cnmi_traveltimes.html
-
 ############### Defaults ###############
 ########################################
 PARAMS: &defaults
@@ -59,6 +42,9 @@ NETWORKS:
     - Wake Island North
     - Wake Island South
 
+
+# Configure each array's channels, back-azimuth targets, 
+# and (optionally) different pre-processing/plotting parameters
 Kenai:
   <<: *defaults
   NSLC: 
