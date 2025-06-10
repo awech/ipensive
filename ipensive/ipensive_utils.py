@@ -44,7 +44,17 @@ def load_config(config_file):
         dict: Configuration dictionary with additional metadata.
     """
     with open(config_file, "r") as file:
+        master_config = yaml.safe_load(file)
+
+    with open(master_config["ARRAYS_CONFIG"], "r") as file:
         config = yaml.safe_load(file)
+
+    config["STATION_XML"] = master_config["STATION_XML"]
+    config["TARGETS_FILE"] = master_config["TARGETS_FILE"]
+    if "EXTRA_LINKS" not in master_config.keys():
+        config["EXTRA_LINKS"] = []
+    else:
+        config["EXTRA_LINKS"] = master_config["EXTRA_LINKS"]
 
     # Extract network and array information
     all_nets = list(config["NETWORKS"].keys())
@@ -59,14 +69,14 @@ def load_config(config_file):
     config["array_list"] = array_list
 
     # Load data output configuration
-    with open(config["DATA_OUT"], "r") as file:
+    with open(master_config["DATA_OUT"], "r") as file:
         data_out = yaml.safe_load(file)
     config["OUT_WEB_DIR"] = data_out["OUT_WEB_DIR"]
     config["OUT_ASCII_DIR"] = data_out["OUT_ASCII_DIR"]
     config["LOGS_DIR"] = data_out["LOGS_DIR"]
 
     # Load data source configuration
-    with open(config["DATA_SOURCE"], "r") as file:
+    with open(master_config["DATA_SOURCE"], "r") as file:
         data_source = yaml.safe_load(file)
 
     client = get_obspy_client(data_source)
