@@ -39,7 +39,7 @@ def run_array_processing():
             timer_tmp = time.time()
             array_processing.process_array(config, array_name, T0)
             dt = time.time() - timer_tmp
-            my_log.info(f"{dt:.1f} seconds to process {array_name}\n\n")
+            my_log.info(f"{dt:.1f} seconds to process {array_name}\n")
 
     # Write out the new HTML file
     array_processing.write_html(config)
