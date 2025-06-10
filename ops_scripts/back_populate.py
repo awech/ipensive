@@ -1,5 +1,6 @@
 """
 Created on 30-Mar-2022
+Modified on 10-Jun-2025
 @author: awech
 """
 
@@ -10,9 +11,9 @@ from ipensive.array_processing import process_array, parse_args
 from ipensive import ipensive_utils as utils
 
 
-T1 = "2025-05-16 20:10"
-T2 = "2025-05-16 20:20"
-OVERWRITE = True
+T1 = "2025-06-10 10:00"
+T2 = "2025-06-10 11:00"
+OVERWRITE = False
 PLOT = True
 
 # specify ARRAYS if you want to just process specific arrays
