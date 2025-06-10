@@ -1,13 +1,14 @@
 import numpy as np
 from pathlib import Path
 import matplotlib as m
-m.use('Agg')  # Use a non-interactive backend for matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import dates
 from copy import deepcopy
 from collections import Counter
 from matplotlib import rcParams
-rcParams.update({'font.size': 10})  # Set default font size for plots
+
+rcParams.update({"font.size": 10})  # Set default font size for plots
+m.use("Agg")  # Use a non-interactive backend for matplotlib
 ################################
 
 
@@ -57,7 +58,7 @@ def update_axes_and_ticks(ax, ylabel):
     ax.set_ylabel(ylabel)
 
 
-def plot_waveform(ax, T1, T2, st, array_params, plot_size, trace_lw):
+def plot_waveform(ax, T1, T2, st, array_params, plot_params):
     """
     Plot the waveform data for the given stream.
 
@@ -65,8 +66,7 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_size, trace_lw):
         ax (matplotlib.axes.Axes): The axes to plot on.
         st (Stream): ObsPy Stream object containing traces.
         array_params (dict): Parameters for the array being processed.
-        plot_size (str): Size of the plot ("big" or "small").
-        trace_lw (float): Line width for the trace plot.
+        plot_params (dict): Parameters for the plot, including size and line widths.
     """
 
     # Generate a time vector for plotting waveforms
@@ -77,12 +77,12 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_size, trace_lw):
     )
     
     ax.set_title(array_params["ARRAY_NAME"] + " " + array_params["ARRAY_LABEL"] + " Array")
-    ax.plot(tvec, st[0].data, "k", linewidth=trace_lw)
+    ax.plot(tvec, st[0].data, "k", linewidth=plot_params["trace_lw"])
     ax.axis("tight")
     ax.set_xlim(T1, T2)
     ymax = np.abs(list(ax.get_ylim())).max()
     ax.set_ylim(-ymax, ymax)
-    if plot_size == "big":
+    if plot_params["plot_size"] == "big":
         update_axes_and_ticks(ax, "Pressure [Pa]")
         ax2 = ax.twinx()
         ax2.set_yticks([])
@@ -96,7 +96,7 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_size, trace_lw):
     ##########################################
 
 
-def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_size, scatter_lw, s_dot, cm, hline_lw, cax):
+def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_params):
     """
     Plots MCCM (Multi-Channel Cross-Correlation Matrix) values on the given matplotlib axis with color mapping and formatting.
 
@@ -107,28 +107,23 @@ def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_size, scatter_lw, s_d
         t (array-like): The x-axis values (typically time).
         mccm (array-like): The MCCM values to plot on the y-axis and for color mapping.
         array_params (dict): Dictionary containing plot parameters, must include "MCTHRESH" for threshold line.
-        plot_size (str): Plot size indicator, "big" for detailed formatting, otherwise minimal formatting.
-        scatter_lw (float): Line width for the scatter plot edge.
-        s_dot (float): Size of the scatter plot dots.
-        cm (matplotlib.colors.Colormap): Colormap for the scatter plot.
-        hline_lw (float): Line width for the horizontal threshold line.
-        cax (tuple): Tuple specifying (ymin, ymax) for y-axis and color limits.
+        plot_params (dict): Dictionary containing plot parameters, including size and line widths.
 
     Returns:
         matplotlib.collections.PathCollection: The scatter plot object for further customization or colorbar attachment.
     """
 
     # Scatter plot of MCCM values with color mapping
-    sc = ax.scatter(t, mccm, c=mccm, s=s_dot, edgecolors="k", lw=scatter_lw, cmap=cm)
+    sc = ax.scatter(t, mccm, c=mccm, s=plot_params["s_dot"], edgecolors="k", lw=plot_params["scatter_lw"], cmap=plot_params["cm"])
     # Add a horizontal line for the MCCM threshold
-    ax.axhline(array_params["MCTHRESH"], ls="--", lw=hline_lw, color="gray")
+    ax.axhline(array_params["MCTHRESH"], ls="--", lw=plot_params["hline_lw"], color="gray")
     # Adjust axis limits and scaling
     ax.axis("tight")
     ax.set_xlim(T1, T2)
-    ax.set_ylim(cax)
-    sc.set_clim(cax)
+    ax.set_ylim(plot_params["cax"])
+    sc.set_clim(plot_params["cax"])
     # Configure axis labels and formatting for larger plots
-    if plot_size == "big":
+    if plot_params["plot_size"] == "big":
         update_axes_and_ticks(ax, r"$M_{d}CCM$")
     else:
         # Remove ticks and labels for smaller plots
@@ -138,7 +133,7 @@ def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_size, scatter_lw, s_d
     return sc
 
 
-def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_size, scatter_lw, s_dot, cm, cax):
+def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_params):
     """
     Plots trace velocities on the given matplotlib axis with color mapping and formatting.
 
@@ -150,12 +145,7 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_size
         velocity (array-like): The trace velocities to plot.
         mccm (array-like): The MCCM values for color mapping.
         array_params (dict): Dictionary containing plot parameters.
-        plot_size (str): Plot size indicator, "big" for detailed formatting, otherwise minimal formatting.
-        scatter_lw (float): Line width for the scatter plot edge.
-        s_dot (float): Size of the scatter plot dots.
-        cm (matplotlib.colors.Colormap): Colormap for the scatter plot.
-        hline_lw (float): Line width for the horizontal threshold line.
-        cax (tuple): Tuple specifying (ymin, ymax) for y-axis and color limits.
+        plot_params (dict): Dictionary containing plot parameters, including size and line widths.
 
     Returns:
         matplotlib.collections.PathCollection: The scatter plot object for further customization or colorbar attachment.
@@ -171,7 +161,7 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_size
         )
 
     # Scatter plot of trace velocities with color mapping based on MCCM values
-    sc = ax.scatter(t, velocity, c=mccm, s=s_dot, edgecolors="k", lw=scatter_lw, cmap=cm)
+    sc = ax.scatter(t, velocity, c=mccm, s=plot_params["s_dot"], edgecolors="k", lw=plot_params["scatter_lw"], cmap=plot_params["cm"])
     # Set y-axis limits based on the array type
     if array_params["ARRAY_LABEL"] == "Hydroacoustic":
         ax.set_ylim(1.2, 1.8)  # Typical range for hydroacoustic arrays
@@ -180,9 +170,9 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_size
     # Set x-axis limits to match the time range
     ax.set_xlim(T1, T2)
     # Set the color limits for the scatter plot
-    sc.set_clim(cax)
+    sc.set_clim(plot_params["cax"])
     # Configure axis labels and formatting for larger plots
-    if plot_size == "big":
+    if plot_params["plot_size"] == "big":
         update_axes_and_ticks(ax, "Trace Velocity\n [km/s]")
     else:
         # Remove ticks and labels for smaller plots
@@ -192,7 +182,7 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_size
     return sc
 
 
-def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_size, scatter_lw, s_dot, cm, cax, hline_lw):
+def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
     """
     Plot back-azimuth values on the given matplotlib axis with color mapping and formatting.
 
@@ -204,12 +194,7 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_size, sc
         azimuth (array-like): Back-azimuth values to plot.
         mccm (array-like): MCCM values for color mapping.
         array_params (dict): Dictionary containing plot parameters, must include 'AZ_MIN', 'AZ_MAX', 'TARGETS'.
-        plot_size (str): Plot size indicator, "big" for detailed formatting, otherwise minimal formatting.
-        scatter_lw (float): Line width for the scatter plot edge.
-        s_dot (float): Size of the scatter plot dots.
-        cm (matplotlib.colors.Colormap or str): Colormap for the scatter plot.
-        cax (tuple): Tuple specifying (ymin, ymax) for y-axis and color limits.
-        hline_lw (float): Line width for the horizontal lines.
+        plot_params (dict): Dictionary containing plot parameters, including size and line widths.
 
     Returns:
         matplotlib.collections.PathCollection: The scatter plot object for further customization or colorbar attachment.
@@ -234,13 +219,13 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_size, sc
             baz = array_params[target]
             if baz > 180:
                 # Plot horizontal lines and labels for targets above 180
-                ax.axhline(baz - 360, ls='--', lw=hline_lw, color='gray', zorder=-1)
-                if plot_size == "big":
+                ax.axhline(baz - 360, ls='--', lw=plot_params["hline_lw"], color='gray', zorder=-1)
+                if plot_params["plot_size"] == "big":
                     ax.text(t[1], baz - 360, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
             else:
                 # Plot horizontal lines and labels for targets below 180
-                ax.axhline(baz, ls='--', lw=hline_lw, color='gray', zorder=-1)
-                if plot_size == "big":
+                ax.axhline(baz, ls='--', lw=plot_params["hline_lw"], color='gray', zorder=-1)
+                if plot_params["plot_size"] == "big":
                     ax.text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
         # Adjust azimuth values above 180 for plotting
         tmp_azimuth[tmp_azimuth > 180] += -360
@@ -248,17 +233,17 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_size, sc
         # Plot horizontal lines and labels for all targets
         for target in array_params['TARGETS']:
             baz = array_params[target]
-            ax.axhline(baz, ls='--', lw=hline_lw, color='gray', zorder=-1)
-            if plot_size == "big":
+            ax.axhline(baz, ls='--', lw=plot_params["hline_lw"], color='gray', zorder=-1)
+            if plot_params["plot_size"] == "big":
                 ax.text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
 
     # Scatter plot for back-azimuth values, colored by MCCM
-    sc = ax.scatter(t, tmp_azimuth, c=mccm, s=s_dot, edgecolors='k', lw=scatter_lw, cmap=cm, zorder=1000)
+    sc = ax.scatter(t, tmp_azimuth, c=mccm, s=plot_params["s_dot"], edgecolors='k', lw=plot_params["scatter_lw"], cmap=plot_params["cm"], zorder=1000)
     ax.set_ylim(az_min, az_max)
     ax.set_xlim(T1, T2)
-    sc.set_clim(cax)
+    sc.set_clim(plot_params["cax"])
 
-    if plot_size == "big":
+    if plot_params["plot_size"] == "big":
         # Configure x-axis for larger plots
         update_axes_and_ticks(ax, "Back-Azimuth\n [deg]")
     else:
@@ -269,7 +254,7 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_size, sc
     return sc
 
 
-def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_size, s_dot, scatter_lw, wm_font):
+def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_params):
     """
     Plot dropped channels (LTS outliers) on the provided axis.
 
@@ -281,10 +266,7 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_size
         st (Stream): ObsPy Stream object containing traces.
         lts_dict (dict): Dictionary of LTS (Least Trimmed Squares) results.
         skip_chans (list): List of channels to skip.
-        plot_size (str): Plot size indicator, "big" for detailed formatting, otherwise minimal formatting.
-        s_dot (float): Size of the scatter plot dots.
-        scatter_lw (float): Line width for the scatter plot edge.
-        wm_font (float): Font size for watermark or info text.
+        plot_params (dict): Dictionary containing plot parameters, including size and line widths.
 
     Returns:
         sc_stas: scatter plot object for dropped channels (or None if not plotted)
@@ -302,7 +284,7 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_size
             0.5, 0.5, txt_str,
             transform=ax.transAxes,
             color='grey', alpha=0.7,
-            fontsize=wm_font, va="center", ha="center"
+            fontsize=plot_params["wm_font"], va="center", ha="center"
         )
         # Identify missing channels
         for chan in skip_chans:
@@ -327,9 +309,9 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_size
                 pts,
                 keys,
                 c=vals,
-                s=s_dot,
+                s=plot_params["s_dot"],
                 edgecolors="k",
-                lw=scatter_lw,
+                lw=plot_params["scatter_lw"],
                 cmap=cm2,
                 vmin=0.5,
                 vmax=n - 0.5,
@@ -340,7 +322,7 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_size
     ax.set_yticklabels([f"{tr.stats.station}.{tr.stats.location}" for tr in st], fontsize=8)
     ax.set_xlim(T1, T2)
 
-    if plot_size == "big":
+    if plot_params["plot_size"] == "big":
         # Add scatter plot for missing channels
         if n > 3 and ndict:
             for m_ind in missing_inds:
@@ -398,7 +380,7 @@ def save_figure(fig, config, array_params, t2, plot_size):
     plt.close('all')
 
 
-def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans, plot_size):
+def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, config, array_params, plot_size):
     """
     Generate and save plots for the results of array processing.
 
@@ -422,26 +404,27 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
     T1 = dates.date2num(t1.datetime)
     T2 = dates.date2num(t2.datetime)
 
+    plot_params = {"plot_size": plot_size}
     # Define colormap and color axis limits for MCCM values
-    cm = "RdYlBu_r"
-    cax = 0.2, 1  # Colorbar range for MCCM values
+    plot_params["cm"] = "RdYlBu_r"
+    plot_params["cax"] = 0.2, 1  # Colorbar range for MCCM values
 
     # Set default plot size and styling parameters
     if plot_size == "big":
         size = (8, 10.5)
-        trace_lw = 0.6
-        scatter_lw = 0.3
-        s_dot = 36
-        hline_lw = 1
-        wm_font = 18
+        plot_params["trace_lw"] = 0.6
+        plot_params["scatter_lw"] = 0.3
+        plot_params["s_dot"] = 36
+        plot_params["hline_lw"] = 1
+        plot_params["wm_font"] = 18
         left, right, top, bottom, hspace = 0.1, 0.9, 0.97, 0.05, 0.1
     elif plot_size == "small":
         size = (2.1, 2.75)
-        trace_lw = 0.1
-        scatter_lw = 0.1
-        hline_lw = 0.4
-        s_dot = 8
-        wm_font = 8
+        plot_params["trace_lw"] = 0.1
+        plot_params["scatter_lw"] = 0.1
+        plot_params["hline_lw"] = 0.4
+        plot_params["s_dot"] = 8
+        plot_params["wm_font"] = 8
         left, right, top, bottom, hspace = 0, 1, 0.99, 0.01, 0.03
 
     # Determine the layout of the plot based on whether MCCM is being plotted
@@ -451,7 +434,6 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
     else:
         ax_list = [["wave"], ["vel"], ["baz"], ["stas"]]
         hr_list = [1, 1, 1, 0.66]
-
 
     # Create the figure and axes using a mosaic layout
     fig, ax = plt.subplot_mosaic(
@@ -463,42 +445,38 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
 
     ############ Plot waveforms ##############
     ##########################################
-    plot_waveform(ax["wave"], T1, T2, st, array_params, plot_size, trace_lw)
+    plot_waveform(ax["wave"], T1, T2, st, array_params, plot_params)
 
     ############ Plot cc values ##############
     ##########################################
     # if MCCM (Mean Cross-Correlation Metric) plotting is enabled
     if array_params["PLOT_MCCM"]:
-        kwargs = (scatter_lw, s_dot, cm, hline_lw, cax)
         sc = plot_cc_values(
-            ax["cc"], T1, T2, t, mccm, array_params, plot_size, *kwargs
+            ax["cc"], T1, T2, t, mccm, array_params, plot_params
         )
 
     ########## Plot Trace Velocities #########
     ##########################################
-    kwargs = (scatter_lw, s_dot, cm, cax)
     sc = plot_trace_velocities(
-        ax["vel"], T1, T2, t, velocity, mccm, array_params, plot_size, *kwargs
+        ax["vel"], T1, T2, t, velocity, mccm, array_params, plot_params
     )
 
     ########### Plot Back-azimuths ###########
     ##########################################
-    kwargs = (scatter_lw, s_dot, cm, cax, hline_lw)
     sc = plot_back_azimuths(
-        ax["baz"], T1, T2, t, azimuth, mccm, array_params, plot_size, *kwargs
+        ax["baz"], T1, T2, t, azimuth, mccm, array_params, plot_params
     )
 
     ########## Plot Dropped Channels #########
     ##########################################
-    kwargs = (s_dot, scatter_lw, wm_font)
     sc_stas = plot_lts_dropped_channels(
-        ax["stas"], T1, T2, t, st, lts_dict, skip_chans, plot_size, *kwargs
+        ax["stas"], T1, T2, t, st, lts_dict, skip_chans, plot_params
     )
 
     ############## Add Colorbars #############
     ##########################################
     if plot_size == "big":
-        add_lts_colorbar(ax["stas"], fig, sc_stas, lts_dict, wm_font)
+        add_lts_colorbar(ax["stas"], fig, sc_stas, lts_dict, plot_params["wm_font"])
         ax_str = "cc" if array_params["PLOT_MCCM"] else "vel"
         add_mccm_colorbar(ax[ax_str], ax["baz"], fig, sc)
 
@@ -508,6 +486,5 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array
         ax[ax_str].fmt_xdata = dates.DateFormatter('%HH:%MM')
         ax[ax_str].xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
         ax[ax_str].set_xlabel('UTC Time [' + t1.strftime('%Y-%b-%d') + ']')
-
 
     save_figure(fig, config, array_params, t2, plot_size)
