@@ -1,4 +1,3 @@
----
 # SYSTEM PARAMETERS
 ARRAYS_CONFIG: ../config/arrays_config.yml
 DATA_SOURCE: ../config/data_src_config.yml
