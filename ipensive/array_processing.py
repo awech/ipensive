@@ -105,8 +105,7 @@ def write_html(config):
     Returns:
         None
     """
-    if "EXTRA_LINKS" not in config.keys():
-        config["EXTRA_LINKS"] = []
+    
     template_file = Path(__file__).parent.parent / "templates" / "index.template"
     with open(template_file, "r") as f:
         template = jinja2.Template(f.read())
@@ -240,7 +239,7 @@ def process_array(config, array_name, T0):
             utils.web_folders(t2, config, array_params)
             my_log.info("Making plot...")
             for plotsize in ["big", "small"]:
-                plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, config, array_params, skip_chans, plotsize)
+                plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, config, array_params, plotsize)
         except:
             import traceback
             my_log.error("Something went wrong making the plot:")
@@ -258,7 +257,7 @@ def process_array(config, array_name, T0):
             my_log.error('Something went wrong writing the CSV file:')
             my_log.error(traceback.format_exc())
 
-    if 'OUT_ASCII_DIR' in config.keys():
+    if 'OUT_ASCII_DIR' in config.keys() and config['OUT_ASCII_DIR']:
         try:
             my_log.info('Writing ASCII file...')
             t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
