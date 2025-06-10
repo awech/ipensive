@@ -37,6 +37,7 @@ Edit [data_source.yml](data_source.yml) with the obspy client type (e.g., *earth
 
 Edit [config.yml](config.yml). 
 1. **system  parameters**: defines input files
+    - ARRAYS_CONFIG: [arrays_config.yml](arrays_config.yml) arrays, pre-processing & plotting parameters
     - DATA_SOURCE: [data_source.yml](data_source.yml) - data source parameters
     - STATION_XML: [station.xml](station.xml) - station metadata
     - TARGETS_FILE: [volcano_list.txt](volcano_list.txt) - csv file of locations with backazimuths of interest (Target,Longitude,Latitude)
