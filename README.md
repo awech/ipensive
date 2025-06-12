@@ -27,6 +27,7 @@ Tested on Python 3.12
 
 3. **Install ipensive as a package:**
     ```bash
+    pip install -r requirements.txt
     pip install -e .
     ```
 
