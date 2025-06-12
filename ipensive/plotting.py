@@ -232,6 +232,8 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
     else:
         # Plot horizontal lines and labels for all targets
         for target in array_params['TARGETS']:
+            if type(target) is dict:
+                target = list(target.keys())[0]
             baz = array_params[target]
             ax.axhline(baz, ls='--', lw=plot_params["hline_lw"], color='gray', zorder=-1)
             if plot_params["plot_size"] == "big":
