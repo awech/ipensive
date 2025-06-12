@@ -25,9 +25,9 @@ Tested on Python 3.12
     conda activate ipensive
     ```
 
-3. **Install all dependencies:**
+3. **Install ipensive as a package:**
     ```bash
-    pip install -r requirements.txt
+    pip install -e .
     ```
 
     This will also install [lts_array](https://github.com/uafgeotools/lts_array) directly from GitHub.
