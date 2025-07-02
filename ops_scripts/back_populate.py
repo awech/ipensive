@@ -5,29 +5,72 @@ Modified on 10-Jun-2025
 """
 
 import logging
+import argparse
+from pathlib import Path
 import pandas as pd
 from obspy import UTCDateTime as utc
-from ipensive.array_processing import process_array, parse_args
+from ipensive.array_processing import process_array
 from ipensive import ipensive_utils as utils
 
 
-T1 = "2025-06-10 10:00"
-T2 = "2025-06-10 11:00"
-OVERWRITE = False
-PLOT = True
+def parse_args():
+    """
+    Parse command-line arguments for the script.
+    
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(
+        epilog="e.g.: python back_populate.py -c <filename.yml> -s 202201010000 -e 202201020000"
+    )
+    default_config = Path(__file__).parent.parent / "config" / "config.yml"
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        help="Name of the config file (yml)",
+        default=default_config,
+    )
+    parser.add_argument(
+        "-s",
+        "--starttime",
+        type=str,
+        help="Start time in UTC: YYYYMMDDHHMM",
+        required=True,
+    )
+    parser.add_argument(
+        "-e",
+        "--endtime",
+        type=str,
+        help="End time in UTC: YYYYMMDDHHMM",
+        required=True,
+    )
+    parser.add_argument(
+        "-o",
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing output files",
+    )
+    parser.add_argument(
+        "-np",
+        "--no-plot",
+        action="store_true",
+        help="Don't plot results.",
+    )
+    parser.add_argument(
+        "-a",
+        "--arrays",
+        type=str,
+        help="Comma-separated list of arrays to process (use _ for arrays with spaces).",
+    )
+    parser.add_argument(
+        "-l", "--log", help="Specify log output file"
+    )
 
-# specify ARRAYS if you want to just process specific arrays
-ARRAYS = []
-# ARRAYS = ["Wake Island North", "Wake Island South"]
+    return parser.parse_args()
 
-args = parse_args()
-config = utils.load_config(args.config)
-config["plot"] = PLOT
 
-utils.setup_logging(utc.utcnow(), config, arg_opt=args.log)
-my_log = logging.getLogger(__name__)
-
-def run_backpopulate():
+def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
     t1 = utc(T1) + config["PARAMS"]["DURATION"]
     for t in pd.date_range(T2, t1.strftime("%Y%m%d%H%M"), freq="-10min"):
         my_log.info(t)
@@ -47,4 +90,18 @@ def run_backpopulate():
 
 
 if __name__ == '__main__':
-    run_backpopulate()
+
+    args = parse_args()  # Parse command-line arguments
+    config_file = args.config
+    config = utils.load_config(config_file)
+    config["plot"] = not args.no_plot
+    print(args)
+    if args.arrays is not None:
+        ARRAYS = list(args.arrays.replace("_"," ").split(","))
+    else:
+        ARRAYS = []
+
+    utils.setup_logging(utc.utcnow(), config, arg_opt=args.log)
+    my_log = logging.getLogger(__name__)
+
+    run_backpopulate(config, args.starttime, args.endtime, args.overwrite, ARRAYS)
