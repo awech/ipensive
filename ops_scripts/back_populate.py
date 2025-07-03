@@ -1,6 +1,6 @@
 """
 Created on 30-Mar-2022
-Modified on 10-Jun-2025
+Modified on 3-Jul-2025
 @author: awech
 """
 
@@ -23,13 +23,13 @@ def parse_args():
     parser = argparse.ArgumentParser(
         epilog="e.g.: python back_populate.py -c <filename.yml> -s 202201010000 -e 202201020000"
     )
-    default_config = Path(__file__).parent.parent / "config" / "config.yml"
+
     parser.add_argument(
         "-c",
         "--config",
         type=str,
-        help="Name of the config file (yml)",
-        default=default_config,
+        help="Path to the config file (yml). If not specified, the default config will be used.",
+        default=utils.get_config_file(),
     )
     parser.add_argument(
         "-s",
@@ -55,7 +55,7 @@ def parse_args():
         "-np",
         "--no-plot",
         action="store_true",
-        help="Don't plot results.",
+        help="Don't plot results. (e.g., if you just want to write out the CSV files)",
     )
     parser.add_argument(
         "-a",
