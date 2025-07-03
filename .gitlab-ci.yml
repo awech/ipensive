@@ -23,8 +23,8 @@ build:image:
     - >-
       docker build
       --no-cache
-      --tag $CI_REGISTRY_IMAGE:${CI_COMMIT_SHA}
-      --tag $CI_REGISTRY_IMAGE:latest
+      --tag ${CI_REGISTRY_IMAGE}-${CI_COMMIT_BRANCH}:${CI_COMMIT_SHA}
+      --tag ${CI_REGISTRY_IMAGE}-${CI_COMMIT_BRANCH}:latest
       .
-    - docker push $CI_REGISTRY_IMAGE:${CI_COMMIT_SHA}
-    - docker push $CI_REGISTRY_IMAGE:latest
+    - docker push ${CI_REGISTRY_IMAGE}-${CI_COMMIT_BRANCH}:${CI_COMMIT_SHA}
+    - docker push ${CI_REGISTRY_IMAGE}-${CI_COMMIT_BRANCH}:latest
