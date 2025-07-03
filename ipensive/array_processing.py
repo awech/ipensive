@@ -31,13 +31,13 @@ def parse_args():
     parser = argparse.ArgumentParser(
         epilog="e.g.: python array_processing.py -c <filename.yml>"
     )
-    default_config = Path(__file__).parent.parent / "config" / "config.yml"
+
     parser.add_argument(
         "-c",
         "--config",
         type=str,
         help="Name of the config file (yml)",
-        default=default_config,
+        default=utils.get_config_file(),
     )
     parser.add_argument(
         "-t",
@@ -52,9 +52,10 @@ def parse_args():
         help="Array name if you want to process a single array. (Use _ instead of spaces, if necessary)",
     )
     parser.add_argument(
+        "-np",
         "--no-plot",
         action="store_true",
-        help="Disable plotting of results",
+        help="Don't plot results. (e.g., if you just want to write out the CSV files)",
     )
     parser.add_argument(
         "-l",

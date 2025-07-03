@@ -33,6 +33,29 @@ class StreamToLogger(object):
         pass
 
 
+def get_config_file():
+    """
+    Get the path to the configuration file.
+
+    Returns:
+        Path: Path to the configuration file.
+    """
+
+    default_config = Path(__file__).parent.parent / "config" / "ipensive_config.yml"
+
+    if "IPENSIVE_CONFIG_DIR" in os.environ:
+        config_dir = Path(os.environ["IPENSIVE_CONFIG_DIR"])
+        if config_dir.exists():
+            default_config = config_dir / "ipensive_config.yml"
+            my_log.info(f"Using config file from IPENSIVE_CONFIG_DIR: {default_config}")
+        else:
+            my_log.warning(f"IPENSIVE_CONFIG_DIR does not exist: {config_dir}")
+    else:
+        my_log.info(f"Using default config file: {default_config}")
+
+    return default_config
+
+
 def load_config(config_file):
     """
     Load configuration from a YAML file and initialize network and array settings.
@@ -45,6 +68,11 @@ def load_config(config_file):
     """
     with open(config_file, "r") as file:
         master_config = yaml.safe_load(file)
+
+    if "IPENSIVE_CONFIG_DIR" in os.environ:
+        master_config["ARRAYS_CONFIG"] = Path(os.environ["IPENSIVE_CONFIG_DIR"]) / master_config["ARRAYS_CONFIG"]
+        master_config["DATA_SOURCE"] = Path(os.environ["IPENSIVE_CONFIG_DIR"]) / master_config["DATA_SOURCE"]
+        master_config["DATA_OUT"] = Path(os.environ["IPENSIVE_CONFIG_DIR"]) / master_config["DATA_OUT"]
 
     with open(master_config["ARRAYS_CONFIG"], "r") as file:
         config = yaml.safe_load(file)
