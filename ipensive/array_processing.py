@@ -194,14 +194,6 @@ def process_array(config, array_name, T0):
         else:
             tr.remove_sensitivity(tr.inventory)
     st.detrend("demean")
-    for tr in st:
-        if tr.stats["sampling_rate"] == 100.0:
-            tr.decimate(2)
-        if tr.stats["sampling_rate"] != 50.0:
-            tr.resample(50.0)
-        if tr.stats["sampling_rate"] == 50.0:
-            if float(array_params["FREQMAX"]) < 50 / 4.0:
-                tr.decimate(2)
     st.taper(max_percentage=None, max_length=array_params["TAPER"])
     st.filter(
         "bandpass",
