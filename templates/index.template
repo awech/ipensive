@@ -1320,7 +1320,7 @@
 				var network = $("#network option:selected").text();
 				var subnet = $('#' + network + 'Subnets option:selected').text();
 				$("#subnetName").text(subnet);
-				$(document).prop('title', subnet + ' - Pensive');
+				$(document).prop('title', subnet + ' - iPensive');
 				updateMainFrame();
 			}
 
