@@ -57,14 +57,15 @@ Edit [config.yml](config.yml).
 
 
 ### Usage
+Make sure you are in the ```ops_scripts/``` directory
 1. **Automatically on a cron**
 
-    ```*/10 * * * * /path_to_file/array_processing.py >> /dev/null 2>&1```
+    ```*/10 * * * * /path_to_file/run_processing.py.py >> /dev/null 2>&1```
 2. **Manually**
 
-    ```python array_processing.py -c <config_file> -t <yyyymmddHHMM>```
+    ```python run_processing.py.py -c <config_file> -t <yyyymmddHHMM>```
 
-    see ```python array_processing.py -h``` for more options. In particular, the ```-a``` option is useful for processing a single array if more than one are defined in the config file.
+    see ```python run_processing.py -h``` for more options. In particular, the ```-a``` option is useful for processing a single array if more than one are defined in the config file.
 
 
 ### Webpage configuration
