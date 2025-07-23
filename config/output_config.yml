@@ -1,3 +1,0 @@
-OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
-OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound/ascii_output
-LOGS_DIR: ../logs

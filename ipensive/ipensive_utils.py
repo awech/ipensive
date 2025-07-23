@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 from pathlib import Path
+from time import sleep
 import yaml
 import numpy as np
 import pandas as pd
@@ -43,14 +44,18 @@ def get_config_file():
 
     default_config = Path(__file__).parent.parent / "config" / "ipensive_config.yml"
 
-    if "IPENSIVE_CONFIG_DIR" in os.environ:
-        config_dir = Path(os.environ["IPENSIVE_CONFIG_DIR"])
-        if config_dir.exists():
-            default_config = config_dir / "ipensive_config.yml"
-            my_log.info(f"Using config file from IPENSIVE_CONFIG_DIR: {default_config}")
+    if "IPENSIVE_CONFIG" in os.environ:
+        env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
+        if env_config_file.exists():
+            default_config = env_config_file
+            print(f"Using config file from IPENSIVE_CONFIG: {default_config}")
+            my_log.info(f"Using config file from IPENSIVE_CONFIG: {default_config}")
         else:
-            my_log.warning(f"IPENSIVE_CONFIG_DIR does not exist: {config_dir}")
+            print(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
+            my_log.warning(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
+            raise Exception(f"{env_config_file} does not exist")
     else:
+        print(f"Using default config file: {default_config}")
         my_log.info(f"Using default config file: {default_config}")
 
     return default_config
@@ -66,25 +71,31 @@ def load_config(config_file):
     Returns:
         dict: Configuration dictionary with additional metadata.
     """
+
+    ###### Load main iPensive config ######
     with open(config_file, "r") as file:
-        master_config = yaml.safe_load(file)
+        ipensive_config = yaml.safe_load(file)
 
-    if "IPENSIVE_CONFIG_DIR" in os.environ:
-        master_config["ARRAYS_CONFIG"] = Path(os.environ["IPENSIVE_CONFIG_DIR"]) / master_config["ARRAYS_CONFIG"]
-        master_config["DATA_SOURCE"] = Path(os.environ["IPENSIVE_CONFIG_DIR"]) / master_config["DATA_SOURCE"]
-        master_config["DATA_OUT"] = Path(os.environ["IPENSIVE_CONFIG_DIR"]) / master_config["DATA_OUT"]
 
-    with open(master_config["ARRAYS_CONFIG"], "r") as file:
+    ###### Load array configurations ######
+    if "ARRAYS_CONFIG" in os.environ:
+        array_file = os.environ["ARRAYS_CONFIG"]
+    else:
+        array_file =  Path(__file__).parent.parent / "config" / "arrays_config.yml"
+    print(f"Using arrays config file: {array_file}")
+    my_log.info(f"Using arrays config file: {array_file}")
+    with open(array_file, "r") as file:
         config = yaml.safe_load(file)
 
-    config["STATION_XML"] = master_config["STATION_XML"]
-    config["TARGETS_FILE"] = master_config["TARGETS_FILE"]
-    if "EXTRA_LINKS" not in master_config.keys():
-        config["EXTRA_LINKS"] = []
-    else:
-        config["EXTRA_LINKS"] = master_config["EXTRA_LINKS"]
 
-    # Extract network and array information
+    ###### Load target & metadata info ######
+    config["STATION_XML"] = ipensive_config["STATION_XML"]
+    config["TARGETS_FILE"] = ipensive_config["TARGETS_FILE"]
+    if "EXTRA_LINKS" not in config.keys():
+        config["EXTRA_LINKS"] = []
+
+
+    ##### Extract network and array information
     all_nets = list(config["NETWORKS"].keys())
     array_list = []
     for net in all_nets:
@@ -92,22 +103,17 @@ def load_config(config_file):
             config[array]["NETWORK_NAME"] = net
             config[array]["ARRAY_NAME"] = array
             array_list.append(array)
-
     config["network_list"] = all_nets
     config["array_list"] = array_list
 
-    # Load data output configuration
-    with open(master_config["DATA_OUT"], "r") as file:
-        data_out = yaml.safe_load(file)
-    config["OUT_WEB_DIR"] = data_out["OUT_WEB_DIR"]
-    config["OUT_ASCII_DIR"] = data_out["OUT_ASCII_DIR"]
-    config["LOGS_DIR"] = data_out["LOGS_DIR"]
 
-    # Load data source configuration
-    with open(master_config["DATA_SOURCE"], "r") as file:
-        data_source = yaml.safe_load(file)
+    ###### Load data output configuration ######
+    config["OUT_WEB_DIR"] = ipensive_config["OUT_WEB_DIR"]
+    config["OUT_ASCII_DIR"] = ipensive_config["OUT_ASCII_DIR"]
+    config["LOGS_DIR"] = ipensive_config["LOGS_DIR"]
 
-    client = get_obspy_client(data_source)
+    ###### Load data source configuration ######
+    client = get_obspy_client(ipensive_config)
     
     # Assign or update the client for each array
     for array in config["array_list"]:
@@ -347,6 +353,7 @@ def add_metadata(st, config, skip_chans=[]):
             )
             client = FDSNClient("IRIS")
             if check_FDSN(tr, client):
+                sleep(0.25)
                 inv = client.get_stations(
                     network=tr.stats.network,
                     station=tr.stats.station,

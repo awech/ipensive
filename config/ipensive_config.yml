@@ -1,12 +1,58 @@
-# SYSTEM PARAMETERS
-ARRAYS_CONFIG: ../config/arrays_config.yml
-DATA_SOURCE: ../config/data_src_config.yml
-DATA_OUT: ../config/output_config.yml
+########## Data Source ##########
+CLIENT_TYPE: earthworm
+HOSTNAME: pubavo1.wr.usgs.gov
+PORT: 16022
+#################################
+
+############ Output #############
+OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
+OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
+LOGS_DIR: ../test-logs
+#################################
+
+###### Targets & Metadata #######
 STATION_XML: ../data/stations.xml
 TARGETS_FILE: ../data/volcano_list.txt
-EXTRA_LINKS:
-  - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
-  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
-  - AK Travel Times: ak_traveltimes.html
-  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
-  - CNMI Travel Times: cnmi_traveltimes.html
+#################################
+
+# Optional array config file location.
+# This can be set here, or as an environment variable.
+# If neither is set, it defaults to ../config/arrays_config.yml
+# 
+# ARRAYS_CONFIG: <path_to_arrays_config.yml>
+
+
+# Example data source configurations:
+############ Winston ############
+# CLIENT_TYPE: earthworm
+# HOSTNAME: ip_address
+# PORT: number
+#################################
+
+############## CWB ##############
+# CLIENT_TYPE: earthworm
+# HOSTNAME: ip_address
+# PORT: number
+#################################
+
+############# FDSN ##############
+# CLIENT_TYPE: fdsn
+# HOSTNAME: url (or obspy mapped name: e.g. IRIS)
+#################################
+
+########## LOCAL FDSN ###########
+# CLIENT_TYPE: local_fdsn
+# LOCAL_FDSN: local_url (e.g. http://localhost:8080/fdsnws/dataselect)
+#################################
+
+############## SDS ##############
+# CLIENT_TYPE: sds
+# DIRECTORY: <path_to_data_directory>
+# FMT: {network}/{year}/{doy:03d}/{station}.{network}.{year}.{doy:03d}
+#################################
+
+############ seedlink ############
+# CLIENT_TYPE: seedlink
+# HOSTNAME: seedlink_hostname
+# PORT: seedlink_port
+#################################
