@@ -152,6 +152,7 @@ def get_obspy_client(config):
             client = SLClient(config["HOSTNAME"], config["PORT"])
         else:
             client = SLClient(config["HOSTNAME"])
+        client.name = config["HOSTNAME"]
         
     return client
 

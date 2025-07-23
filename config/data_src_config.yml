@@ -25,3 +25,9 @@ PORT: 16022
 # DIRECTORY: <path_to_data_directory>
 # FMT: "{network}/{year}/{doy:03d}/{station}.{network}.{year}.{doy:03d}"
 #################################
+
+############ seedlink ############
+# CLIENT_TYPE: seedlink
+# HOSTNAME: seedlink_hostname
+# PORT: seedlink_port
+#################################
