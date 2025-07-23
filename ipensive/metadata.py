@@ -26,7 +26,7 @@ def update_stationXML(config):
 
     inventory = Inventory()
     for nslc in NSLC:
-
+        sleep(0.25)
         my_log.info(f"Updating metadata for {nslc}")
         net, sta, loc, chan = nslc.split(".")
         client = client_iris
