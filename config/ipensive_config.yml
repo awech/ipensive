@@ -2,6 +2,7 @@
 CLIENT_TYPE: earthworm
 HOSTNAME: pubavo1.wr.usgs.gov
 PORT: 16022
+TIMEOUT: 10
 #################################
 
 ############ Output #############

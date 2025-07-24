@@ -135,29 +135,33 @@ def get_obspy_client(config):
     Returns:
         ObsPy client object.
     """
+
+    if "TIMEOUT"  not in config.keys():
+        config["TIMEOUT"] = 30
+
     if config["CLIENT_TYPE"].lower() == "fdsn":
-        client = FDSNClient(config["HOSTNAME"])
+        client = FDSNClient(config["HOSTNAME"], timeout=config["TIMEOUT"])
         client.name = config["HOSTNAME"]
 
     elif config["CLIENT_TYPE"].lower() == "local_fdsn":
-        client = FDSNClient("IRIS", service_mappings={"dataselect": config["LOCAL_FDSN"]})
+        client = FDSNClient("IRIS", service_mappings={"dataselect": config["LOCAL_FDSN"]}, timeout=config["TIMEOUT"])
         client.name = config["LOCAL_FDSN"]
 
     elif config["CLIENT_TYPE"].lower() == "sds":
-        client = SDSClient(config["DIRECTORY"])
+        client = SDSClient(config["DIRECTORY"], timeout=config["TIMEOUT"])
         if "FMT" in list(config.keys()):
             client.FMTSTR = config["FMT"]
         client.name = config["DIRECTORY"]
 
     elif config["CLIENT_TYPE"].lower() == "earthworm":
-        client = EWClient(config["HOSTNAME"], config["PORT"])
+        client = EWClient(config["HOSTNAME"], config["PORT"], timeout=config["TIMEOUT"])
         client.name = config["HOSTNAME"]
 
     elif config["CLIENT_TYPE"].lower() == "seedlink":
         if "PORT" in list(config.keys()):
-            client = SLClient(config["HOSTNAME"], config["PORT"])
+            client = SLClient(config["HOSTNAME"], config["PORT"], timeout=config["TIMEOUT"])
         else:
-            client = SLClient(config["HOSTNAME"])
+            client = SLClient(config["HOSTNAME"], timeout=config["TIMEOUT"])
         client.name = config["HOSTNAME"]
         
     return client
