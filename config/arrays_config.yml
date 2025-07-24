@@ -237,3 +237,11 @@ Wake Island South:
 #   TARGETS:
 #     - Cleveland
 #     - Some Place: 240
+
+## optional urls that get linked from the iPensive webpage
+EXTRA_LINKS:
+  - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
+  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
+  - AK Travel Times: https://avosouth.wr.usgs.gov/infrasound/ak_traveltimes.html
+  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
+  - CNMI Travel Times: https://avosouth.wr.usgs.gov/infrasound/cnmi_traveltimes.html

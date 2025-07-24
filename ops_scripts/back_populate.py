@@ -49,7 +49,7 @@ def parse_args():
         "-o",
         "--overwrite",
         action="store_true",
-        help="Overwrite existing output files",
+        help="Overwrite existing output files. Default is False",
     )
     parser.add_argument(
         "-np",
