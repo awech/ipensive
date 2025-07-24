@@ -1,14 +1,14 @@
 ########## Data Source ##########
 CLIENT_TYPE: earthworm
-HOSTNAME: pubavo1.wr.usgs.gov
-PORT: 16022
+HOSTNAME: <ip_address>
+PORT: <int>
 TIMEOUT: 10
 #################################
 
 ############ Output #############
-OUT_WEB_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
-OUT_ASCII_DIR: /www/avosouth.wr.usgs.gov/htdocs/infrasound
-LOGS_DIR: ../test-logs
+OUT_WEB_DIR: <path_to_web_output>
+OUT_ASCII_DIR: <path_to_ascii_output>
+LOGS_DIR: <path_to_logs>
 #################################
 
 ###### Targets & Metadata #######
