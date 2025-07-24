@@ -2,7 +2,7 @@
 CLIENT_TYPE: earthworm
 HOSTNAME: <ip_address>
 PORT: <int>
-TIMEOUT: 10
+TIMEOUT: 10       # optional. Defaults to 30
 #################################
 
 ############ Output #############
