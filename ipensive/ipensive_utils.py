@@ -136,7 +136,7 @@ def get_obspy_client(config):
         ObsPy client object.
     """
 
-    if "TIMEOUT"  not in config.keys():
+    if "TIMEOUT" not in config.keys():
         config["TIMEOUT"] = 30
 
     if config["CLIENT_TYPE"].lower() == "fdsn":
