@@ -343,17 +343,18 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_para
     return sc_stas
 
 
-def add_lts_colorbar(ax, fig, sc_stas, lts_dict, wm_font):
+def add_lts_colorbar(ax, fig, sc_stas, lts_dict, plot_params):
     if sc_stas is not None:
         ctop = ax.get_position().y1
         cbot = ax.get_position().y0
         cbaxes_stas = fig.add_axes([0.91, cbot, 0.02, ctop - cbot])
         hc_stas = plt.colorbar(sc_stas, cax=cbaxes_stas)
-        hc_stas.set_label(r"# Dropped Pairs")
+        x = plot_params["lts_alpha"]
+        hc_stas.set_label("# Dropped Pairs\n"+rf"$\alpha={x}$")
         hc_stas.set_ticks(np.arange(1, lts_dict['size']))
     elif lts_dict:
         txt_str = "No dropped channels"
-        ax.text(0.5, 0.5, txt_str, transform=ax.transAxes, color='grey', alpha=0.7, fontsize=wm_font, va="center", ha="center")
+        ax.text(0.5, 0.5, txt_str, transform=ax.transAxes, color='grey', alpha=0.7, fontsize=plot_params["wm_font"], va="center", ha="center")
 
 
 def add_mccm_colorbar(ax1, ax2, fig, sc):
@@ -410,6 +411,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, c
     # Define colormap and color axis limits for MCCM values
     plot_params["cm"] = "RdYlBu_r"
     plot_params["cax"] = 0.2, 1  # Colorbar range for MCCM values
+    plot_params["lts_alpha"] = array_params["LTS_ALPHA"]  # Alpha value for LTS processing
 
     # Set default plot size and styling parameters
     if plot_size == "big":
@@ -478,7 +480,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, c
     ############## Add Colorbars #############
     ##########################################
     if plot_size == "big":
-        add_lts_colorbar(ax["stas"], fig, sc_stas, lts_dict, plot_params["wm_font"])
+        add_lts_colorbar(ax["stas"], fig, sc_stas, lts_dict, plot_params)
         ax_str = "cc" if array_params["PLOT_MCCM"] else "vel"
         add_mccm_colorbar(ax[ax_str], ax["baz"], fig, sc)
 
