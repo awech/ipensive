@@ -80,6 +80,8 @@ def load_config(config_file):
     ###### Load array configurations ######
     if "ARRAYS_CONFIG" in os.environ:
         array_file = os.environ["ARRAYS_CONFIG"]
+    elif "ARRAYS_CONFIG" in ipensive_config.keys():
+        array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
         array_file =  Path(__file__).parent.parent / "config" / "arrays_config.yml"
     print(f"Using arrays config file: {array_file}")
