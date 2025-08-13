@@ -15,7 +15,7 @@ Tested on Python 3.12
 
 1. **Clone this repository:**
     ```bash
-    git clone https://github.com/awech/ipensive.git
+    git clone https://code.usgs.gov/vsc/seis/tools/ipensive.git
     cd ipensive
     ```
 
