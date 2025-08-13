@@ -79,7 +79,7 @@ Operational scripts are located in `../ops_scripts` directory
     see ```python run_processing.py -h``` for more options. In particular, the ```-a``` option is useful for processing a single array if more than one are defined in the config file.
 
 3. **Back populate**
-    - `python back_populate.py -s 202507010000 -e 202507020000`
+    - ```python back_populate.py -s 202507010000 -e 202507020000```
 
     see ```python back_populate.py -h``` for more options.
 
