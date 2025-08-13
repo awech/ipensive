@@ -11,7 +11,7 @@ dynamic = ["version"]
 authors = [{name = "Aaron Wech", email = "awech@usgs.gov"}]
 description = "Infrasound array processing for volcano monitoring."
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "CC0-1.0" }
 requires-python = ">=3.10"
 classifiers = [
     # How mature is this project? Common values are
@@ -22,7 +22,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
+    "License :: CC0 1.0 Universal (CC0 1.0)",
 ]
 keywords = ["infrasound", "volcano", "array processing", "monitoring"]
 
