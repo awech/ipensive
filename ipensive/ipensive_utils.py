@@ -83,7 +83,7 @@ def load_config(config_file):
     elif "ARRAYS_CONFIG" in ipensive_config.keys():
         array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
-        array_file =  Path(__file__).parent.parent / "config" / "arrays_config.yml"
+        array_file = Path(__file__).parent.parent / "config" / "arrays_config.yml"
     print(f"Using arrays config file: {array_file}")
     my_log.info(f"Using arrays config file: {array_file}")
     with open(array_file, "r") as file:
@@ -275,7 +275,7 @@ def check_FDSN(tr, client):
     """
     value = True
     try:
-        inventory = client.get_stations(
+        client.get_stations(
             network=tr.stats.network,
             station=tr.stats.station,
             location=tr.stats.location,
@@ -462,7 +462,9 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
             if tr[0].stats.endtime - tr[0].stats.starttime < T2 - T1:
                 tr.detrend('demean')
                 tr.taper(max_percentage=0.01)
-        except:
+        except Exception as e:
+            my_log.error(f"Error occurred while grabbing data: {e}")
+            my_log.warning(f"No data available for {nslc} from {client.name}. Creating empty Stream object.")
             tr = Stream()  # Create an empty stream if data retrieval fails
 
         # If no data is available, create a blank trace

@@ -1,6 +1,5 @@
 import time
 import logging
-from obspy import UTCDateTime as utc
 from ipensive import ipensive_utils as utils
 from ipensive import array_processing
 

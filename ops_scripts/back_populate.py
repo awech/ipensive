@@ -6,7 +6,6 @@ Modified on 3-Jul-2025
 
 import logging
 import argparse
-from pathlib import Path
 import pandas as pd
 from obspy import UTCDateTime as utc
 from ipensive.array_processing import process_array
