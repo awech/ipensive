@@ -233,7 +233,7 @@ def process_array(config, array_name, T0):
             my_log.info("Making plot...")
             for plotsize in ["big", "small"]:
                 plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, config, array_params, plotsize)
-        except:
+        except Exception:
             import traceback
             my_log.error("Something went wrong making the plot:")
             my_log.error(traceback.format_exc())
@@ -245,7 +245,7 @@ def process_array(config, array_name, T0):
             t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
             sta_name = st[0].stats.station
             utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, sta_name, config)
-        except:
+        except Exception:
             import traceback
             my_log.error('Something went wrong writing the CSV file:')
             my_log.error(traceback.format_exc())
@@ -255,7 +255,7 @@ def process_array(config, array_name, T0):
             my_log.info('Writing ASCII file...')
             t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
             utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, array_name, config)
-        except:
+        except Exception:
             import traceback
             my_log.error('Something went wrong writing the ASCII file:')
             my_log.error(traceback.format_exc())
