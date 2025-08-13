@@ -8,6 +8,14 @@ from obspy import UTCDateTime as utc
 my_log = logging.getLogger(__name__)
 
 def get_stations(config):
+    """Get a list of station NSLC codes from the configuration.
+
+    Args:
+        config (dict): Configuration dictionary.
+
+    Returns:
+        list: List of station NSLC codes.
+    """
 
     NSLC = []
     for net in list(config["NETWORKS"].keys()):
@@ -18,6 +26,11 @@ def get_stations(config):
 
 
 def update_stationXML(config):
+    """Update the station metadata XML file.
+
+    Args:
+        config (dict): Configuration dictionary.
+    """
 
     client_iris = Client("IRIS")
     NSLC = get_stations(config)

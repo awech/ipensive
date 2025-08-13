@@ -70,6 +70,17 @@ def parse_args():
 
 
 def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
+    """
+    Run the back population process for the specified time window and arrays.
+
+    Args:
+        config (dict): Configuration dictionary.
+        T1 (str): Start time in UTC.
+        T2 (str): End time in UTC.
+        OVERWRITE (bool): Flag to overwrite existing files.
+        ARRAYS (list): List of arrays to process.
+    """
+
     t1 = utc(T1) + config["PARAMS"]["DURATION"]
     for t in pd.date_range(T2, t1.strftime("%Y%m%d%H%M"), freq="-10min"):
         my_log.info(t)
@@ -89,6 +100,9 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
 
 
 if __name__ == '__main__':
+    """
+    Main entry point for the back population script.
+    """
 
     args = parse_args()  # Parse command-line arguments
     config_file = args.config

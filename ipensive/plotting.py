@@ -64,6 +64,8 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_params):
 
     Args:
         ax (matplotlib.axes.Axes): The axes to plot on.
+        T1 (matplotlib datenum): The start value for the x-axis limit.
+        T2 (matplotlib datenum): The end value for the x-axis limit.
         st (Stream): ObsPy Stream object containing traces.
         array_params (dict): Parameters for the array being processed.
         plot_params (dict): Parameters for the plot, including size and line widths.
@@ -102,9 +104,9 @@ def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_params):
 
     Parameters:
         ax (matplotlib.axes.Axes): The axis on which to plot.
-        T1 (float or datetime): The start value for the x-axis limit.
-        T2 (float or datetime): The end value for the x-axis limit.
-        t (array-like): The x-axis values (typically time).
+        T1 (matplotlib datenum): The start time for the x-axis limit.
+        T2 (matplotlib datenum): The end time for the x-axis limit.
+        t (array-like): Time (datenum) values.
         mccm (array-like): The MCCM values to plot on the y-axis and for color mapping.
         array_params (dict): Dictionary containing plot parameters, must include "MCTHRESH" for threshold line.
         plot_params (dict): Dictionary containing plot parameters, including size and line widths.
@@ -139,9 +141,9 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_para
 
     Parameters:
         ax (matplotlib.axes.Axes): The axis on which to plot.
-        T1 (float or datetime): The start value for the x-axis limit.
-        T2 (float or datetime): The end value for the x-axis limit.
-        t (array-like): The x-axis values (typically time).
+        T1 (matplotlib datenum): The start time for the x-axis limit.
+        T2 (matplotlib datenum): The end time for the x-axis limit.
+        t (array-like): Time (datenum) values.
         velocity (array-like): The trace velocities to plot.
         mccm (array-like): The MCCM values for color mapping.
         array_params (dict): Dictionary containing plot parameters.
@@ -188,9 +190,9 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
 
     Args:
         ax (dict): Dictionary of matplotlib axes, must contain "baz".
-        T1 (float): Start value for the x-axis limit (date2num).
-        T2 (float): End value for the x-axis limit (date2num).
-        t (array-like): The x-axis values (typically time).
+        T1 (matplotlib datenum): Start time for the x-axis limit.
+        T2 (matplotlib datenum): End time for the x-axis limit.
+        t (array-like): Time (datenum) values.
         azimuth (array-like): Back-azimuth values to plot.
         mccm (array-like): MCCM values for color mapping.
         array_params (dict): Dictionary containing plot parameters, must include 'AZ_MIN', 'AZ_MAX', 'TARGETS'.
@@ -262,8 +264,8 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_para
 
     Args:
         ax (dict): Dictionary of matplotlib axes, must contain "stas".
-        T1 (float): Start value for the x-axis limit (date2num).
-        T2 (float): End value for the x-axis limit (date2num).
+        T1 (matplotlib datenum): The start time for the x-axis limit.
+        T2 (matplotlib datenum): The end time for the x-axis limit.
         t (numpy.ndarray): Array of timestamps for the results.
         st (Stream): ObsPy Stream object containing traces.
         lts_dict (dict): Dictionary of LTS (Least Trimmed Squares) results.
@@ -344,6 +346,16 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_para
 
 
 def add_lts_colorbar(ax, fig, sc_stas, lts_dict, plot_params):
+    """Add a colorbar for the LTS (Least Trimmed Squares) results.
+
+    Args:
+        ax (matplotlib.axes.Axes): The axes to add the colorbar to.
+        fig (matplotlib.figure.Figure): The figure containing the axes.
+        sc_stas (matplotlib.collections.PathCollection): The scatter plot object for dropped channels.
+        lts_dict (dict): Dictionary of LTS results.
+        plot_params (dict): Dictionary containing plot parameters.
+    """
+
     if sc_stas is not None:
         ctop = ax.get_position().y1
         cbot = ax.get_position().y0
@@ -358,6 +370,15 @@ def add_lts_colorbar(ax, fig, sc_stas, lts_dict, plot_params):
 
 
 def add_mccm_colorbar(ax1, ax2, fig, sc):
+    """
+    Add a colorbar for the MCCM (Multi-Channel Cross-Matching) results.
+
+    Args:
+        ax1 (matplotlib.axes.Axes): The axes for the first subplot.
+        ax2 (matplotlib.axes.Axes): The axes for the second subplot.
+        fig (matplotlib.figure.Figure): The figure containing the axes.
+        sc (matplotlib.collections.PathCollection): The scatter plot object for MCCM results.
+    """
     
     ctop = ax1.get_position().y1
     cbot = ax2.get_position().y0
@@ -367,7 +388,17 @@ def add_mccm_colorbar(ax1, ax2, fig, sc):
 
 
 def save_figure(fig, config, array_params, t2, plot_size):
+    """
+    Save the figure to a file.
 
+    Args:
+        fig (matplotlib.figure.Figure): The figure to save.
+        config (dict): Configuration dictionary.
+        array_params (dict): Array parameters.
+        t2 (UTCDateTime): End time of the data window.
+        plot_size (str): Size of the plot ("big" or "small").
+    """
+    
     # Define output directories for plots
     out_dir = Path(config["OUT_WEB_DIR"]) / array_params["NETWORK_NAME"] / array_params["ARRAY_NAME"] / str(t2.year)
     out_dir = out_dir / '{:03d}'.format(t2.julday)

@@ -39,7 +39,7 @@ def get_config_file():
     Get the path to the configuration file.
 
     Returns:
-        Path: Path to the configuration file.
+        pathlib.Path: Path to the configuration file.
     """
 
     default_config = Path(__file__).parent.parent / "config" / "ipensive_config.yml"
@@ -170,7 +170,18 @@ def get_obspy_client(config):
 
 
 def get_file_path(t, array_name, config):
+    """
+    Get the file path for .png output of a specific array and time.
 
+    Args:
+        t (obspy.UTCDateTime): The time for which to get the file path.
+        array_name (str): The name of the array.
+        config (dict): The configuration dictionary.
+
+    Returns:
+        pathlib.Path: The file path for the .png file of the specified array and time.
+    """
+    
     out_web_dir = Path(config["OUT_WEB_DIR"])
     array_dict = config.get(array_name, {})
     network_dir = out_web_dir / array_dict["NETWORK_NAME"]
@@ -323,7 +334,7 @@ def add_metadata(st, config, skip_chans=[]):
     Args:
         st (Stream): ObsPy Stream object.
         config (dict): Configuration dictionary.
-        skip_chans (list): List of channels to skip.
+        skip_chans (list): List of channels (NSLC) to skip.
 
     Returns:
         Stream: Stream with updated metadata.
@@ -425,8 +436,8 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
     Args:
         client (ObsPy Client): Client object to fetch data.
         NSLC (list or dict): List of channel identifiers (e.g., 'NET.STA.LOC.CHA').
-        T1 (UTCDateTime): Start time for data retrieval.
-        T2 (UTCDateTime): End time for data retrieval.
+        T1 (obspy.UTCDateTime): Start time for data retrieval.
+        T2 (obspy.UTCDateTime): End time for data retrieval.
         fill_value (int or str): Value to fill gaps in data (default is 0).
 
     Returns:
@@ -490,7 +501,7 @@ def web_folders(t2, config, params):
     Create directory structure for web output.
 
     Args:
-        t2 (UTCDateTime): Current time.
+        t2 (obspy.UTCDateTime): Current time.
         config (dict): Configuration dictionary.
         params (dict): Array parameters.
 
@@ -516,7 +527,7 @@ def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
     Write results to an ASCII file.
 
     Args:
-        t2 (UTCDateTime): Current time.
+        t2 (obspy.UTCDateTime): Current time.
         t (list): List of timestamps.
         pressure (list): Pressure values.
         azimuth (list): Azimuth values.
@@ -578,7 +589,7 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
     Write results to a CSV file for valve output.
 
     Args:
-        t2 (UTCDateTime): Current time.
+        t2 (obspy.UTCDateTime): Current time.
         t (list): List of timestamps.
         pressure (list): Pressure values.
         azimuth (list): Azimuth values.

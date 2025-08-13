@@ -76,7 +76,7 @@ def get_starttime(config, args):
         args (argparse.Namespace): Parsed command-line arguments.
 
     Returns:
-        tuple: Start time (UTCDateTime) and delay (int).
+        tuple: Start time (obspy.UTCDateTime) and delay (int).
     """
     date_fmt = "%Y-%m-%d %H:%M"
 
@@ -127,7 +127,7 @@ def process_array(config, array_name, T0):
     Args:
         config (dict): Configuration dictionary.
         array_name (str): Name of the array to process.
-        T0 (UTCDateTime): End time of the processing window.
+        T0 (obspy.UTCDateTime): End time of the processing window.
 
     Returns:
         None

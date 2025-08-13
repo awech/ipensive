@@ -4,6 +4,10 @@ import ipensive.ipensive_utils as utils
 from ipensive.metadata import update_stationXML
 
 if __name__ == "__main__":
+    """
+    Main entry point for the metadata update script.
+    """
+
     parser = argparse.ArgumentParser(
         epilog="e.g.: python update_metadata.py -c <filename.yml>"
     )
