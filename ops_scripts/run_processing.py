@@ -4,11 +4,11 @@ from ipensive import ipensive_utils as utils
 from ipensive import array_processing
 
 
-def run_array_processing():
+if __name__ == "__main__":
     """
-    Main entry point for the script. Handles argument parsing, configuration loading,
-    and processing of arrays.
+    Main entry point for the script.
     """
+    
     timer_0 = time.time()
 
     args = array_processing.parse_args()  # Parse command-line arguments
@@ -44,6 +44,3 @@ def run_array_processing():
     array_processing.write_html(config)
 
     my_log.info(f"{time.time()-timer_0:.1f} seconds to process all")
-
-if __name__ == "__main__":
-    run_array_processing()
