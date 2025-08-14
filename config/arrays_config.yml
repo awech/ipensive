@@ -103,6 +103,6 @@ Wake Island South:
 
 ## optional urls that get linked from the iPensive webpage
 EXTRA_LINKS:
-  - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
+  - Data Output: ../tests/ascii_output/
   - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
   - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
