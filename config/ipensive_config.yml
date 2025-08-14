@@ -28,22 +28,26 @@ TARGETS_FILE: ../data/volcano_list.txt
 # CLIENT_TYPE: earthworm
 # HOSTNAME: ip_address
 # PORT: number
+# TIMEOUT: 10       # optional. Defaults to 30
 #################################
 
 ############## CWB ##############
 # CLIENT_TYPE: earthworm
 # HOSTNAME: ip_address
 # PORT: number
+# TIMEOUT: 10       # optional. Defaults to 30
 #################################
 
 ############# FDSN ##############
 # CLIENT_TYPE: fdsn
 # HOSTNAME: url (or obspy mapped name: e.g. IRIS)
+# TIMEOUT: 10       # optional. Defaults to 30
 #################################
 
 ########## LOCAL FDSN ###########
 # CLIENT_TYPE: local_fdsn
 # LOCAL_FDSN: local_url (e.g. http://localhost:8080/fdsnws/dataselect)
+# TIMEOUT: 10       # optional. Defaults to 30
 #################################
 
 ############## SDS ##############
@@ -56,4 +60,5 @@ TARGETS_FILE: ../data/volcano_list.txt
 # CLIENT_TYPE: seedlink
 # HOSTNAME: seedlink_hostname
 # PORT: seedlink_port
+# TIMEOUT: 10       # optional. Defaults to 30.
 #################################
