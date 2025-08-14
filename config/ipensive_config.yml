@@ -1,14 +1,14 @@
 ########## Data Source ##########
-CLIENT_TYPE: earthworm
-HOSTNAME: <ip_address>
-PORT: <int>
+CLIENT_TYPE: <obspy client type (earthworm, fdsn, local_fdsn, sds, seedlink)>
+HOSTNAME: <ip_address (if relevant)>
+PORT: <int (if relevant)>
 TIMEOUT: 10       # optional. Defaults to 30
 #################################
 
 ############ Output #############
-OUT_WEB_DIR: <path_to_web_output>
-OUT_ASCII_DIR: <path_to_ascii_output>
-LOGS_DIR: <path_to_logs>
+OUT_WEB_DIR: ../tests/html
+OUT_ASCII_DIR: ../tests/ascii_output
+LOGS_DIR: ../tests/logs
 #################################
 
 ###### Targets & Metadata #######
