@@ -142,7 +142,8 @@ def process_array(config, array_name, T0):
     my_log.info("--- " + array_params["ARRAY_NAME"] + " ---")
     my_log.info(f"{t1.strftime('%Y-%b-%d %H:%M')} - {t2.strftime('%H:%M')}")
     if os.getenv("FROMCRON") == "yep":
-        time.sleep(array_params["EXTRA_PAUSE"])  # Pause if running from a cron job
+        if "EXTRA_PAUSE" in array_params:
+            time.sleep(array_params["EXTRA_PAUSE"])  # Pause if running from a cron job
 
     #### Download data ####
     if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
