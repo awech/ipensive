@@ -42,23 +42,23 @@ def get_config_file():
         pathlib.Path: Path to the configuration file.
     """
 
-    default_config = Path(__file__).parent.parent / "config" / "ipensive_config.yml"
+    default_config_file = Path(__file__).parent.parent / "config" / "ipensive_config.yml"
 
     if "IPENSIVE_CONFIG" in os.environ:
         env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
         if env_config_file.exists():
-            default_config = env_config_file
-            print(f"Using config file from IPENSIVE_CONFIG: {default_config}")
-            my_log.info(f"Using config file from IPENSIVE_CONFIG: {default_config}")
+            default_config_file = env_config_file
+            print(f"Using config file from IPENSIVE_CONFIG: {default_config_file}")
+            my_log.info(f"Using config file from IPENSIVE_CONFIG: {default_config_file}")
         else:
             print(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
             my_log.warning(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
             raise Exception(f"{env_config_file} does not exist")
     else:
-        print(f"Using default config file: {default_config}")
-        my_log.info(f"Using default config file: {default_config}")
+        print(f"Using default config file: {default_config_file}")
+        my_log.info(f"Using default config file: {default_config_file}")
 
-    return default_config
+    return default_config_file
 
 
 def load_config(config_file):
@@ -87,44 +87,44 @@ def load_config(config_file):
     print(f"Using arrays config file: {array_file}")
     my_log.info(f"Using arrays config file: {array_file}")
     with open(array_file, "r") as file:
-        config = yaml.safe_load(file)
+        arrays_config = yaml.safe_load(file)
 
 
     ###### Load target & metadata info ######
-    config["STATION_XML"] = ipensive_config["STATION_XML"]
-    config["TARGETS_FILE"] = ipensive_config["TARGETS_FILE"]
-    if "EXTRA_LINKS" not in config.keys():
-        config["EXTRA_LINKS"] = []
+    arrays_config["STATION_XML"] = Path(ipensive_config["STATION_XML"])
+    arrays_config["TARGETS_FILE"] = Path(ipensive_config["TARGETS_FILE"])
+    if "EXTRA_LINKS" not in arrays_config.keys():
+        arrays_config["EXTRA_LINKS"] = []
 
 
     ##### Extract network and array information
-    all_nets = list(config["NETWORKS"].keys())
+    all_nets = list(arrays_config["NETWORKS"].keys())
     array_list = []
     for net in all_nets:
-        for array in config["NETWORKS"][net]:
-            config[array]["NETWORK_NAME"] = net
-            config[array]["ARRAY_NAME"] = array
+        for array in arrays_config["NETWORKS"][net]:
+            arrays_config[array]["NETWORK_NAME"] = net
+            arrays_config[array]["ARRAY_NAME"] = array
             array_list.append(array)
-    config["network_list"] = all_nets
-    config["array_list"] = array_list
+    arrays_config["network_list"] = all_nets
+    arrays_config["array_list"] = array_list
 
 
     ###### Load data output configuration ######
-    config["OUT_WEB_DIR"] = ipensive_config["OUT_WEB_DIR"]
-    config["OUT_ASCII_DIR"] = ipensive_config["OUT_ASCII_DIR"]
-    config["LOGS_DIR"] = ipensive_config["LOGS_DIR"]
+    arrays_config["OUT_WEB_DIR"] = Path(ipensive_config["OUT_WEB_DIR"])
+    arrays_config["OUT_ASCII_DIR"] = Path(ipensive_config["OUT_ASCII_DIR"])
+    arrays_config["LOGS_DIR"] = Path(ipensive_config["LOGS_DIR"])
 
     ###### Load data source configuration ######
     client = get_obspy_client(ipensive_config)
     
     # Assign or update the client for each array
-    for array in config["array_list"]:
-        if "CLIENT_TYPE" not in config[array].keys():
-            config[array]["CLIENT"] = client
+    for array in arrays_config["array_list"]:
+        if "CLIENT_TYPE" not in arrays_config[array]:
+            arrays_config[array]["CLIENT"] = client
         else:
-            config[array]["CLIENT"] = get_obspy_client(config[array])
+            arrays_config[array]["CLIENT"] = get_obspy_client(arrays_config[array])
 
-    return config
+    return arrays_config
 
 
 def get_obspy_client(config):
@@ -138,7 +138,7 @@ def get_obspy_client(config):
         ObsPy client object.
     """
 
-    if "TIMEOUT" not in config.keys():
+    if "TIMEOUT" not in config:
         config["TIMEOUT"] = 30
 
     if config["CLIENT_TYPE"].lower() == "fdsn":
@@ -165,7 +165,11 @@ def get_obspy_client(config):
         else:
             client = SLClient(config["HOSTNAME"], timeout=config["TIMEOUT"])
         client.name = config["HOSTNAME"]
-        
+
+    else:
+        client = None
+        my_log.error(f"CLIENT_TYPE {config['CLIENT_TYPE']} not recognized. Exiting.")
+
     return client
 
 
@@ -174,17 +178,16 @@ def get_file_path(t, array_name, config):
     Get the file path for .png output of a specific array and time.
 
     Args:
-        t (obspy.UTCDateTime): The time for which to get the file path.
+        t (pandas Timestamp): The time for which to get the file path.
         array_name (str): The name of the array.
         config (dict): The configuration dictionary.
 
     Returns:
         pathlib.Path: The file path for the .png file of the specified array and time.
     """
-    
-    out_web_dir = Path(config["OUT_WEB_DIR"])
+
     array_dict = config.get(array_name, {})
-    network_dir = out_web_dir / array_dict["NETWORK_NAME"]
+    network_dir = config["OUT_WEB_DIR"] / array_dict["NETWORK_NAME"]
     array_dir = network_dir / array_dict["ARRAY_NAME"]
     year_dir = array_dir / str(t.year)
     julian_day_dir = year_dir / str(t.day_of_year)
@@ -204,6 +207,7 @@ def setup_logging(day, config, arg_opt=None):
         config (dict): Configuration dictionary.
     """
 
+    # Move path to `load_config`
     # Determine the logs directory
     if 'LOGS_DIR' in config:
         if config["LOGS_DIR"] is not None:
@@ -508,8 +512,9 @@ def web_folders(t2, config, params):
     Returns:
         None
     """
+
     # Create the base output directory if it doesn't exist
-    out_web_dir = Path(config["OUT_WEB_DIR"])
+    out_web_dir = config["OUT_WEB_DIR"]
     out_web_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectories for the network, array, year, and Julian day
@@ -544,8 +549,7 @@ def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
     tmp_name = name.replace(' ', '_')
 
     # Create output directories
-    out_ascii_dir = Path(config["OUT_ASCII_DIR"])
-    array_dir = out_ascii_dir / tmp_name
+    array_dir = config["OUT_ASCII_DIR"] / tmp_name
     month_dir = array_dir / t1.strftime('%Y-%m')
     month_dir.mkdir(parents=True, exist_ok=True)
 
@@ -614,7 +618,7 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
     })
 
     # Save the DataFrame to a CSV file
-    out_valve_dir = Path(config["OUT_VALVE_DIR"])
+    out_valve_dir = config["OUT_VALVE_DIR"]
     out_valve_dir.mkdir(parents=True, exist_ok=True)
     filename = out_valve_dir / f"{name}_{t2.strftime('%Y%m%d-%H%M')}.txt"
     A.to_csv(filename, index=False, header=True, sep=',', float_format='%.3f')
