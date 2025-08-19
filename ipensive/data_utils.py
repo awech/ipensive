@@ -5,7 +5,6 @@ from obspy.clients.earthworm import Client as EWClient
 from obspy.clients.fdsn import Client as FDSNClient
 from obspy.clients.filesystem.sds import Client as SDSClient
 from obspy.clients.seedlink import Client as SLClient
-from obspy.core.util import AttribDict
 
 
 my_log = logging.getLogger(__name__)
