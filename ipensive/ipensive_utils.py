@@ -2,17 +2,12 @@ import os
 import sys
 import logging
 from pathlib import Path
-from time import sleep
 import yaml
 import numpy as np
 import pandas as pd
-from obspy import Stream, UTCDateTime, read_inventory
-from obspy.clients.earthworm import Client as EWClient
-from obspy.clients.fdsn import Client as FDSNClient
-from obspy.clients.filesystem.sds import Client as SDSClient
-from obspy.clients.seedlink import Client as SLClient
+from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
-from obspy.core.util import AttribDict
+from .data_utils import get_obspy_client
 
 my_log = logging.getLogger(__name__)
 
@@ -127,52 +122,6 @@ def load_config(config_file):
     return arrays_config
 
 
-def get_obspy_client(config):
-    """
-    Initialize an ObsPy client based on the configuration.
-
-    Args:
-        config (dict): Configuration dictionary for the client.
-
-    Returns:
-        ObsPy client object.
-    """
-
-    if "TIMEOUT" not in config:
-        config["TIMEOUT"] = 30
-
-    if config["CLIENT_TYPE"].lower() == "fdsn":
-        client = FDSNClient(config["HOSTNAME"], timeout=config["TIMEOUT"])
-        client.name = config["HOSTNAME"]
-
-    elif config["CLIENT_TYPE"].lower() == "local_fdsn":
-        client = FDSNClient("IRIS", service_mappings={"dataselect": config["LOCAL_FDSN"]}, timeout=config["TIMEOUT"])
-        client.name = config["LOCAL_FDSN"]
-
-    elif config["CLIENT_TYPE"].lower() == "sds":
-        client = SDSClient(config["DIRECTORY"], timeout=config["TIMEOUT"])
-        if "FMT" in list(config.keys()):
-            client.FMTSTR = config["FMT"]
-        client.name = config["DIRECTORY"]
-
-    elif config["CLIENT_TYPE"].lower() == "earthworm":
-        client = EWClient(config["HOSTNAME"], config["PORT"], timeout=config["TIMEOUT"])
-        client.name = config["HOSTNAME"]
-
-    elif config["CLIENT_TYPE"].lower() == "seedlink":
-        if "PORT" in list(config.keys()):
-            client = SLClient(config["HOSTNAME"], config["PORT"], timeout=config["TIMEOUT"])
-        else:
-            client = SLClient(config["HOSTNAME"], timeout=config["TIMEOUT"])
-        client.name = config["HOSTNAME"]
-
-    else:
-        client = None
-        my_log.error(f"CLIENT_TYPE {config['CLIENT_TYPE']} not recognized. Exiting.")
-
-    return client
-
-
 def get_file_path(t, array_name, config):
     """
     Get the file path for .png output of a specific array and time.
@@ -252,146 +201,6 @@ def setup_logging(day, config, arg_opt=None):
     my_log = logging.getLogger(__name__)
     sys.stdout = StreamToLogger(my_log, logging.INFO)
     sys.stderr = StreamToLogger(my_log, logging.ERROR)
-    
-
-def check_inventory(tr, inv):
-    """
-    Check if a trace exists in the inventory.
-
-    Args:
-        tr (Trace): ObsPy Trace object.
-        inv (Inventory): ObsPy Inventory object.
-
-    Returns:
-        bool: True if the trace exists in the inventory, False otherwise.
-    """
-    inv_test = inv.select(
-        network=tr.stats.network,
-        station=tr.stats.station,
-        location=tr.stats.location,
-        channel=tr.stats.channel,
-        starttime=tr.stats.starttime,
-        endtime=tr.stats.starttime,
-    )
-    value = True if len(inv_test) > 0 else False
-    return value
-
-
-def check_FDSN(tr, client):
-    """
-    Check if a trace exists in the FDSN client.
-
-    Args:
-        tr (Trace): ObsPy Trace object.
-        client (FDSNClient): ObsPy FDSN client.
-
-    Returns:
-        bool: True if the trace exists in the FDSN client, False otherwise.
-    """
-    value = True
-    try:
-        client.get_stations(
-            network=tr.stats.network,
-            station=tr.stats.station,
-            location=tr.stats.location,
-            channel=tr.stats.channel,
-            starttime=tr.stats.starttime,
-            endtime=tr.stats.starttime,
-            level="response",
-        )
-    except Exception as err:
-        if "No data available for request." in err.args[0]:
-            value = False
-    return value
-
-
-def add_coordinate_info(st, config, array_name):
-    """
-    Add coordinate information to traces in a stream.
-
-    Args:
-        st (Stream): ObsPy Stream object.
-        config (dict): Configuration dictionary.
-        array_name (str): Name of the array.
-
-    Returns:
-        Stream: Stream with updated coordinate information.
-    """
-    array_params = config[array_name]
-    nslc_params = array_params["NSLC"]
-
-    for tr in st:
-        tmp_lat = nslc_params[tr.id.replace("--", "")]["lat"]
-        tmp_lon = nslc_params[tr.id.replace("--", "")]["lon"]
-        tr.stats.coordinates = AttribDict({
-            'latitude': tmp_lat,
-            'longitude': tmp_lon,
-            'elevation': 0.0
-        })
-    return st
-
-
-def add_metadata(st, config, skip_chans=[]):
-    """
-    Add metadata to traces in a stream.
-
-    Args:
-        st (Stream): ObsPy Stream object.
-        config (dict): Configuration dictionary.
-        skip_chans (list): List of channels (NSLC) to skip.
-
-    Returns:
-        Stream: Stream with updated metadata.
-    """
-    import warnings
-
-    warnings.simplefilter("ignore", UserWarning, append=True)
-    if "STATION_XML" in config.keys():
-        inventory = read_inventory(config["STATION_XML"])
-
-    for tr in st:
-        if tr.id in skip_chans:
-            my_log.warning(f"Skipping metadata for {tr.id} due to missing data")
-            tr.stats.coordinates = AttribDict({
-                'latitude': np.nan,
-                'longitude': np.nan,
-                'elevation': 0.0
-            })
-            continue
-        my_log.info(f"Getting metadata for {tr.id}")
-        if check_inventory(tr, inventory):
-            inv = inventory.select(
-                network=tr.stats.network,
-                station=tr.stats.station,
-                location=tr.stats.location,
-                channel=tr.stats.channel,
-                starttime=tr.stats.starttime,
-                endtime=tr.stats.endtime,
-            )
-        else:
-            my_log.warning(
-                f"No station response info in stationXML file. Getting station response for {tr.id} from IRIS"
-            )
-            client = FDSNClient("IRIS")
-            if check_FDSN(tr, client):
-                sleep(0.25)
-                inv = client.get_stations(
-                    network=tr.stats.network,
-                    station=tr.stats.station,
-                    location=tr.stats.location,
-                    channel=tr.stats.channel,
-                    starttime=tr.stats.starttime,
-                    endtime=tr.stats.endtime,
-                    level="response",
-                )
-            else:
-                my_log.warning(f"No data available for request. Removing {tr.id}")
-                st.remove(tr)
-                continue
-        tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
-        tr.inventory = inv
-
-    return st
 
 
 def get_target_backazimuth(st, config, array_params):
@@ -431,73 +240,6 @@ def get_target_backazimuth(st, config, array_params):
         array_params[t] = baz
 
     return array_params
-
-
-def grab_data(client, NSLC, T1, T2, fill_value=0):
-    """
-    Retrieve waveform data for specified channels and time range.
-
-    Args:
-        client (ObsPy Client): Client object to fetch data.
-        NSLC (list or dict): List of channel identifiers (e.g., 'NET.STA.LOC.CHA').
-        T1 (obspy.UTCDateTime): Start time for data retrieval.
-        T2 (obspy.UTCDateTime): End time for data retrieval.
-        fill_value (int or str): Value to fill gaps in data (default is 0).
-
-    Returns:
-        Stream: ObsPy Stream object containing the retrieved data.
-    """
-    my_log.info(f"Grabbing data from {client.name}...")
-
-    st = Stream()
-
-    if isinstance(NSLC, dict):
-        NSLC = list(NSLC.keys())
-
-    for nslc in NSLC:
-        nslc = nslc.replace("--", "")  # Remove placeholder for empty location codes
-        try:
-            # Fetch waveform data for the specified channel and time range
-            tr = client.get_waveforms(*nslc.split('.'), T1, T2)
-            if len(tr) > 1:
-                # Handle cases with multiple traces (e.g., due to gaps)
-                if fill_value == 0 or fill_value is None:
-                    tr.detrend("demean")
-                    tr.taper(max_percentage=0.01)
-                for sub_trace in tr:
-                    # Ensure consistent data types and sampling rates
-                    if sub_trace.data.dtype.name != "int32":
-                        sub_trace.data = sub_trace.data.astype("int32")
-                    if sub_trace.stats.sampling_rate != np.round(sub_trace.stats.sampling_rate):
-                        sub_trace.stats.sampling_rate = np.round(sub_trace.stats.sampling_rate)
-                my_log.info("Merging gappy data...")
-                tr.merge(fill_value=fill_value)
-
-            # Handle cases where the trace length is shorter than expected
-            if tr[0].stats.endtime - tr[0].stats.starttime < T2 - T1:
-                tr.detrend('demean')
-                tr.taper(max_percentage=0.01)
-        except Exception as e:
-            my_log.error(f"Error occurred while grabbing data: {e}")
-            my_log.warning(f"No data available for {nslc} from {client.name}. Creating empty Stream object.")
-            tr = Stream()  # Create an empty stream if data retrieval fails
-
-        # If no data is available, create a blank trace
-        if not tr:
-            from obspy import Trace
-            from numpy import zeros
-            tr = Trace()
-            tr.id = nslc
-            tr.stats['sampling_rate'] = 100
-            tr.stats['starttime'] = T1
-            tr.data = zeros(int((T2 - T1) * tr.stats["sampling_rate"]), dtype="int32")
-        st += tr
-
-    # Trim the stream to the specified time range and fill gaps
-    st.trim(T1, T2, pad=True, fill_value=0)
-    my_log.info("Detrending data...")
-    st.detrend("demean")
-    return st
 
 
 def web_folders(t2, config, params):
