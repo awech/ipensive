@@ -123,7 +123,33 @@ def check_inventory(tr, inv):
     return value
 
 
-def add_metadata(st, config, skip_chans=[]):
+def add_coordinate_info(st, config, array_name):
+    """
+    Add coordinate information to traces in a stream.
+
+    Args:
+        st (Stream): ObsPy Stream object.
+        config (dict): Configuration dictionary.
+        array_name (str): Name of the array.
+
+    Returns:
+        Stream: Stream with updated coordinate information.
+    """
+    array_params = config[array_name]
+    nslc_params = array_params["NSLC"]
+
+    for tr in st:
+        tmp_lat = nslc_params[tr.id.replace("--", "")]["lat"]
+        tmp_lon = nslc_params[tr.id.replace("--", "")]["lon"]
+        tr.stats.coordinates = AttribDict({
+            'latitude': tmp_lat,
+            'longitude': tmp_lon,
+            'elevation': 0.0
+        })
+    return st
+
+
+def add_metadata(st, config, array_name, skip_chans=[]):
     """
     Add metadata to traces in a stream.
 
@@ -138,7 +164,14 @@ def add_metadata(st, config, skip_chans=[]):
     import warnings
 
     warnings.simplefilter("ignore", UserWarning, append=True)
+
+    if isinstance(config[array_name]["NSLC"], dict):
+        my_log.info(f"Adding coordinate info for {array_name} directly from config file")
+        st = add_coordinate_info(st, config, array_name)
+        return st
+
     if "STATION_XML" in config.keys():
+        my_log.info(f"Adding metadata from {config['STATION_XML']}")
         inventory = read_inventory(config["STATION_XML"])
 
     for tr in st:

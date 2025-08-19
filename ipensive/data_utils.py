@@ -144,27 +144,28 @@ def preprocess_data(st, t1, t2, skip_chans, array_params):
     st.trim(t1, t2 + array_params["WINDOW_LENGTH"])
 
 
-def add_coordinate_info(st, config, array_name):
-    """
-    Add coordinate information to traces in a stream.
+def QC_data(st, array_params):
 
-    Args:
-        st (Stream): ObsPy Stream object.
-        config (dict): Configuration dictionary.
-        array_name (str): Name of the array.
+    #### Check for enough data ####
+    check_st = st.copy()
+    skip_chans = []
+    good_data = True
+    for tr in check_st:
+        if np.sum(np.abs(tr.data)) == 0:  # Check for blank traces
+            skip_chans.append(tr.id)
+            check_st.remove(tr)
+    if len(check_st) < array_params["MIN_CHAN"]:
+        my_log.warning("Too many blank traces. Skipping.")
+        good_data = False
+        return good_data, skip_chans
+    ########################
 
-    Returns:
-        Stream: Stream with updated coordinate information.
-    """
-    array_params = config[array_name]
-    nslc_params = array_params["NSLC"]
+    #### Check for gappy data ####
+    for tr in check_st:
+        if np.any([np.any(tr.data == 0)]):  # Check for gaps in data
+            check_st.remove(tr)
+    if len(check_st) < array_params["MIN_CHAN"]:
+        my_log.warning("Too gappy. Skipping.")
+        good_data = False
 
-    for tr in st:
-        tmp_lat = nslc_params[tr.id.replace("--", "")]["lat"]
-        tmp_lon = nslc_params[tr.id.replace("--", "")]["lon"]
-        tr.stats.coordinates = AttribDict({
-            'latitude': tmp_lat,
-            'longitude': tmp_lon,
-            'elevation': 0.0
-        })
-    return st
+    return good_data, skip_chans

@@ -14,7 +14,8 @@ import jinja2
 from obspy import UTCDateTime as utc
 from . import ipensive_utils as utils
 from .plotting_utils import plot_results
-from .data_utils import grab_data
+from .data_utils import grab_data, QC_data, preprocess_data
+from .metadata_utils import add_coordinate_info, add_metadata
 
 from lts_array import ltsva
 import warnings
@@ -133,6 +134,7 @@ def process_array(config, array_name, T0):
     Returns:
         None
     """
+
     array_params = config[array_name]
     t1 = T0 - array_params["DURATION"]  # Start time of the processing window
     t2 = T0  # End time of the processing window
@@ -142,15 +144,17 @@ def process_array(config, array_name, T0):
 
     my_log.info("--- " + array_params["ARRAY_NAME"] + " ---")
     my_log.info(f"{t1.strftime('%Y-%b-%d %H:%M')} - {t2.strftime('%H:%M')}")
+
+    # Check for minimum channels
+    if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
+        my_log.warning("Not enough channels defined.")
+        return
+    # Check for latency delay
     if os.getenv("FROMCRON") == "yep":
         if "EXTRA_PAUSE" in array_params:
             time.sleep(array_params["EXTRA_PAUSE"])  # Pause if running from a cron job
 
-    #### Download data ####
-    if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
-        my_log.warning("Not enough channels defined.")
-        return
-
+    # Download data
     st = grab_data(
         array_params["CLIENT"],
         array_params["NSLC"],
@@ -158,56 +162,22 @@ def process_array(config, array_name, T0):
         T2,
     )
 
-    #### Check for enough data ####
-    check_st = st.copy()
-    skip_chans = []
-    for tr in check_st:
-        if np.sum(np.abs(tr.data)) == 0:  # Check for blank traces
-            skip_chans.append(tr.id)
-            check_st.remove(tr)
-    if len(check_st) < array_params["MIN_CHAN"]:
-        my_log.warning("Too many blank traces. Skipping.")
+    # Check data quality
+    good_data, skip_chans = QC_data(st, array_params)
+    if not good_data:
         return
-    ########################
 
-    #### Check for gappy data ####
-    for tr in check_st:
-        if np.any([np.any(tr.data == 0)]):  # Check for gaps in data
-            check_st.remove(tr)
-    if len(check_st) < array_params["MIN_CHAN"]:
-        my_log.warning("Too gappy. Skipping.")
-        return
-    ########################
+    # Add metadata or coordinates
+    st = add_metadata(st, config, array_name, skip_chans)
 
-    #### Add metadata or coordinates ####
-    if isinstance(array_params["NSLC"], dict):
-        st = utils.add_coordinate_info(st, config, array_name)
-    else:
-        st = utils.add_metadata(st, config, skip_chans)
+    # Add volcano backazimuths
     array_params = utils.get_target_backazimuth(st, config, array_params)
-    ########################
 
-    #### Preprocess data ####
-    for tr in st:
-        if tr.id in skip_chans:
-            continue
-        if isinstance(array_params["NSLC"], dict):
-            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
-        else:
-            tr.remove_sensitivity(tr.inventory)
-    st.detrend("demean")
-    st.taper(max_percentage=None, max_length=array_params["TAPER"])
-    st.filter(
-        "bandpass",
-        freqmin=array_params["FREQMIN"],
-        freqmax=array_params["FREQMAX"],
-        corners=2,
-        zerophase=True,
-    )
-    st.trim(t1, t2 + array_params["WINDOW_LENGTH"])
-    ########################
+    # Preprocess data
+    st = preprocess_data(st, t1, t2, skip_chans, array_params)
 
-    #### Perform array processing ####
+
+    # Perform array processing
     lat_list = []
     lon_list = []
     for tr in st:
@@ -227,7 +197,8 @@ def process_array(config, array_name, T0):
         pressure.append(np.max(np.abs(tr_win.data)))
     pressure = np.array(pressure)
 
-    #### Generate plots ####
+
+    # Generate plots
     if config["plot"]:
         try:
             utils.web_folders(t2, config, array_params)
@@ -238,7 +209,8 @@ def process_array(config, array_name, T0):
             my_log.error("Something went wrong making the plot:")
             my_log.error(traceback.format_exc())
 
-    #### Write output files ####
+
+    # Write output files
     if 'OUT_VALVE_DIR' in config.keys():
         try:
             sta_name = st[0].stats.station
