@@ -15,7 +15,7 @@ from obspy import UTCDateTime as utc
 from . import ipensive_utils as utils
 from .plotting_utils import plot_results
 from .data_utils import grab_data, QC_data, preprocess_data
-from .metadata_utils import add_coordinate_info, add_metadata
+from .metadata_utils import add_metadata
 
 from lts_array import ltsva
 import warnings
