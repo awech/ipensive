@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 import numpy as np
 import pandas as pd
+from matplotlib import dates
 from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
 from .data_utils import get_obspy_client
@@ -255,6 +256,8 @@ def web_folders(t2, config, params):
         None
     """
 
+    my_log.info("Setting up web output folders")
+
     # Create the base output directory if it doesn't exist
     out_web_dir = config["OUT_WEB_DIR"]
     out_web_dir.mkdir(parents=True, exist_ok=True)
@@ -287,6 +290,9 @@ def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
     Returns:
         None
     """
+
+    my_log.info('Writing ASCII file...')
+    
     t1 = t2 - config[name]["DURATION"]
     tmp_name = name.replace(' ', '_')
 
@@ -299,6 +305,8 @@ def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
 
     # Adjust azimuth values to be within 0-360 degrees
     azimuth[azimuth < 0] += 360
+
+    t = np.array([UTCDateTime(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
 
     # Create a DataFrame with the results
     tmp = pd.DataFrame({
@@ -348,6 +356,11 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
     Returns:
         None
     """
+
+    my_log.info('Writing CSV file for Valve...')
+
+    t = np.array([UTCDateTime(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
+
     # Create a DataFrame with the results
     A = pd.DataFrame({
         'TIMESTAMP': t,

@@ -1,15 +1,18 @@
-import numpy as np
+import logging
 from pathlib import Path
+from copy import deepcopy
+from collections import Counter
+import numpy as np
 import matplotlib as m
 import matplotlib.pyplot as plt
 from matplotlib import dates
-from copy import deepcopy
-from collections import Counter
 from matplotlib import rcParams
 
 rcParams.update({"font.size": 10})  # Set default font size for plots
 m.use("Agg")  # Use a non-interactive backend for matplotlib
 ################################
+
+my_log = logging.getLogger(__name__)
 
 
 def missing_elements_adjust(st, skip_chans, array):
@@ -434,6 +437,8 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, c
     Returns:
         None
     """
+
+    my_log.info(f"Making {plot_size} plot...")
 
     T1 = dates.date2num(t1.datetime)
     T2 = dates.date2num(t2.datetime)

@@ -5,16 +5,17 @@ Modified on 15-May-2025
 """
 
 import os
-import numpy as np
-from pathlib import Path
-import time
-import jinja2
-from obspy.core import UTCDateTime as utc
-from matplotlib import dates
-from . import ipensive_utils as utils
-from .plotting import plot_results
 import argparse
 import logging
+import time
+from pathlib import Path
+import numpy as np
+import jinja2
+from obspy import UTCDateTime as utc
+from . import ipensive_utils as utils
+from .plotting_utils import plot_results
+from .data_utils import grab_data
+
 from lts_array import ltsva
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning, append=True)
@@ -150,7 +151,7 @@ def process_array(config, array_name, T0):
         my_log.warning("Not enough channels defined.")
         return
 
-    st = utils.grab_data(
+    st = grab_data(
         array_params["CLIENT"],
         array_params["NSLC"],
         T1,
@@ -229,9 +230,7 @@ def process_array(config, array_name, T0):
     #### Generate plots ####
     if config["plot"]:
         try:
-            my_log.info("Setting up web output folders")
             utils.web_folders(t2, config, array_params)
-            my_log.info("Making plot...")
             for plotsize in ["big", "small"]:
                 plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, config, array_params, plotsize)
         except Exception:
@@ -242,8 +241,6 @@ def process_array(config, array_name, T0):
     #### Write output files ####
     if 'OUT_VALVE_DIR' in config.keys():
         try:
-            my_log.info('Writing CSV file...')
-            t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
             sta_name = st[0].stats.station
             utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, sta_name, config)
         except Exception:
@@ -253,8 +250,6 @@ def process_array(config, array_name, T0):
 
     if 'OUT_ASCII_DIR' in config.keys() and config['OUT_ASCII_DIR']:
         try:
-            my_log.info('Writing ASCII file...')
-            t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
             utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, array_name, config)
         except Exception:
             import traceback
