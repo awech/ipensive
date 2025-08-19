@@ -1,7 +1,7 @@
 import argparse
 from obspy import UTCDateTime as utc
 import ipensive.ipensive_utils as utils
-from ipensive.metadata import update_stationXML
+from ipensive.metadata_utils import update_stationXML
 
 if __name__ == "__main__":
     """
