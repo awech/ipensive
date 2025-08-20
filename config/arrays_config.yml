@@ -101,6 +101,26 @@ Wake Island South:
     - IM.H11S3.--.EDH
 
 
+# Example of manual metadata entry:
+# Adak:
+#   <<: *defaults
+#   NSLC:
+#     AV.ADKI.01.HDF:
+#       lat: 51.86190727
+#       lon: -176.6438598
+#       gain: 11541.508142041417
+#     AV.ADKI.02.HDF:
+#       lat: 51.86324162
+#       lon: -176.6435998
+#       gain: 11541.508142041417
+
+
+# Example of manual target backazimuth entry:
+#   TARGETS:
+#     - Cleveland
+#     - Some Place: 240
+
+
 ## optional urls that get linked from the iPensive webpage
 EXTRA_LINKS:
   - Data Output: ../tests/ascii_output/
