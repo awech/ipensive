@@ -82,6 +82,7 @@ def check_FDSN(tr, client):
     Returns:
         bool: True if the trace exists in the FDSN client, False otherwise.
     """
+    
     value = True
     try:
         client.get_stations(
@@ -111,6 +112,7 @@ def check_inventory(tr, inv):
     Returns:
         bool: True if the trace exists in the inventory, False otherwise.
     """
+    
     inv_test = inv.select(
         network=tr.stats.network,
         station=tr.stats.station,
@@ -135,6 +137,7 @@ def add_coordinate_info(st, config, array_name):
     Returns:
         Stream: Stream with updated coordinate information.
     """
+    
     array_params = config[array_name]
     nslc_params = array_params["NSLC"]
 
@@ -161,6 +164,7 @@ def add_metadata(st, config, array_name, skip_chans=[]):
     Returns:
         Stream: Stream with updated metadata.
     """
+    
     import warnings
 
     warnings.simplefilter("ignore", UserWarning, append=True)
