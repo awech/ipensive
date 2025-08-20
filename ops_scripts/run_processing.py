@@ -12,8 +12,8 @@ if __name__ == "__main__":
     timer_0 = time.time()
 
     args = array_processing.parse_args()  # Parse command-line arguments
-    config_file = args.config
-    config = utils.load_config(config_file)  # Load configuration
+    ipensive_config_file = args.config
+    config, array_config_file = utils.load_config(ipensive_config_file)  # Load configuration
 
     config["plot"] = False if args.no_plot else True
 
@@ -21,6 +21,8 @@ if __name__ == "__main__":
 
     utils.setup_logging(T0, config, arg_opt=args.log)
     my_log = logging.getLogger(__name__)
+    my_log.info(f"Using ipensive config file: {ipensive_config_file}")
+    my_log.info(f"Using array config file: {array_config_file}")
     my_log.info("Process Started")
     
     time.sleep(delay)  # Pause to allow for data latency to catch up
@@ -41,6 +43,6 @@ if __name__ == "__main__":
             my_log.info(f"{dt:.1f} seconds to process {array_name}\n")
 
     # Write out the new HTML file
-    array_processing.write_html(config)
+    utils.write_html(config)
 
-    my_log.info(f"{time.time()-timer_0:.1f} seconds to process all")
+    my_log.info(f"{time.time() - timer_0:.1f} seconds to process all")
