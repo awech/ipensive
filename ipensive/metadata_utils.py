@@ -174,6 +174,8 @@ def add_metadata(st, config, array_name, skip_chans=[]):
         my_log.info(f"Adding metadata from {config['STATION_XML']}")
         inventory = read_inventory(config["STATION_XML"])
 
+    lat_list = []
+    lon_list = []
     for tr in st:
         if tr.id in skip_chans:
             my_log.warning(f"Skipping metadata for {tr.id} due to missing data")
@@ -216,4 +218,7 @@ def add_metadata(st, config, array_name, skip_chans=[]):
         tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
         tr.inventory = inv
 
-    return st
+        lat_list.append(tr.stats.coordinates.latitude)
+        lon_list.append(tr.stats.coordinates.longitude)
+
+    return st, lat_list, lon_list

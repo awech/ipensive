@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 import numpy as np
 import pandas as pd
+import jinja2
 from matplotlib import dates
 from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
@@ -44,14 +45,11 @@ def get_config_file():
         env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
         if env_config_file.exists():
             default_config_file = env_config_file
-            print(f"Using config file from IPENSIVE_CONFIG: {default_config_file}")
             my_log.info(f"Using config file from IPENSIVE_CONFIG: {default_config_file}")
         else:
-            print(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
             my_log.warning(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
             raise Exception(f"{env_config_file} does not exist")
     else:
-        print(f"Using default config file: {default_config_file}")
         my_log.info(f"Using default config file: {default_config_file}")
 
     return default_config_file
@@ -80,7 +78,6 @@ def load_config(config_file):
         array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
         array_file = Path(__file__).parent.parent / "config" / "arrays_config.yml"
-    print(f"Using arrays config file: {array_file}")
     my_log.info(f"Using arrays config file: {array_file}")
     with open(array_file, "r") as file:
         arrays_config = yaml.safe_load(file)
@@ -107,9 +104,11 @@ def load_config(config_file):
 
     ###### Load data output configuration ######
     arrays_config["OUT_WEB_DIR"] = Path(ipensive_config["OUT_WEB_DIR"])
-    arrays_config["OUT_ASCII_DIR"] = Path(ipensive_config["OUT_ASCII_DIR"])
     arrays_config["LOGS_DIR"] = Path(ipensive_config["LOGS_DIR"])
-
+    if "OUT_ASCII_DIR" in ipensive_config and ipensive_config["OUT_ASCII_DIR"]:
+        arrays_config["OUT_ASCII_DIR"] = Path(ipensive_config["OUT_ASCII_DIR"])
+    if "OUT_VALVE_DIR" in ipensive_config and ipensive_config["OUT_VALVE_DIR"]:
+        arrays_config["OUT_VALVE_DIR"] = Path(ipensive_config["OUT_VALVE_DIR"])
     ###### Load data source configuration ######
     client = get_obspy_client(ipensive_config)
     
@@ -120,7 +119,7 @@ def load_config(config_file):
         else:
             arrays_config[array]["CLIENT"] = get_obspy_client(arrays_config[array])
 
-    return arrays_config
+    return arrays_config, array_file
 
 
 def get_file_path(t, array_name, config):
@@ -157,7 +156,6 @@ def setup_logging(day, config, arg_opt=None):
         config (dict): Configuration dictionary.
     """
 
-    # Move path to `load_config`
     # Determine the logs directory
     if 'LOGS_DIR' in config:
         if config["LOGS_DIR"] is not None:
@@ -183,7 +181,6 @@ def setup_logging(day, config, arg_opt=None):
         log_file = arg_opt
     else:
         log_file = None
-
 
     if log_file:
         logging.basicConfig(
@@ -243,6 +240,30 @@ def get_target_backazimuth(st, config, array_params):
     return array_params
 
 
+def write_html(config):
+    """
+    Generate an HTML file for web output.
+
+    Args:
+        config (dict): Configuration dictionary.
+
+    Returns:
+        None
+    """
+    
+    template_file = Path(__file__).parent.parent / "templates" / "index.template"
+    with open(template_file, "r") as f:
+        template = jinja2.Template(f.read())
+    html = template.render(
+        networks=config["network_list"],
+        arrays=config["NETWORKS"],
+        extra_links=config["EXTRA_LINKS"],
+    )
+    out_file = config["OUT_WEB_DIR"] / "index.html"
+    with open(out_file, "w") as f:
+        f.write(html)
+
+
 def web_folders(t2, config, params):
     """
     Create directory structure for web output.
@@ -272,18 +293,41 @@ def web_folders(t2, config, params):
     return
 
 
-def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config):
+def write_data_files(t2, st, df, config):
+    
+    df["Time"] = [dates.num2date(ti).strftime('%Y-%m-%d %H:%M:%S') for ti in df.Time]
+    if "OUT_VALVE_DIR" in config and config["OUT_VALVE_DIR"]:
+        try:
+            sta_name = st[0].stats.station
+            write_valve_file(t2, df, sta_name, config)
+        except Exception:
+            import traceback
+            my_log.error("Something went wrong writing the Valve CSV file:")
+            my_log.error(traceback.format_exc())
+
+    if "OUT_ASCII_DIR" in config and config["OUT_ASCII_DIR"]:
+        try:
+            write_ascii_file(t2, df, config)
+        except Exception:
+            import traceback
+            my_log.error("Something went wrong writing the ASCII data file:")
+            my_log.error(traceback.format_exc())
+
+
+def write_ascii_file(t2, tmp_df, config):
     """
     Write results to an ASCII file.
 
     Args:
         t2 (obspy.UTCDateTime): Current time.
-        t (list): List of timestamps.
-        pressure (list): Pressure values.
-        azimuth (list): Azimuth values.
-        velocity (list): Velocity values.
-        mccm (list): MCCM values.
-        rms (list): RMS values.
+        df (pd.Dataframe): Dataframe containing:
+                            Time: List of timestamps.
+                            Array: Array name.
+                            Pressure: Pressure values.
+                            Azimuth: Azimuth values.
+                            Velocity: Velocity values.
+                            MCCM: MCCM values.
+                            Sigma_tau: Sigma_tau values.
         name (str): Array name.
         config (dict): Configuration dictionary.
 
@@ -291,66 +335,58 @@ def write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
         None
     """
 
-    my_log.info('Writing ASCII file...')
-    
-    t1 = t2 - config[name]["DURATION"]
-    tmp_name = name.replace(' ', '_')
+    my_log.info("Writing ASCII file...")
+
+    array_name = tmp_df.iloc[0]["Array"]
+    t1 = t2 - config[array_name]["DURATION"]
+    array_path_name = array_name.replace(" ", "_")
 
     # Create output directories
-    array_dir = config["OUT_ASCII_DIR"] / tmp_name
-    month_dir = array_dir / t1.strftime('%Y-%m')
+    array_dir = config["OUT_ASCII_DIR"] / array_path_name
+    month_dir = array_dir / t1.strftime("%Y-%m")
     month_dir.mkdir(parents=True, exist_ok=True)
 
-    filename = month_dir / f"{tmp_name}_{t1.strftime('%Y-%m-%d')}.txt"
+    filename = month_dir / f"{array_path_name}_{t1.strftime('%Y-%m-%d')}.txt"
 
     # Adjust azimuth values to be within 0-360 degrees
-    azimuth[azimuth < 0] += 360
+    tmp_df.loc[tmp_df["Azimuth"] < 0, "Azimuth"] += 360
 
-    t = np.array([UTCDateTime(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-
-    # Create a DataFrame with the results
-    tmp = pd.DataFrame({
-        'Time': t,
-        'Array': name,
-        'Azimuth': azimuth,
-        'Velocity': 1000 * velocity,  # Convert velocity to m/s
-        'MCCM': mccm,
-        'Pressure': pressure,
-        'rms': rms
-    })
-    tmp['Time'] = pd.to_datetime(tmp['Time'])
-    tmp = tmp[tmp['Time'] <= t2.strftime('%Y-%m-%d %H:%M:%S')]
+    # Convert time to datetime
+    tmp_df["Time"] = pd.to_datetime(tmp_df["Time"])
+    tmp_df = tmp_df[tmp_df["Time"] <= t2.strftime('%Y-%m-%d %H:%M:%S')]
 
     # Append to or overwrite the existing file
     if filename.exists():
-        df = pd.read_csv(filename, sep='\t', parse_dates=['Time'])
-        df = df[(df['Time'] <= t1.strftime('%Y-%m-%d %H:%M:%S')) | (df['Time'] > t2.strftime('%Y-%m-%d %H:%M:%S'))]
-        df = pd.concat([df, tmp])
-        df = df.sort_values('Time')
+        df = pd.read_csv(filename, sep="\t", parse_dates=["Time"])
+        df = df[(df["Time"] <= t1.strftime("%Y-%m-%d %H:%M:%S")) | (df["Time"] > t2.strftime("%Y-%m-%d %H:%M:%S"))]
+        df = pd.concat([df, tmp_df])
+        df = df.sort_values("Time")
     else:
-        df = tmp
+        df = tmp_df
 
     # Round values for better readability
-    df = df.round({'Azimuth': 1, 'Velocity': 1, 'MCCM': 2, 'Pressure': 3, 'rms': 1})
+    df = df.round({"Azimuth": 1, "Velocity": 1, "MCCM": 2, "Pressure": 3, "Sigma_tau": 2})
 
     # Save the DataFrame to a file
-    df.to_csv(filename, index=False, header=True, sep='\t')
+    df.to_csv(filename, index=False, header=True, sep="\t")
+
     return
 
 
-def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config):
+def write_valve_file(t2, df, name, config):
     """
     Write results to a CSV file for valve output.
 
     Args:
         t2 (obspy.UTCDateTime): Current time.
-        t (list): List of timestamps.
-        pressure (list): Pressure values.
-        azimuth (list): Azimuth values.
-        velocity (list): Velocity values.
-        mccm (list): MCCM values.
-        rms (list): RMS values.
-        name (str): Array name.
+        df (pd.Dataframe): Dataframe containing:
+                            Time: List of timestamps.
+                            Array: Array name.
+                            Pressure: Pressure values.
+                            Azimuth: Azimuth values.
+                            Velocity: Velocity values.
+                            MCCM: MCCM values.
+                            Sigma_tau: Sigma_tau values.
         config (dict): Configuration dictionary.
 
     Returns:
@@ -359,23 +395,15 @@ def write_valve_file(t2, t, pressure, azimuth, velocity, mccm, rms, name, config
 
     my_log.info('Writing CSV file for Valve...')
 
-    t = np.array([UTCDateTime(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-
     # Create a DataFrame with the results
-    A = pd.DataFrame({
-        'TIMESTAMP': t,
-        'CHANNEL': name,
-        'Azimuth': azimuth,
-        'Velocity': 1000 * velocity,  # Convert velocity to m/s
-        'MCCM': mccm,
-        'Pressure': pressure,
-        'rms': rms
-    })
+    A = df.rename(columns={"Time": "TIMESTAMP", "Array": "CHANNEL"})
+
+    A = A[["TIMESTAMP", "CHANNEL", "Azimuth", "Velocity", "MCCM", "Pressure", "Sigma_tau"]]
 
     # Save the DataFrame to a CSV file
     out_valve_dir = config["OUT_VALVE_DIR"]
     out_valve_dir.mkdir(parents=True, exist_ok=True)
     filename = out_valve_dir / f"{name}_{t2.strftime('%Y%m%d-%H%M')}.txt"
-    A.to_csv(filename, index=False, header=True, sep=',', float_format='%.3f')
-    return
+    A.to_csv(filename, index=False, header=True, float_format="%.3f")
 
+    return

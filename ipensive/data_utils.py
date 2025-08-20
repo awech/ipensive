@@ -123,7 +123,8 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
     return st
 
 
-def preprocess_data(st, t1, t2, skip_chans, array_params):
+def preprocess_data(ST, t1, t2, skip_chans, array_params):
+    st = ST.copy()
     for tr in st:
         if tr.id in skip_chans:
             continue
@@ -141,6 +142,8 @@ def preprocess_data(st, t1, t2, skip_chans, array_params):
         zerophase=True,
     )
     st.trim(t1, t2 + array_params["WINDOW_LENGTH"])
+
+    return st
 
 
 def QC_data(st, array_params):
@@ -168,3 +171,14 @@ def QC_data(st, array_params):
         good_data = False
 
     return good_data, skip_chans
+
+
+def get_pressures(st, array_params):
+    pressure = []
+    for tr_win in st[0].slide(
+        window_length=array_params["WINDOW_LENGTH"],
+        step=array_params["WINDOW_LENGTH"] - array_params["OVERLAP"],
+    ):
+        pressure.append(np.max(np.abs(tr_win.data)))
+    pressure = np.array(pressure)
+    return pressure
