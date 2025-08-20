@@ -105,10 +105,10 @@ if __name__ == '__main__':
     """
 
     args = parse_args()  # Parse command-line arguments
-    config_file = args.config
-    config = utils.load_config(config_file)
+    ipensive_config_file = args.config
+    config, array_config_file = utils.load_config(ipensive_config_file)
     config["plot"] = not args.no_plot
-    print(args)
+
     if args.arrays is not None:
         ARRAYS = list(args.arrays.replace("_"," ").split(","))
     else:
@@ -116,5 +116,9 @@ if __name__ == '__main__':
 
     utils.setup_logging(utc.utcnow(), config, arg_opt=args.log)
     my_log = logging.getLogger(__name__)
+    my_log.info(f"Array config: {array_config_file}")
+    for key, value in args.__dict__.items():
+        my_log.info(f"{key}: {value}")
+    my_log.info("\n")
 
     run_backpopulate(config, args.starttime, args.endtime, args.overwrite, ARRAYS)
