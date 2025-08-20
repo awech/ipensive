@@ -122,7 +122,7 @@ def load_config(config_file):
     return arrays_config, array_file
 
 
-def get_file_path(t, array_name, config):
+def get_pngfile_path(t, array_name, config):
     """
     Get the file path for .png output of a specific array and time.
 
@@ -294,6 +294,14 @@ def web_folders(t2, config, params):
 
 
 def write_data_files(t2, st, df, config):
+    """Write data files for the given time, stream, and dataframe.
+
+    Args:
+        t2 (obspy.UTCDateTime): Current time.
+        st (obspy.Stream): Stream containing seismic traces.
+        df (pd.DataFrame): DataFrame containing metadata and results.
+        config (dict): Configuration dictionary.
+    """
     
     df["Time"] = [dates.num2date(ti).strftime('%Y-%m-%d %H:%M:%S') for ti in df.Time]
     if "OUT_VALVE_DIR" in config and config["OUT_VALVE_DIR"]:
