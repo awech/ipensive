@@ -1,5 +1,13 @@
-import os
+# pip install pytest
+# pip install coverage
+# To test: `pytest -v --disable-warnings`
+# -v for verbose
+# --disable-warnings (does what it says)
+# To check coverage:
+# `coverage run -m pytest` to collect coverage data
+# `coverage html -d ~/Desktop/test_html` to generate HTML report
 
+import os
 
 from ipensive import ipensive_utils as utils
 from ipensive import data_utils, metadata_utils, plotting_utils
