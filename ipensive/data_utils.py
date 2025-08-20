@@ -124,6 +124,20 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
 
 
 def preprocess_data(ST, t1, t2, skip_chans, array_params):
+    """
+    Preprocess seismic data by removing sensitivity, tapering, filtering, and trimming.
+
+    Args:
+        ST (obspy.Stream): Stream containing seismic traces.
+        t1 (obspy.UTCDateTime): Start time for trimming.
+        t2 (obspy.UTCDateTime): End time for trimming.
+        skip_chans (list): List of channels to skip.
+        array_params (dict): Array parameters including filtering and tapering settings.
+
+    Returns:
+        obspy.Stream: Preprocessed stream.
+    """
+
     st = ST.copy()
     for tr in st:
         if tr.id in skip_chans:
@@ -147,7 +161,18 @@ def preprocess_data(ST, t1, t2, skip_chans, array_params):
 
 
 def QC_data(st, array_params):
+    """
+    Quality control for seismic data.
 
+    Args:
+        st (obspy.Stream): Stream containing seismic traces.
+        array_params (dict): Array parameters including quality control thresholds.
+
+    Returns:
+        tuple: (good_data, skip_chans) where good_data is a boolean indicating
+               if the data passed QC and skip_chans is a list of channels to skip.
+    """
+    
     #### Check for enough data ####
     check_st = st.copy()
     skip_chans = []
