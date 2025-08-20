@@ -153,7 +153,8 @@ def process_array(config, array_name, T0, return_figure=False):
 
     # Download data
     st = data_utils.grab_data(array_params["CLIENT"], array_params["NSLC"], T1, T2)
-
+    # st.write("test_raw.mseed")
+    
     # Check data quality
     good_data, skip_chans = data_utils.QC_data(st, array_params)
     if not good_data:
@@ -167,9 +168,11 @@ def process_array(config, array_name, T0, return_figure=False):
 
     # Preprocess data
     st = data_utils.preprocess_data(st, t1, t2, skip_chans, array_params)
+    # st.write("test_preprocessed.mseed")
 
     # Perform array processing
     results_df, lts_dict = do_LTS(st, array_params, lat_list, lon_list, skip_chans)
+    # results_df.to_csv("test_results.csv", index=False, float_format='%.7f')
 
     # Write output files
     utils.write_data_files(t2, st, results_df, config)
