@@ -1,5 +1,10 @@
-matplotlib==3.5.1
-numpy==1.21.5
-obspy==1.3.1
-pandas==1.3.5
-Jinja2==3.1.1
+# General dependencies
+numpy==1.26.4
+pandas==2.2.3
+matplotlib==3.8.4
+obspy==1.4.1
+jinja2==3.1.5
+pyyaml==6.0.2
+
+# Add the lts_array package from the GitHub repository
+git+https://github.com/uafgeotools/lts_array.git@5a52703a628e5c12d3945daf88dcad1b3b9f87f8#egg=lts_array

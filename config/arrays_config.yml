@@ -1,0 +1,247 @@
+############### Defaults ###############
+########################################
+PARAMS: &defaults
+
+  # PROCESSING PARAMETERS
+  DURATION      : 600   # DON'T CHANGE THIS!
+  LATENCY       : 60    # how long to pause and wait for data latency to catch up before processing (seconds)
+  EXTRA_PAUSE   : 0     # extra pause in case some arrays are extra latent (Dillingham)
+  FREQMIN       : 0.8   # minimum frequency
+  FREQMAX       : 5.0   # maximum frequency
+  TAPER         : 5.0   # seconds to taper beginning and end of trace before filtering
+  WINDOW_LENGTH : 30    # window length for each calculation [seconds]
+  OVERLAP       : 15    # amount of overlap between windows [seconds]
+  MIN_CHAN      : 3     # minimum number of channels needed to perform inversion
+  LTS_ALPHA     : 0.75  # decimal [0.50, 1.0] amount of data to keep in the subsets
+
+  # PLOTTING PARAMETERS
+  PLOT_MCCM     : True  # make MdCCM scatter subplot
+  MCTHRESH      : 0.6   # where to draw the threshold line in MCCM plot
+  AZ_MIN        : 0     # minimum azimuth to plot
+  AZ_MAX        : 360   # maximum azimuth to plot
+  VEL_MIN       : 0.25  # minimum sound speed range
+  VEL_MAX       : 0.45  # maximum sound speed range
+  ARRAY_LABEL   : Infrasound
+########################################
+########################################
+
+
+# Define arrays to be processed
+NETWORKS:
+  AVO:
+    - Kenai
+    - Sand Point
+    - Akutan
+    - Okmok
+    - Cleveland
+    - Adak
+    - Amchitka
+    - Dillingham
+  CNMI:
+    - Saipan
+    - Wake Island North
+    - Wake Island South
+
+
+# Configure each array's channels, back-azimuth targets, 
+# and (optionally) different pre-processing/plotting parameters
+Kenai:
+  <<: *defaults
+  NSLC: 
+    - AV.KENI.01.HDF
+    - AV.KENI.02.HDF
+    - AV.KENI.03.HDF
+    - AV.KENI.04.HDF
+    - AV.KENI.05.HDF
+    - AV.KENI.06.HDF
+  TARGETS: 
+    - Wrangell
+    - Spurr
+    - Redoubt
+    - Iliamna
+    - Augustine
+  AZ_MIN: 200
+  AZ_MAX: 80
+
+Sand Point:
+  <<: *defaults
+  NSLC: 
+    - AV.SDPI.01.HDF
+    - AV.SDPI.02.HDF
+    - AV.SDPI.03.HDF
+    - AV.SDPI.04.HDF
+    - AV.SDPI.05.HDF
+    - AV.SDPI.06.HDF
+  TARGETS: 
+    - Pavlof
+    - Veniaminof
+    - Shishaldin
+    - Trident
+  AZ_MIN: 240
+  AZ_MAX: 60
+  FREQMIN: 1
+
+Akutan:
+  <<: *defaults
+  NSLC:
+    - AV.AKS.01.HDF
+    - AV.AKS.02.HDF
+    - AV.AKS.03.HDF
+    - AV.AKS.04.HDF
+    - AV.AKS.05.HDF
+    - AV.AKS.06.HDF
+  TARGETS: 
+    - Makushin
+    - Akutan
+    - Shishaldin
+  FREQMIN: 1
+
+Okmok:
+  <<: *defaults
+  NSLC: 
+    - AV.OKIF.01.HDF
+    - AV.OKIF.02.HDF
+    - AV.OKIF.03.HDF
+    - AV.OKIF.04.HDF
+    - AV.OKIF.05.HDF
+    - AV.OKIF.06.HDF
+  TARGETS:
+    - Bogoslof
+    - Cleveland
+    - Okmok
+    - Makushin
+    - Shishaldin
+
+Cleveland:
+  <<: *defaults
+  NSLC:
+    - AV.CLCO.01.HDF
+    - AV.CLCO.02.HDF
+    - AV.CLCO.03.HDF
+    - AV.CLCO.04.HDF
+    - AV.CLCO.05.HDF
+    - AV.CLCO.06.HDF
+  TARGETS:
+    - Cleveland
+    - Bogoslof
+    - Shishaldin
+
+Adak:
+  <<: *defaults
+  NSLC:
+    - AV.ADKI.01.HDF
+    - AV.ADKI.02.HDF
+    - AV.ADKI.03.HDF
+    - AV.ADKI.04.HDF
+    - AV.ADKI.05.HDF
+    - AV.ADKI.06.HDF
+
+  TARGETS:
+    - Cleveland
+    - Great Sitkin
+    - Moffett
+    - Semisopochnoi
+    - Shishaldin
+
+Amchitka:
+  <<: *defaults
+  NSLC:
+    - AV.AMKA.01.HDF
+    - AV.AMKA.02.HDF
+    - AV.AMKA.03.HDF
+    - AV.AMKA.04.HDF
+    - AV.AMKA.05.HDF
+    - AV.AMKA.06.HDF
+  TARGETS:
+    - Little Sitkin
+    - Semisopochnoi
+    - Gareloi
+  AZ_MIN: 270
+  AZ_MAX: 90
+
+Dillingham:
+  <<: *defaults
+  NSLC:
+    - AV.DLL.01.HDF
+    - AV.DLL.02.HDF
+    - AV.DLL.03.HDF
+    - AV.DLL.04.HDF
+    - AV.DLL.05.HDF
+    - AV.DLL.06.HDF
+  TARGETS:
+    - Spurr
+    - Bogoslof
+    - Veniaminof
+    - Semisopochnoi
+    - Trident
+    - Shishaldin
+  EXTRA_PAUSE: 90
+
+Saipan:
+  <<: *defaults
+  NSLC:
+    - MI.FLX.01.HDF
+    - MI.FLX.02.HDF
+    - MI.FLX.03.HDF
+    - MI.FLX.04.HDF
+    - MI.FLX.05.HDF
+    - MI.FLX.06.HDF
+  TARGETS:
+    - Anatahan
+    - Pagan
+  AZ_MIN: 205
+  AZ_MAX: 15
+
+Wake Island North: &hydro_defaults
+  <<: *defaults
+  NSLC:
+    - IM.H11N1.--.EDH
+    - IM.H11N2.--.EDH
+    - IM.H11N3.--.EDH
+  TARGETS:
+    - Saipan
+    - Anatahan
+    - Pagan
+    - Ahyi Seamount
+  FREQMIN: 1
+  FREQMAX: 10
+  VEL_MIN: 1.4
+  VEL_MAX: 1.6
+  AZ_MIN : 250
+  AZ_MAX : 290
+  ARRAY_LABEL: Hydroacoustic
+
+Wake Island South:
+  <<: *hydro_defaults
+  NSLC:
+    - IM.H11S1.--.EDH
+    - IM.H11S2.--.EDH
+    - IM.H11S3.--.EDH
+
+
+# Example of manual metadata entry:
+# Adak:
+#   <<: *defaults
+#   NSLC:
+#     AV.ADKI.01.HDF:
+#       lat: 51.86190727
+#       lon: -176.6438598
+#       gain: 11541.508142041417
+#     AV.ADKI.02.HDF:
+#       lat: 51.86324162
+#       lon: -176.6435998
+#       gain: 11541.508142041417
+
+
+# Example of manual target backazimuth entry:
+#   TARGETS:
+#     - Cleveland
+#     - Some Place: 240
+
+## optional urls that get linked from the iPensive webpage
+EXTRA_LINKS:
+  - Data Output: https://avosouth.wr.usgs.gov/infrasound/ascii_output/
+  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
+  - AK Travel Times: https://avosouth.wr.usgs.gov/infrasound/ak_traveltimes.html
+  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
+  - CNMI Travel Times: https://avosouth.wr.usgs.gov/infrasound/cnmi_traveltimes.html

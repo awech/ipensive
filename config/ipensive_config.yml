@@ -1,0 +1,64 @@
+########## Data Source ##########
+CLIENT_TYPE: earthworm
+HOSTNAME: <ip_address>
+PORT: <int>
+TIMEOUT: 10       # optional. Defaults to 30
+#################################
+
+############ Output #############
+OUT_WEB_DIR: <path_to_web_output>
+OUT_ASCII_DIR: <path_to_ascii_output>
+LOGS_DIR: <path_to_logs>
+#################################
+
+###### Targets & Metadata #######
+STATION_XML: ../data/stations.xml
+TARGETS_FILE: ../data/volcano_list.txt
+#################################
+
+# Optional array config file location.
+# This can be set here, or as an environment variable.
+# If neither is set, it defaults to ../config/arrays_config.yml
+# 
+# ARRAYS_CONFIG: <path_to_arrays_config.yml>
+
+
+# Example data source configurations:
+############ Winston ############
+# CLIENT_TYPE: earthworm
+# HOSTNAME: ip_address
+# PORT: number
+# TIMEOUT: 10       # optional. Defaults to 30
+#################################
+
+############## CWB ##############
+# CLIENT_TYPE: earthworm
+# HOSTNAME: ip_address
+# PORT: number
+# TIMEOUT: 10       # optional. Defaults to 30
+#################################
+
+############# FDSN ##############
+# CLIENT_TYPE: fdsn
+# HOSTNAME: url (or obspy mapped name: e.g. IRIS)
+# TIMEOUT: 10       # optional. Defaults to 30
+#################################
+
+########## LOCAL FDSN ###########
+# CLIENT_TYPE: local_fdsn
+# LOCAL_FDSN: local_url (e.g. http://localhost:8080/fdsnws/dataselect)
+# TIMEOUT: 10       # optional. Defaults to 30
+#################################
+
+############## SDS ##############
+# CLIENT_TYPE: sds
+# DIRECTORY: <path_to_data_directory>
+# FMT: {network}/{year}/{doy:03d}/{station}.{network}.{year}.{doy:03d}
+#################################
+
+############ seedlink ############
+# CLIENT_TYPE: seedlink
+# HOSTNAME: seedlink_hostname
+# PORT: seedlink_port
+# TIMEOUT: 10       # optional. Defaults to 30.
+#################################
