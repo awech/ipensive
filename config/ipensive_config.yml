@@ -6,9 +6,9 @@ TIMEOUT: 10        # optional. Defaults to 30
 #################################
 
 ############ Output #############
-OUT_WEB_DIR: ../tests/html
-OUT_ASCII_DIR: ../tests/ascii_output
-LOGS_DIR: ../tests/logs
+OUT_WEB_DIR: ../output/html
+OUT_ASCII_DIR: ../output/ascii_output
+LOGS_DIR: ../output/logs
 #################################
 
 ###### Targets & Metadata #######
