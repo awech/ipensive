@@ -220,18 +220,18 @@ def get_target_backazimuth(st, config, array_params):
 
     tmp_targets = []
     tmp_baz = []
-    for target in array_params["TARGETS"]:
-        if type(target) is str:
+    
+    if isinstance(array_params["TARGETS"], dict):
+        for target in array_params["TARGETS"]:
+            tmp_targets.append(target)
+            tmp_baz.append(array_params["TARGETS"][target])
+    elif isinstance(array_params["TARGETS"], list):
+        for target in array_params["TARGETS"]:
             # If the target is a string, look up its coordinates in the CSV
             df = DF[DF["Target"] == target]
             _, baz, _ = gps2dist_azimuth(lat0, lon0, df.iloc[0]["Latitude"], df.iloc[0]["Longitude"])
             tmp_targets.append(target)
             tmp_baz.append(baz)
-        elif type(target) is dict:
-            # If the target is a dictionary, use the provided backazimuth
-            t_name = list(target.keys())[0]
-            tmp_targets.append(t_name)
-            tmp_baz.append(target[t_name])
 
     # Add the calculated backazimuths to the array parameters
     for t, baz in zip(tmp_targets, tmp_baz):

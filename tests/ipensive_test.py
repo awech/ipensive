@@ -259,3 +259,19 @@ def test_array_processing(tmp_path):
     fig = ap.process_array(config, ARRAY, utc(T0), return_figure=True)
 
     assert fig is not None
+
+
+def test_manual_metadata(tmp_path):
+    from obspy import UTCDateTime as utc
+    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+
+    config['OUT_ASCII_DIR'] = tmp_path / "ascii"
+    config['OUT_VALVE_DIR'] = tmp_path / "valve"
+    config['OUT_WEB_DIR'] = tmp_path / "web"
+
+    config["plot"] = True
+
+    fig = None
+    fig = ap.process_array(config, "Wake Island South", utc(T0), return_figure=True)
+
+    assert fig is not None

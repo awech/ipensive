@@ -169,17 +169,22 @@ def add_metadata(st, config, array_name, skip_chans=[]):
 
     warnings.simplefilter("ignore", UserWarning, append=True)
 
+    lat_list = []
+    lon_list = []
+
     if isinstance(config[array_name]["NSLC"], dict):
         my_log.info(f"Adding coordinate info for {array_name} directly from config file")
         st = add_coordinate_info(st, config, array_name)
-        return st
+        for tr in st:
+            lat_list.append(tr.stats.coordinates.latitude)
+            lon_list.append(tr.stats.coordinates.longitude)
+        return st, lat_list, lon_list
 
     if "STATION_XML" in config.keys():
         my_log.info(f"Adding metadata from {config['STATION_XML']}")
         inventory = read_inventory(config["STATION_XML"])
 
-    lat_list = []
-    lon_list = []
+
     for tr in st:
         if tr.id in skip_chans:
             my_log.warning(f"Skipping metadata for {tr.id} due to missing data")
