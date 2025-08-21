@@ -260,6 +260,9 @@ def test_array_processing(tmp_path):
 
     assert fig is not None
 
+    image_files = list(tmp_path.rglob('*.png'))
+    assert len(image_files) == 0
+
 
 def test_manual_metadata(tmp_path):
     from obspy import UTCDateTime as utc
@@ -271,7 +274,7 @@ def test_manual_metadata(tmp_path):
 
     config["plot"] = True
 
-    fig = None
-    fig = ap.process_array(config, "Wake Island South", utc(T0), return_figure=True)
+    ap.process_array(config, "Wake Island South", utc(T0), return_figure=False)
 
-    assert fig is not None
+    image_files = list(tmp_path.rglob('*.png'))
+    assert len(image_files) == 2
