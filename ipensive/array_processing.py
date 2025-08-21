@@ -5,16 +5,16 @@ Modified on 15-May-2025
 """
 
 import os
-import numpy as np
-from pathlib import Path
-import time
-import jinja2
-from obspy.core import UTCDateTime as utc
-from matplotlib import dates
-from . import ipensive_utils as utils
-from .plotting import plot_results
 import argparse
 import logging
+import time
+import pandas as pd
+from obspy import UTCDateTime as utc
+from . import ipensive_utils as utils
+from .plotting_utils import plot_results, save_figure
+from . import data_utils
+from .metadata_utils import add_metadata
+
 from lts_array import ltsva
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning, append=True)
@@ -83,44 +83,44 @@ def get_starttime(config, args):
     if args.time:
         # Use the provided time argument
         T0 = utc(args.time)
-        delay = 0
+        wait = 0
     else:
         # Use the current UTC time and add latency and window length
         T0 = utc.utcnow()
-        delay = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
-        my_log.info(f"Waiting {delay:g} seconds")
+        wait = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
 
     # Round down to the nearest 10-minute interval
     T0 = utc(T0.strftime(date_fmt)[:-1] + "0")
+    earliest_start = T0 + wait
+    delay = max(0, earliest_start - utc.utcnow())
 
     return T0, delay
 
 
-def write_html(config):
-    """
-    Generate an HTML file for web output.
+def do_LTS(st, array_params, lat_list, lon_list, skip_chans):
 
-    Args:
-        config (dict): Configuration dictionary.
-
-    Returns:
-        None
-    """
-    
-    template_file = Path(__file__).parent.parent / "templates" / "index.template"
-    with open(template_file, "r") as f:
-        template = jinja2.Template(f.read())
-    html = template.render(
-        networks=config["network_list"],
-        arrays=config["NETWORKS"],
-        extra_links=config["EXTRA_LINKS"],
+    my_log.info("Performing LTS analysis...")
+    overlap_fraction = array_params["OVERLAP"] / array_params["WINDOW_LENGTH"]
+    ALPHA = array_params["LTS_ALPHA"] if len(st) > 3 else 1.0
+    skip_inds = [i for i, tr in enumerate(st) if tr.id in skip_chans]
+    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(
+        st.copy(), lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA, remove_elements=skip_inds
     )
-    out_file = Path(config["OUT_WEB_DIR"]) / "index.html"
-    with open(out_file, "w") as f:
-        f.write(html)
+
+    df = pd.DataFrame({
+        "Time": t,
+        "Array": array_params["ARRAY_NAME"],
+        "Azimuth": azimuth,
+        "Velocity": 1000 * velocity, # Convert velocity to m/s
+        "MCCM": mccm,
+        "Pressure": data_utils.get_pressures(st, array_params),
+        "Sigma_tau": sigma_tau,
+    })
+
+    return df, lts_dict
 
 
-def process_array(config, array_name, T0):
+def process_array(config, array_name, T0, return_figure=False):
     """
     Process a single array for the specified time window.
 
@@ -130,8 +130,9 @@ def process_array(config, array_name, T0):
         T0 (obspy.UTCDateTime): End time of the processing window.
 
     Returns:
-        None
+        matplotlib figure or None
     """
+
     array_params = config[array_name]
     t1 = T0 - array_params["DURATION"]  # Start time of the processing window
     t2 = T0  # End time of the processing window
@@ -141,123 +142,52 @@ def process_array(config, array_name, T0):
 
     my_log.info("--- " + array_params["ARRAY_NAME"] + " ---")
     my_log.info(f"{t1.strftime('%Y-%b-%d %H:%M')} - {t2.strftime('%H:%M')}")
-    if os.getenv("FROMCRON") == "yep":
-        time.sleep(array_params["EXTRA_PAUSE"])  # Pause if running from a cron job
 
-    #### Download data ####
+    # Check for minimum channels
     if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
         my_log.warning("Not enough channels defined.")
-        return
+        return None
+    # Check for latency delay
+    if os.getenv("FROMCRON") == "yep":
+        if "EXTRA_PAUSE" in array_params:
+            time.sleep(array_params["EXTRA_PAUSE"])  # Pause if running from a cron job
 
-    st = utils.grab_data(
-        array_params["CLIENT"],
-        array_params["NSLC"],
-        T1,
-        T2,
-    )
+    # Download data
+    st = data_utils.grab_data(array_params["CLIENT"], array_params["NSLC"], T1, T2)
+    # st.write("test_raw.mseed")
+    
+    # Check data quality
+    good_data, skip_chans = data_utils.QC_data(st, array_params)
+    if not good_data:
+        return None
 
-    #### Check for enough data ####
-    check_st = st.copy()
-    skip_chans = []
-    for tr in check_st:
-        if np.sum(np.abs(tr.data)) == 0:  # Check for blank traces
-            skip_chans.append(tr.id)
-            check_st.remove(tr)
-    if len(check_st) < array_params["MIN_CHAN"]:
-        my_log.warning("Too many blank traces. Skipping.")
-        return
-    ########################
+    # Add metadata or coordinates
+    st, lat_list, lon_list = add_metadata(st, config, array_name, skip_chans)
 
-    #### Check for gappy data ####
-    for tr in check_st:
-        if np.any([np.any(tr.data == 0)]):  # Check for gaps in data
-            check_st.remove(tr)
-    if len(check_st) < array_params["MIN_CHAN"]:
-        my_log.warning("Too gappy. Skipping.")
-        return
-    ########################
-
-    #### Add metadata or coordinates ####
-    if isinstance(array_params["NSLC"], dict):
-        st = utils.add_coordinate_info(st, config, array_name)
-    else:
-        st = utils.add_metadata(st, config, skip_chans)
+    # Add volcano backazimuths
     array_params = utils.get_target_backazimuth(st, config, array_params)
-    ########################
 
-    #### Preprocess data ####
-    for tr in st:
-        if tr.id in skip_chans:
-            continue
-        if isinstance(array_params["NSLC"], dict):
-            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
-        else:
-            tr.remove_sensitivity(tr.inventory)
-    st.detrend("demean")
-    st.taper(max_percentage=None, max_length=array_params["TAPER"])
-    st.filter(
-        "bandpass",
-        freqmin=array_params["FREQMIN"],
-        freqmax=array_params["FREQMAX"],
-        corners=2,
-        zerophase=True,
-    )
-    st.trim(t1, t2 + array_params["WINDOW_LENGTH"])
-    ########################
+    # Preprocess data
+    st = data_utils.preprocess_data(st, t1, t2, skip_chans, array_params)
+    # st.write("test_preprocessed.mseed")
 
-    #### Perform array processing ####
-    lat_list = []
-    lon_list = []
-    for tr in st:
-        lat_list.append(tr.stats.coordinates.latitude)
-        lon_list.append(tr.stats.coordinates.longitude)
-    overlap_fraction = array_params["OVERLAP"] / array_params["WINDOW_LENGTH"]
-    ALPHA = array_params["LTS_ALPHA"] if len(st) > 3 else 1.0
-    skip_inds = [i for i, tr in enumerate(st) if tr.id in skip_chans]
-    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(
-        st.copy(), lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA, remove_elements=skip_inds
-    )
-    pressure = []
-    for tr_win in st[0].slide(
-        window_length=array_params["WINDOW_LENGTH"],
-        step=array_params["WINDOW_LENGTH"] - array_params["OVERLAP"],
-    ):
-        pressure.append(np.max(np.abs(tr_win.data)))
-    pressure = np.array(pressure)
+    # Perform array processing
+    results_df, lts_dict = do_LTS(st, array_params, lat_list, lon_list, skip_chans)
+    # results_df.to_csv("test_results.csv", index=False, float_format='%.7f')
 
-    #### Generate plots ####
-    if config["plot"]:
-        try:
-            my_log.info("Setting up web output folders")
-            utils.web_folders(t2, config, array_params)
-            my_log.info("Making plot...")
-            for plotsize in ["big", "small"]:
-                plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, config, array_params, plotsize)
-        except Exception:
-            import traceback
-            my_log.error("Something went wrong making the plot:")
-            my_log.error(traceback.format_exc())
+    # Write output files
+    utils.write_data_files(t2, st, results_df, config)
 
-    #### Write output files ####
-    if 'OUT_VALVE_DIR' in config.keys():
-        try:
-            my_log.info('Writing CSV file...')
-            t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-            sta_name = st[0].stats.station
-            utils.write_valve_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, sta_name, config)
-        except Exception:
-            import traceback
-            my_log.error('Something went wrong writing the CSV file:')
-            my_log.error(traceback.format_exc())
+    # Generate plots
+    if not config["plot"]:
+        return None
 
-    if 'OUT_ASCII_DIR' in config.keys() and config['OUT_ASCII_DIR']:
-        try:
-            my_log.info('Writing ASCII file...')
-            t = np.array([utc(dates.num2date(ti)).strftime('%Y-%m-%d %H:%M:%S') for ti in t])
-            utils.write_ascii_file(t2, t, pressure, azimuth, velocity, mccm, sigma_tau, array_name, config)
-        except Exception:
-            import traceback
-            my_log.error('Something went wrong writing the ASCII file:')
-            my_log.error(traceback.format_exc())
+    if not return_figure:
+        utils.web_folders(t2, config, array_params)    
+        for plotsize in ["big", "small"]:
+            fig = plot_results(t2, st, results_df, lts_dict, skip_chans, array_params, plotsize)
+            save_figure(fig, config, array_params, t2, plotsize)
+    else:
+        fig = plot_results(t2, st, results_df, lts_dict, skip_chans, array_params, "big")
 
-    return
+    return fig
