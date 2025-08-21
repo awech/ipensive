@@ -83,7 +83,7 @@ def get_starttime(config, args):
     if args.time:
         # Use the provided time argument
         T0 = utc(args.time)
-        delay = 0
+        wait = 0
     else:
         # Use the current UTC time and add latency and window length
         T0 = utc.utcnow()
