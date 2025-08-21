@@ -24,8 +24,10 @@ if __name__ == "__main__":
     my_log.info(f"Using ipensive config file: {ipensive_config_file}")
     my_log.info(f"Using array config file: {array_config_file}")
     my_log.info("Process Started")
-    
-    time.sleep(delay)  # Pause to allow for data latency to catch up
+
+    if delay > 0:
+        my_log.info(f"Waiting {delay:.1f} seconds for data latency to catch up")
+        time.sleep(delay)
     timer_0 += delay
 
     if args.array:

@@ -87,11 +87,12 @@ def get_starttime(config, args):
     else:
         # Use the current UTC time and add latency and window length
         T0 = utc.utcnow()
-        delay = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
-        my_log.info(f"Waiting {delay:g} seconds")
+        wait = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
 
     # Round down to the nearest 10-minute interval
     T0 = utc(T0.strftime(date_fmt)[:-1] + "0")
+    earliest_start = T0 + wait
+    delay = max(0, earliest_start - utc.utcnow())
 
     return T0, delay
 
