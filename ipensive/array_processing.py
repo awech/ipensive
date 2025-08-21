@@ -130,7 +130,7 @@ def process_array(config, array_name, T0, return_figure=False):
         T0 (obspy.UTCDateTime): End time of the processing window.
 
     Returns:
-        None
+        matplotlib figure or None
     """
 
     array_params = config[array_name]
@@ -146,7 +146,7 @@ def process_array(config, array_name, T0, return_figure=False):
     # Check for minimum channels
     if len(array_params["NSLC"]) < array_params["MIN_CHAN"]:
         my_log.warning("Not enough channels defined.")
-        return
+        return None
     # Check for latency delay
     if os.getenv("FROMCRON") == "yep":
         if "EXTRA_PAUSE" in array_params:
@@ -159,7 +159,7 @@ def process_array(config, array_name, T0, return_figure=False):
     # Check data quality
     good_data, skip_chans = data_utils.QC_data(st, array_params)
     if not good_data:
-        return
+        return None
 
     # Add metadata or coordinates
     st, lat_list, lon_list = add_metadata(st, config, array_name, skip_chans)
