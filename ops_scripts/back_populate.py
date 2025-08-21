@@ -91,12 +91,15 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
             array_list = config["array_list"]
         for array_name in array_list:
             # check if you should process this time window
-            file = utils.get_file_path(t, array_name, config)
+            file = utils.get_pngfile_path(t, array_name, config)
             if not file.exists() or OVERWRITE:
                 process_array(config, array_name, utc(t))
                 my_log.info("\n")
             else:
                 my_log.info("File exists. No overwrite. Skip " + array_name)
+    my_log.info("Back population complete.")
+    my_log.info("Writing .html file")
+    utils.write_html(config)
 
 
 if __name__ == '__main__':
