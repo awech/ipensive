@@ -129,7 +129,8 @@ if __name__ == '__main__':
     my_log.info(f"Array config: {array_config_file}")
     for key, value in args.__dict__.items():
         if key in ["starttime", "endtime"]:
-            value = utc(value).strftime("%Y-%m-%d %H:%M:%S")
+            if value is not None:
+                value = utc(value).strftime("%Y-%m-%d %H:%M:%S")
         my_log.info(f"{key}: {value}")
     my_log.info("\n")
 
@@ -153,6 +154,10 @@ if __name__ == '__main__':
         elif args.endtime is not None:
             T2 = utc(args.endtime)
             T1 = T2 - dt
+        else:
+            T2 = utc.utcnow()
+            T1 = T2 - dt
+            my_log.info(f"No start or end time specified. Using current time {T2.strftime('%Y-%m-%d %H:%M:%S')} as end time")
 
     if "T1" not in locals() and "T2" not in locals():
         raise ValueError("Must define start (-s) and end (-e) times, or one start/end with a duration (-dt)")
