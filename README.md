@@ -2,7 +2,8 @@
 Infrasound array processing for volcano monitoring. Developed for operational use at the Alaska Volcano Observatory and slightly generalized for broader use.
 
 ### Dependencies
-Tested on Python 3.12
+![Static Badge](https://img.shields.io/badge/3.10%20%7C%203.11%20%7C%203.12-blue?label=Python)
+
 
 - obspy
 - pandas
