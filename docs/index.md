@@ -2,15 +2,15 @@
 Navigate to the `ops_scripts/` subdirectory 
 ```bash
 ipensive
-├── config
-├── data
-├── src
-├── ops_scripts
+├── config/
+├── data/
+├── src/
+├── ops_scripts/
 │   ├── run_processing.py
 │   ├── update_metadata.py
 │   └── back_populate.py
-├── templates
-├── tests
+├── templates/
+├── tests/
 └── ...
 ```
 
@@ -20,16 +20,16 @@ cd ops_scripts
 python run_processing.py
 ```
 
-This should create an `output/` subdirectory with an `html/` folder and `ascii_output/` folder:
+This should create an `output/` folder with  `output/html/` and `output/ascii_output/` subdirectories:
 ```bash
 ipensive
-├── config
-├── src
-├── ops_scripts
+├── config/
+├── src/
+├── ops_scripts/
 ...
-├── output
-│   ├── html
-│   └── ascii_output
+├── output/
+│   ├── html/
+│   └── ascii_output/
 └── ...
 ```
 
@@ -40,11 +40,11 @@ Navigate to and open `output/html/index.html` with your web browser to verify th
 There are 2 configuration files in `config/`:
 ```bash
 ipensive
-├── config
+├── config/
 │   ├── ipensive_config.yml
 │   └── arrays_config.yml
-├── src
-├── ops_scripts
+├── src/
+├── ops_scripts/
 └── ...
 ```
 
