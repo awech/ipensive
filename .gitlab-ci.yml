@@ -30,7 +30,7 @@ build:image:
     - docker push $CI_REGISTRY_IMAGE:${CI_COMMIT_SHA}
     - docker push $CI_REGISTRY_IMAGE:latest
 
-test-coverage-style:
+test-coverage:
   stage: test
   before_script:
     - pip install --upgrade pip
