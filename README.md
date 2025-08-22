@@ -27,6 +27,7 @@ Infrasound array processing for volcano monitoring. Developed for operational us
 
 3. **Install ipensive as a package:**
     ```bash
+    pip install -r requirements.txt
     pip install -e .
     ```
 
