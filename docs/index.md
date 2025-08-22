@@ -1,5 +1,5 @@
 ## Quick-start
-Navigate to the `/ops_scripts` subdirectory 
+Navigate to the `ops_scripts/` subdirectory 
 ```bash
 ipensive
 ├── config
@@ -20,7 +20,7 @@ cd ops_scripts
 python run_processing.py
 ```
 
-This should create an `/output` subdirectory with an `html` folder and `ascii_output` folder:
+This should create an `output/` subdirectory with an `html/` folder and `ascii_output/` folder:
 ```bash
 ipensive
 ├── config
@@ -33,11 +33,11 @@ ipensive
 └── ...
 ```
 
-Navigate to and open `/output/html/index.html` with your web browser to verify the webpage and images were generated.
+Navigate to and open `output/html/index.html` with your web browser to verify the webpage and images were generated.
 
 
 ## Configuration Files
-There are 2 configuration files in `/config`:
+There are 2 configuration files in `config/`:
 ```bash
 ipensive
 ├── config
@@ -91,17 +91,17 @@ This config file defines:
 
 
 ### Usage
-Operational scripts are located in `/ops_scripts` directory
+Operational scripts are located in `ops_scripts/` directory
 
 1. **Manually**
 
     ```python run_processing.py.py -c <config_file> -t <yyyymmddHHMM>```
 
-     `-c` and `-t` are optional. If `-c` is not supplied, the config defaults to either the path defined by environment varable `IPENSIVE_CONFIG` (1st) or `/config/ipensive_config.yml` (2nd). If `-t` is not supplied, the time is rounded to the most recent 10-minute mark. See ```python run_processing.py -h``` for more options. In particular, the ```-a``` option is useful for processing a single array if more than one are defined in the arrays config file.
+     `-c` and `-t` are optional. If `-c` is not supplied, the config defaults to either the path defined by environment varable `IPENSIVE_CONFIG` (1st) or `config/ipensive_config.yml` (2nd). If `-t` is not supplied, the time is rounded to the most recent 10-minute mark. See ```python run_processing.py -h``` for more options. In particular, the ```-a``` option is useful for processing a single array if more than one are defined in the arrays config file.
 
 2. **Automatically on a cron**
 
-    ```*/10 * * * * python /path_to_file/run_processing.py.py >> /dev/null 2>&1```
+    ```*/10 * * * * python /<path_to_file>/run_processing.py.py >> /dev/null 2>&1```
 
 3. **Back populate**
 
