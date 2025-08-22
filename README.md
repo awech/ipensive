@@ -40,7 +40,7 @@ Change in the `/ops_scripts` subdirectory
 ipensive
 ├── config
 ├── data
-├── ipensive
+├── src
 ├── ops_scripts
 │   ├── run_processing.py
 │   ├── update_metadata.py
@@ -60,7 +60,7 @@ This should create an `/output` subdirectory with an `html` folder and `ascii_ou
 ```bash
 ipensive
 ├── config
-├── ipensive
+├── src
 ├── ops_scripts
 ...
 ├── output
@@ -79,7 +79,7 @@ ipensive
 ├── config
 │   ├── ipensive_config.yml
 │   └── arrays_config.yml
-├── ipensive
+├── src
 ├── ops_scripts
 └── ...
 ```
