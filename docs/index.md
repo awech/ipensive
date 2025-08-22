@@ -1,5 +1,5 @@
 ## Quick-start
-Change in the `/ops_scripts` subdirectory 
+Navigate to the `/ops_scripts` subdirectory 
 ```bash
 ipensive
 ├── config
