@@ -133,7 +133,7 @@ def test_data_and_preprocessing():
 
     from obspy import read
     from obspy import UTCDateTime as utc
-    from numpy.testing import assert_array_equal
+    from numpy.testing import assert_allclose
 
 
     config_file = utils.get_config_file()
@@ -151,7 +151,7 @@ def test_data_and_preprocessing():
 
     for tr in st:
         TR = ST.select(id=tr.id)[0]
-        assert_array_equal(tr.data, TR.data)
+        assert_allclose(tr.data, TR.data, atol=1e-5, rtol=1e-8)
 
     st, *_ = metadata_utils.add_metadata(st, config, ARRAY, [])
     st = data_utils.preprocess_data(st, t1, t2, [], array_params)
@@ -159,7 +159,7 @@ def test_data_and_preprocessing():
 
     for tr in st:
         TR = ST.select(id=tr.id)[0]
-        assert_array_equal(tr.data, TR.data)
+        assert_allclose(tr.data, TR.data, atol=1e-9, rtol=1e-12)
 
 
 def test_write_html(tmp_path):

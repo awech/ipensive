@@ -12,6 +12,7 @@ cache:
 
 stages:
   - build
+  - test
 
 build:image:
   stage: build
@@ -28,3 +29,15 @@ build:image:
       .
     - docker push $CI_REGISTRY_IMAGE:${CI_COMMIT_SHA}
     - docker push $CI_REGISTRY_IMAGE:latest
+
+test-coverage:
+  stage: test
+  before_script:
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install -e .
+    - pip install coverage pytest
+  script:
+    - coverage run -m pytest
+    - coverage report
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
