@@ -35,14 +35,21 @@ def parse_args():
         "--starttime",
         type=str,
         help="Start time in UTC: YYYYMMDDHHMM",
-        required=True,
+        required=False,
     )
     parser.add_argument(
         "-e",
         "--endtime",
         type=str,
         help="End time in UTC: YYYYMMDDHHMM",
-        required=True,
+        required=False,
+    )
+    parser.add_argument(
+        "-dt",
+        "--duration",
+        type=str,
+        help="Duration in hours (\"h\") days (\"d\") before present to process (e.g. -dt 3h)",
+        required=False,
     )
     parser.add_argument(
         "-o",
@@ -121,7 +128,37 @@ if __name__ == '__main__':
     my_log = logging.getLogger(__name__)
     my_log.info(f"Array config: {array_config_file}")
     for key, value in args.__dict__.items():
+        if key in ["starttime", "endtime"]:
+            value = utc(value).strftime("%Y-%m-%d %H:%M:%S")
         my_log.info(f"{key}: {value}")
     my_log.info("\n")
 
-    run_backpopulate(config, args.starttime, args.endtime, args.overwrite, ARRAYS)
+    if args.starttime is not None and args.endtime is not None:
+        T1 = args.starttime
+        T2 = args.endtime
+        if utc(T1) > utc(T2):
+            raise ValueError("Start time must be before end time.")
+    elif args.duration is not None:
+        duration_value = int(args.duration[:-1])
+        if args.duration.endswith("h"):
+            dt = pd.Timedelta(hours=duration_value)
+        elif args.duration.endswith("d"):
+            dt = pd.Timedelta(days=duration_value)
+        else:
+            raise ValueError("Invalid duration format. Use 'h' for hours or 'd' for days.")
+
+        if args.starttime is not None:
+            T1 = utc(args.starttime)
+            T2 = T1 + dt
+        elif args.endtime is not None:
+            T2 = utc(args.endtime)
+            T1 = T2 - dt
+
+    if "T1" not in locals() and "T2" not in locals():
+        raise ValueError("Must define start (-s) and end (-e) times, or one start/end with a duration (-dt)")
+
+    date_fmt = "%Y%m%d%H%M"
+    T1 = utc(T1).strftime(date_fmt)[:-1] + "0"
+    T2 = utc(T2).strftime(date_fmt)[:-1] + "0"
+
+    run_backpopulate(config, T1, T2, args.overwrite, ARRAYS)
