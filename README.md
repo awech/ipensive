@@ -56,7 +56,7 @@ cd ops_scripts
 python run_processing.py
 ```
 
-This should create an `/output` subdirectory with an `html` folder and `ascii_output`` folder:
+This should create an `/output` subdirectory with an `html` folder and `ascii_output` folder:
 ```bash
 ipensive
 ├── config
@@ -84,12 +84,12 @@ ipensive
 └── ...
 ```
 
-1.  [ipensive_config.yml](../config/ipensive_config.yml) controls the data source and the output locations
-2.  [arrays_config.yml](../config/arrays_config.yml) defines the arrays, processing parameters, and plot controls
+1.  [`ipensive_config.yml`](../config/ipensive_config.yml) controls the data source and the output locations
+2.  [`arrays_config.yml`](../config/arrays_config.yml) defines the arrays, processing parameters, and plot controls
 
 Both files have example/template entries in them to demonstrate the structure and available configuration options. The simplest step would be to edit these files in place with your arrays, data source, and desired output locations. The path to a separate `ipensive_config.yml` can also be provided as an argument to the scripts in `/ops_scripts`, and the path to `arrays_config.yml` can also be defined within `ipensive_config.yml`.
 
->[!TIP]
+>NOTE:
 >There is also the option to create an environment variables `IPENSIVE_CONFIG` and `ARRAYS_CONFIG` defining paths to separate locations of these configs. 
 
 
