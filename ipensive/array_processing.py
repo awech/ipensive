@@ -184,7 +184,7 @@ def process_array(config, array_name, T0, return_figure=False):
 
     if not return_figure:
         utils.web_folders(t2, config, array_params)    
-        for plotsize in ["big", "small"]:
+        for plotsize in ["big", "thumbnail"]:
             fig = plot_results(t2, st, results_df, lts_dict, skip_chans, array_params, plotsize)
             save_figure(fig, config, array_params, t2, plotsize)
     else:

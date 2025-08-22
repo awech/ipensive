@@ -226,7 +226,7 @@ def test_LTS_and_image_output(tmp_path):
     assert_frame_equal(expected_df, test_df.round(7))
 
     utils.web_folders(t2, config, array_params)
-    for plotsize in ["big", "small"]:
+    for plotsize in ["big", "thumbnail"]:
         fig = plotting_utils.plot_results(
             t2, st, test_df, lts_dict, skip_chans, array_params, plotsize
         )

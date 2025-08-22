@@ -134,7 +134,7 @@ def plot_cc_values(ax, T1, T2, df, array_params, plot_params):
     if plot_params["plot_size"] == "big":
         update_axes_and_ticks(ax, r"$M_{d}CCM$")
     else:
-        # Remove ticks and labels for smaller plots
+        # Remove ticks and labels for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
 
@@ -185,7 +185,7 @@ def plot_trace_velocities(ax, T1, T2, df, array_params, plot_params):
     if plot_params["plot_size"] == "big":
         update_axes_and_ticks(ax, "Trace Velocity\n [km/s]")
     else:
-        # Remove ticks and labels for smaller plots
+        # Remove ticks and labels for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
         ##########################################
@@ -261,7 +261,7 @@ def plot_back_azimuths(ax, T1, T2, df, array_params, plot_params):
         # Configure x-axis for larger plots
         update_axes_and_ticks(ax, "Back-Azimuth\n [deg]")
     else:
-        # Remove ticks for smaller plots
+        # Remove ticks for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
 
@@ -350,7 +350,7 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_para
         update_axes_and_ticks(ax, "")
 
     else:
-        # Remove ticks for smaller plots
+        # Remove ticks for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
     ax.invert_yaxis()
@@ -410,7 +410,7 @@ def save_figure(fig, config, array_params, t2, plot_size):
         config (dict): Configuration dictionary.
         array_params (dict): Array parameters.
         t2 (UTCDateTime): End time of the data window.
-        plot_size (str): Size of the plot ("big" or "small").
+        plot_size (str): Size of the plot ("big" or "thumbnail").
     """
     
     # Define output directories for plots
@@ -421,7 +421,7 @@ def save_figure(fig, config, array_params, t2, plot_size):
         filename = out_dir / (array_params["ARRAY_NAME"] + '_' + t2.strftime('%Y%m%d-%H%M') + '.png')
         fig.savefig(filename, dpi=72, format='png')
 
-    elif plot_size == "small":
+    elif plot_size == "thumbnail":
         filename = out_dir / (array_params["ARRAY_NAME"] + '_' + t2.strftime('%Y%m%d-%H%M') + '_thumb.png')
         fig.savefig(filename, format='png', pad_inches=0, dpi=72)
 
@@ -470,7 +470,7 @@ def plot_results(t2, st, df, lts_dict, skip_chans, array_params, plot_size):
         plot_params["hline_lw"] = 1
         plot_params["wm_font"] = 18
         left, right, top, bottom, hspace = 0.1, 0.9, 0.97, 0.05, 0.1
-    elif plot_size == "small":
+    elif plot_size == "thumbnail":
         size = (2.1, 2.75)
         plot_params["trace_lw"] = 0.1
         plot_params["scatter_lw"] = 0.1
