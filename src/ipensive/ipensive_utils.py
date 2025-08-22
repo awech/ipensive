@@ -39,7 +39,7 @@ def get_config_file():
         pathlib.Path: Path to the configuration file.
     """
 
-    default_config_file = Path(__file__).parent.parent / "config" / "ipensive_config.yml"
+    default_config_file = Path(__file__).parent.parent.parent / "config" / "ipensive_config.yml"
 
     if "IPENSIVE_CONFIG" in os.environ:
         env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
@@ -77,7 +77,7 @@ def load_config(config_file):
     elif "ARRAYS_CONFIG" in ipensive_config.keys():
         array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
-        array_file = Path(__file__).parent.parent / "config" / "arrays_config.yml"
+        array_file = Path(__file__).parent.parent.parent / "config" / "arrays_config.yml"
     my_log.info(f"Using arrays config file: {array_file}")
     with open(array_file, "r") as file:
         arrays_config = yaml.safe_load(file)
@@ -251,7 +251,7 @@ def write_html(config):
         None
     """
     
-    template_file = Path(__file__).parent.parent / "templates" / "index.template"
+    template_file = Path(__file__).parent.parent.parent / "templates" / "index.template"
     with open(template_file, "r") as f:
         template = jinja2.Template(f.read())
     html = template.render(
