@@ -90,7 +90,7 @@ This config file defines:
     - Any parameter set in `PARAMS` above can be customized for individual arrays here
 
 
-### Usage
+## Usage
 Operational scripts are located in `ops_scripts/` directory
 
 1. **Manually**

@@ -33,4 +33,5 @@ Infrasound array processing for volcano monitoring. Developed for operational us
 
     >Note: This will also install [lts_array](https://github.com/uafgeotools/lts_array) directly from GitHub.
 
-More usage information and documentation found [here](/docs/index.md)
+## Usage 
+#### Details and documentation found [here](/docs/index.md)
