@@ -111,7 +111,7 @@ This config file defines
     - `TARGETS_FILE`: <path_to_file> (.csv file with columns: `Target`,`Longitude`,`Latitude`)
 
 
-### Array Config: `arrays_config.yml`
+### Array config: `arrays_config.yml`
 This config file defines:
 
 1. **processing parameters** `PARAMS`
@@ -146,6 +146,12 @@ Operational scripts are located in `/ops_scripts` directory
     ```
 
     see ```python back_populate.py -h``` for more options.
+
+4. **Update Metadata**
+    ```bash
+    python update_metadata.py -c <config_file>
+    ```
+    This will update the `data/stations.xml` file with station-channel lat/lon information used for array processing. Ideally run somewhat periodically, though not as often as the array processing itself.
 
 
 ### Webpage configuration
