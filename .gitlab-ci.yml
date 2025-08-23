@@ -34,7 +34,6 @@ test-coverage:
   stage: test
   before_script:
     - pip install --upgrade pip
-    - pip install -r requirements.txt
     - pip install -e .
     - pip install coverage pytest
   script:

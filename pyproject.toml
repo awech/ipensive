@@ -44,3 +44,9 @@ version = {attr = "ipensive.__version__"}
 where = ["src"]
 
 [project.urls]
+
+[tool.coverage.run]
+omit = [
+    "src/lts_array/*",
+    "tests/*"
+]
