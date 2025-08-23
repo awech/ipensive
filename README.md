@@ -9,7 +9,8 @@ Infrasound array processing for volcano monitoring. Developed for operational us
 - jinja2
 - matplotlib
 - pyyaml
-- lts_array (from GitHub: [uafgeotools/lts_array](https://github.com/uafgeotools/lts_array))
+- numba
+
 
 ## Installation
 
@@ -27,11 +28,10 @@ Infrasound array processing for volcano monitoring. Developed for operational us
 
 3. **Install ipensive as a package:**
     ```bash
-    pip install -r requirements.txt
     pip install -e .
     ```
 
-    >Note: This will also install [lts_array](https://github.com/uafgeotools/lts_array) directly from GitHub.
+    >Note: This will also install Jordan Bishop's [lts_array](https://github.com/uafgeotools/lts_array) which is included in ipensive package
 
 ## Usage 
 #### Details and documentation found [here](/docs/index.md)
