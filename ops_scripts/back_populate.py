@@ -35,14 +35,21 @@ def parse_args():
         "--starttime",
         type=str,
         help="Start time in UTC: YYYYMMDDHHMM",
-        required=True,
+        required=False,
     )
     parser.add_argument(
         "-e",
         "--endtime",
         type=str,
         help="End time in UTC: YYYYMMDDHHMM",
-        required=True,
+        required=False,
+    )
+    parser.add_argument(
+        "-dt",
+        "--duration",
+        type=str,
+        help="Duration in hours (\"h\") days (\"d\") before present to process (e.g. -dt 3h)",
+        required=False,
     )
     parser.add_argument(
         "-o",
@@ -91,12 +98,15 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
             array_list = config["array_list"]
         for array_name in array_list:
             # check if you should process this time window
-            file = utils.get_file_path(t, array_name, config)
+            file = utils.get_pngfile_path(t, array_name, config)
             if not file.exists() or OVERWRITE:
                 process_array(config, array_name, utc(t))
                 my_log.info("\n")
             else:
                 my_log.info("File exists. No overwrite. Skip " + array_name)
+    my_log.info("Back population complete.")
+    my_log.info("Writing .html file")
+    utils.write_html(config)
 
 
 if __name__ == '__main__':
@@ -105,10 +115,10 @@ if __name__ == '__main__':
     """
 
     args = parse_args()  # Parse command-line arguments
-    config_file = args.config
-    config = utils.load_config(config_file)
+    ipensive_config_file = args.config
+    config, array_config_file = utils.load_config(ipensive_config_file)
     config["plot"] = not args.no_plot
-    print(args)
+
     if args.arrays is not None:
         ARRAYS = list(args.arrays.replace("_"," ").split(","))
     else:
@@ -116,5 +126,44 @@ if __name__ == '__main__':
 
     utils.setup_logging(utc.utcnow(), config, arg_opt=args.log)
     my_log = logging.getLogger(__name__)
+    my_log.info(f"Array config: {array_config_file}")
+    for key, value in args.__dict__.items():
+        if key in ["starttime", "endtime"]:
+            if value is not None:
+                value = utc(value).strftime("%Y-%m-%d %H:%M:%S")
+        my_log.info(f"{key}: {value}")
+    my_log.info("\n")
 
-    run_backpopulate(config, args.starttime, args.endtime, args.overwrite, ARRAYS)
+    if args.starttime is not None and args.endtime is not None:
+        T1 = args.starttime
+        T2 = args.endtime
+        if utc(T1) > utc(T2):
+            raise ValueError("Start time must be before end time.")
+    elif args.duration is not None:
+        duration_value = args.duration[:-1]
+        if args.duration.endswith("h"):
+            dt = pd.Timedelta(hours=int(duration_value))
+        elif args.duration.endswith("d"):
+            dt = pd.Timedelta(days=int(duration_value))
+        else:
+            raise ValueError("Invalid duration format. Use 'h' for hours or 'd' for days.")
+
+        if args.starttime is not None:
+            T1 = utc(args.starttime)
+            T2 = T1 + dt
+        elif args.endtime is not None:
+            T2 = utc(args.endtime)
+            T1 = T2 - dt
+        else:
+            T2 = utc.utcnow()
+            T1 = T2 - dt
+            my_log.info(f"No start or end time specified. Using current time {T2.strftime('%Y-%m-%d %H:%M:%S')} as end time")
+
+    if "T1" not in locals() and "T2" not in locals():
+        raise ValueError("Must define start (-s) and end (-e) times, or one start/end with a duration (-dt)")
+
+    date_fmt = "%Y%m%d%H%M"
+    T1 = utc(T1).strftime(date_fmt)[:-1] + "0"
+    T2 = utc(T2).strftime(date_fmt)[:-1] + "0"
+
+    run_backpopulate(config, T1, T2, args.overwrite, ARRAYS)

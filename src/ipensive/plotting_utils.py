@@ -1,15 +1,18 @@
-import numpy as np
+import logging
 from pathlib import Path
+from copy import deepcopy
+from collections import Counter
+import numpy as np
 import matplotlib as m
 import matplotlib.pyplot as plt
 from matplotlib import dates
-from copy import deepcopy
-from collections import Counter
 from matplotlib import rcParams
 
 rcParams.update({"font.size": 10})  # Set default font size for plots
 m.use("Agg")  # Use a non-interactive backend for matplotlib
 ################################
+
+my_log = logging.getLogger(__name__)
 
 
 def missing_elements_adjust(st, skip_chans, array):
@@ -98,7 +101,7 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_params):
     ##########################################
 
 
-def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_params):
+def plot_cc_values(ax, T1, T2, df, array_params, plot_params):
     """
     Plots MCCM (Multi-Channel Cross-Correlation Matrix) values on the given matplotlib axis with color mapping and formatting.
 
@@ -106,8 +109,11 @@ def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_params):
         ax (matplotlib.axes.Axes): The axis on which to plot.
         T1 (matplotlib datenum): The start time for the x-axis limit.
         T2 (matplotlib datenum): The end time for the x-axis limit.
-        t (array-like): Time (datenum) values.
-        mccm (array-like): The MCCM values to plot on the y-axis and for color mapping.
+        df (DataFrame): DataFrame containing:
+                    Time: Array of timestamps for the results.
+                    MCCM: MCCM values for the results.
+                    Velocity: Trace velocities for the results.
+                    Azimuth: Back-azimuth values for the results.
         array_params (dict): Dictionary containing plot parameters, must include "MCTHRESH" for threshold line.
         plot_params (dict): Dictionary containing plot parameters, including size and line widths.
 
@@ -116,7 +122,7 @@ def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_params):
     """
 
     # Scatter plot of MCCM values with color mapping
-    sc = ax.scatter(t, mccm, c=mccm, s=plot_params["s_dot"], edgecolors="k", lw=plot_params["scatter_lw"], cmap=plot_params["cm"])
+    sc = ax.scatter(df["Time"], df["MCCM"], c=df["MCCM"], s=plot_params["s_dot"], edgecolors="k", lw=plot_params["scatter_lw"], cmap=plot_params["cm"])
     # Add a horizontal line for the MCCM threshold
     ax.axhline(array_params["MCTHRESH"], ls="--", lw=plot_params["hline_lw"], color="gray")
     # Adjust axis limits and scaling
@@ -128,14 +134,14 @@ def plot_cc_values(ax, T1, T2, t, mccm, array_params, plot_params):
     if plot_params["plot_size"] == "big":
         update_axes_and_ticks(ax, r"$M_{d}CCM$")
     else:
-        # Remove ticks and labels for smaller plots
+        # Remove ticks and labels for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
 
     return sc
 
 
-def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_params):
+def plot_trace_velocities(ax, T1, T2, df, array_params, plot_params):
     """
     Plots trace velocities on the given matplotlib axis with color mapping and formatting.
 
@@ -143,9 +149,11 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_para
         ax (matplotlib.axes.Axes): The axis on which to plot.
         T1 (matplotlib datenum): The start time for the x-axis limit.
         T2 (matplotlib datenum): The end time for the x-axis limit.
-        t (array-like): Time (datenum) values.
-        velocity (array-like): The trace velocities to plot.
-        mccm (array-like): The MCCM values for color mapping.
+        df (DataFrame): DataFrame containing:
+                    Time: Array of timestamps for the results.
+                    MCCM: MCCM values for the results.
+                    Velocity: Trace velocities for the results.
+                    Azimuth: Back-azimuth values for the results.
         array_params (dict): Dictionary containing plot parameters.
         plot_params (dict): Dictionary containing plot parameters, including size and line widths.
 
@@ -163,7 +171,7 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_para
         )
 
     # Scatter plot of trace velocities with color mapping based on MCCM values
-    sc = ax.scatter(t, velocity, c=mccm, s=plot_params["s_dot"], edgecolors="k", lw=plot_params["scatter_lw"], cmap=plot_params["cm"])
+    sc = ax.scatter(df["Time"], df["Velocity"]/1000, c=df["MCCM"], s=plot_params["s_dot"], edgecolors="k", lw=plot_params["scatter_lw"], cmap=plot_params["cm"])
     # Set y-axis limits based on the array type
     if array_params["ARRAY_LABEL"] == "Hydroacoustic":
         ax.set_ylim(1.2, 1.8)  # Typical range for hydroacoustic arrays
@@ -177,14 +185,14 @@ def plot_trace_velocities(ax, T1, T2, t, velocity, mccm, array_params, plot_para
     if plot_params["plot_size"] == "big":
         update_axes_and_ticks(ax, "Trace Velocity\n [km/s]")
     else:
-        # Remove ticks and labels for smaller plots
+        # Remove ticks and labels for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
         ##########################################
     return sc
 
 
-def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
+def plot_back_azimuths(ax, T1, T2, df, array_params, plot_params):
     """
     Plot back-azimuth values on the given matplotlib axis with color mapping and formatting.
 
@@ -192,9 +200,11 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
         ax (dict): Dictionary of matplotlib axes, must contain "baz".
         T1 (matplotlib datenum): Start time for the x-axis limit.
         T2 (matplotlib datenum): End time for the x-axis limit.
-        t (array-like): Time (datenum) values.
-        azimuth (array-like): Back-azimuth values to plot.
-        mccm (array-like): MCCM values for color mapping.
+        df (DataFrame): DataFrame containing:
+            Time: Array of timestamps for the results.
+            MCCM: MCCM values for the results.
+            Velocity: Trace velocities for the results.
+            Azimuth: Back-azimuth values for the results.
         array_params (dict): Dictionary containing plot parameters, must include 'AZ_MIN', 'AZ_MAX', 'TARGETS'.
         plot_params (dict): Dictionary containing plot parameters, including size and line widths.
 
@@ -208,7 +218,7 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
     # Deepcopy azimuth min/max to avoid modifying input
     az_min = deepcopy(array_params['AZ_MIN'])
     az_max = deepcopy(array_params['AZ_MAX'])
-    tmp_azimuth = deepcopy(azimuth)
+    tmp_azimuth = deepcopy(df["Azimuth"])
 
     # If AZ_MAX < AZ_MIN, adjust azimuth range and values for plotting
     if array_params['AZ_MAX'] < array_params['AZ_MIN']:
@@ -223,12 +233,12 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
                 # Plot horizontal lines and labels for targets above 180
                 ax.axhline(baz - 360, ls='--', lw=plot_params["hline_lw"], color='gray', zorder=-1)
                 if plot_params["plot_size"] == "big":
-                    ax.text(t[1], baz - 360, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
+                    ax.text(df["Time"][1], baz - 360, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
             else:
                 # Plot horizontal lines and labels for targets below 180
                 ax.axhline(baz, ls='--', lw=plot_params["hline_lw"], color='gray', zorder=-1)
                 if plot_params["plot_size"] == "big":
-                    ax.text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
+                    ax.text(df["Time"][1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
         # Adjust azimuth values above 180 for plotting
         tmp_azimuth[tmp_azimuth > 180] += -360
     else:
@@ -239,10 +249,10 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
             baz = array_params[target]
             ax.axhline(baz, ls='--', lw=plot_params["hline_lw"], color='gray', zorder=-1)
             if plot_params["plot_size"] == "big":
-                ax.text(t[1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
+                ax.text(df["Time"][1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
 
     # Scatter plot for back-azimuth values, colored by MCCM
-    sc = ax.scatter(t, tmp_azimuth, c=mccm, s=plot_params["s_dot"], edgecolors='k', lw=plot_params["scatter_lw"], cmap=plot_params["cm"], zorder=1000)
+    sc = ax.scatter(df["Time"], tmp_azimuth, c=df["MCCM"], s=plot_params["s_dot"], edgecolors='k', lw=plot_params["scatter_lw"], cmap=plot_params["cm"], zorder=1000)
     ax.set_ylim(az_min, az_max)
     ax.set_xlim(T1, T2)
     sc.set_clim(plot_params["cax"])
@@ -251,7 +261,7 @@ def plot_back_azimuths(ax, T1, T2, t, azimuth, mccm, array_params, plot_params):
         # Configure x-axis for larger plots
         update_axes_and_ticks(ax, "Back-Azimuth\n [deg]")
     else:
-        # Remove ticks for smaller plots
+        # Remove ticks for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
 
@@ -266,7 +276,11 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_para
         ax (dict): Dictionary of matplotlib axes, must contain "stas".
         T1 (matplotlib datenum): The start time for the x-axis limit.
         T2 (matplotlib datenum): The end time for the x-axis limit.
-        t (numpy.ndarray): Array of timestamps for the results.
+        df (DataFrame): DataFrame containing:
+            Time: Array of timestamps for the results.
+            MCCM: MCCM values for the results.
+            Velocity: Trace velocities for the results.
+            Azimuth: Back-azimuth values for the results.
         st (Stream): ObsPy Stream object containing traces.
         lts_dict (dict): Dictionary of LTS (Least Trimmed Squares) results.
         skip_chans (list): List of channels to skip.
@@ -336,7 +350,7 @@ def plot_lts_dropped_channels(ax, T1, T2, t, st, lts_dict, skip_chans, plot_para
         update_axes_and_ticks(ax, "")
 
     else:
-        # Remove ticks for smaller plots
+        # Remove ticks for thumbnail plots
         ax.set_xticks([])
         ax.set_yticks([])
     ax.invert_yaxis()
@@ -396,7 +410,7 @@ def save_figure(fig, config, array_params, t2, plot_size):
         config (dict): Configuration dictionary.
         array_params (dict): Array parameters.
         t2 (UTCDateTime): End time of the data window.
-        plot_size (str): Size of the plot ("big" or "small").
+        plot_size (str): Size of the plot ("big" or "thumbnail").
     """
     
     # Define output directories for plots
@@ -407,25 +421,25 @@ def save_figure(fig, config, array_params, t2, plot_size):
         filename = out_dir / (array_params["ARRAY_NAME"] + '_' + t2.strftime('%Y%m%d-%H%M') + '.png')
         fig.savefig(filename, dpi=72, format='png')
 
-    elif plot_size == "small":
+    elif plot_size == "thumbnail":
         filename = out_dir / (array_params["ARRAY_NAME"] + '_' + t2.strftime('%Y%m%d-%H%M') + '_thumb.png')
         fig.savefig(filename, format='png', pad_inches=0, dpi=72)
 
     plt.close('all')
 
 
-def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, config, array_params, plot_size):
+def plot_results(t2, st, df, lts_dict, skip_chans, array_params, plot_size):
     """
     Generate and save plots for the results of array processing.
 
     Args:
-        t1 (UTCDateTime): Start time of the data window.
-        t2 (UTCDateTime): End time of the data window.
-        t (numpy.ndarray): Array of timestamps for the results.
+        t0 (UTCDateTime): End time of the data window.
         st (Stream): ObsPy Stream object containing traces.
-        mccm (numpy.ndarray): MCCM values for the results.
-        velocity (numpy.ndarray): Trace velocities for the results.
-        azimuth (numpy.ndarray): Back-azimuth values for the results.
+        df (DataFrame): DataFrame containing:
+                            Time: Array of timestamps for the results.
+                            MCCM: MCCM values for the results.
+                            Velocity: Trace velocities for the results.
+                            Azimuth: Back-azimuth values for the results.
         lts_dict (dict): Dictionary of LTS (Least Trimmed Squares) results.
         config (dict): Configuration dictionary.
         array_params (dict): Parameters for the array being processed.
@@ -435,6 +449,9 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, c
         None
     """
 
+    my_log.info(f"Making {plot_size} plot...")
+
+    t1 = t2 - array_params["DURATION"]
     T1 = dates.date2num(t1.datetime)
     T2 = dates.date2num(t2.datetime)
 
@@ -453,7 +470,7 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, c
         plot_params["hline_lw"] = 1
         plot_params["wm_font"] = 18
         left, right, top, bottom, hspace = 0.1, 0.9, 0.97, 0.05, 0.1
-    elif plot_size == "small":
+    elif plot_size == "thumbnail":
         size = (2.1, 2.75)
         plot_params["trace_lw"] = 0.1
         plot_params["scatter_lw"] = 0.1
@@ -487,25 +504,25 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, c
     # if MCCM (Mean Cross-Correlation Metric) plotting is enabled
     if array_params["PLOT_MCCM"]:
         sc = plot_cc_values(
-            ax["cc"], T1, T2, t, mccm, array_params, plot_params
+            ax["cc"], T1, T2, df, array_params, plot_params
         )
 
     ########## Plot Trace Velocities #########
     ##########################################
     sc = plot_trace_velocities(
-        ax["vel"], T1, T2, t, velocity, mccm, array_params, plot_params
+        ax["vel"], T1, T2, df, array_params, plot_params
     )
 
     ########### Plot Back-azimuths ###########
     ##########################################
     sc = plot_back_azimuths(
-        ax["baz"], T1, T2, t, azimuth, mccm, array_params, plot_params
+        ax["baz"], T1, T2, df, array_params, plot_params
     )
 
     ########## Plot Dropped Channels #########
     ##########################################
     sc_stas = plot_lts_dropped_channels(
-        ax["stas"], T1, T2, t, st, lts_dict, skip_chans, plot_params
+        ax["stas"], T1, T2, df["Time"], st, lts_dict, skip_chans, plot_params
     )
 
     ############## Add Colorbars #############
@@ -522,4 +539,4 @@ def plot_results(t1, t2, t, st, mccm, velocity, azimuth, lts_dict, skip_chans, c
         ax[ax_str].xaxis.set_major_formatter(dates.DateFormatter("%H:%M"))
         ax[ax_str].set_xlabel('UTC Time [' + t1.strftime('%Y-%b-%d') + ']')
 
-    save_figure(fig, config, array_params, t2, plot_size)
+    return fig
