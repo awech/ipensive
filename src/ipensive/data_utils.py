@@ -35,7 +35,7 @@ def get_obspy_client(config):
         client.name = config["LOCAL_FDSN"]
 
     elif config["CLIENT_TYPE"].lower() == "sds":
-        client = SDSClient(config["DIRECTORY"], timeout=config["TIMEOUT"])
+        client = SDSClient(config["DIRECTORY"])
         if "FMT" in list(config.keys()):
             client.FMTSTR = config["FMT"]
         client.name = config["DIRECTORY"]
