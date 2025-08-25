@@ -1,6 +1,8 @@
 import logging
 import numpy as np
+from matplotlib import dates
 from obspy import Stream
+from obspy import UTCDateTime as utc
 from obspy.clients.earthworm import Client as EWClient
 from obspy.clients.fdsn import Client as FDSNClient
 from obspy.clients.filesystem.sds import Client as SDSClient
@@ -198,12 +200,23 @@ def QC_data(st, array_params):
     return good_data, skip_chans
 
 
-def get_pressures(st, array_params):
+def get_pressures(st, t, array_params):
+    """Extract pressure data from the seismic stream.
+
+    Args:
+        st (obspy.Stream): Stream containing seismic traces.
+        t (np.ndarray): Array of time values (matplotlib dates) from ltsva.
+        array_params (dict): Array parameters including window length.
+
+    Returns:
+        np.ndarray: Array of pressure values.
+    """
+    
     pressure = []
-    for tr_win in st[0].slide(
-        window_length=array_params["WINDOW_LENGTH"],
-        step=array_params["WINDOW_LENGTH"] - array_params["OVERLAP"],
-    ):
+    for ti in t:
+        t1 = utc(dates.num2date(ti)) - array_params["WINDOW_LENGTH"] / 2
+        t2 = t1 + array_params["WINDOW_LENGTH"]
+        tr_win = st[0].slice(t1, t2)
         pressure.append(np.max(np.abs(tr_win.data)))
     pressure = np.array(pressure)
     return pressure
