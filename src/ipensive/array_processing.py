@@ -113,7 +113,7 @@ def do_LTS(st, array_params, lat_list, lon_list, skip_chans):
         "Azimuth": azimuth,
         "Velocity": 1000 * velocity, # Convert velocity to m/s
         "MCCM": mccm,
-        "Pressure": data_utils.get_pressures(st, t,array_params),
+        "Pressure": data_utils.get_pressures(st, t, array_params),
         "Sigma_tau": sigma_tau,
     })
 
