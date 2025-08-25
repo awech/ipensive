@@ -186,14 +186,6 @@ def add_metadata(st, config, array_name, skip_chans=[]):
 
 
     for tr in st:
-        if tr.id in skip_chans:
-            my_log.warning(f"Skipping metadata for {tr.id} due to missing data")
-            tr.stats.coordinates = AttribDict({
-                'latitude': np.nan,
-                'longitude': np.nan,
-                'elevation': 0.0
-            })
-            continue
         my_log.info(f"Getting metadata for {tr.id}")
         if check_inventory(tr, inventory):
             inv = inventory.select(
@@ -204,6 +196,8 @@ def add_metadata(st, config, array_name, skip_chans=[]):
                 starttime=tr.stats.starttime,
                 endtime=tr.stats.endtime,
             )
+            tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
+            tr.inventory = inv
         else:
             my_log.warning(
                 f"No station response info in stationXML file. Getting station response for {tr.id} from IRIS"
@@ -220,12 +214,15 @@ def add_metadata(st, config, array_name, skip_chans=[]):
                     endtime=tr.stats.endtime,
                     level="response",
                 )
+                tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
+                tr.inventory = inv
             else:
-                my_log.warning(f"No data available for request. Removing {tr.id}")
-                st.remove(tr)
-                continue
-        tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
-        tr.inventory = inv
+                my_log.warning(f"No data available for request for channel {tr.id}. Adding NaNs")
+                tr.stats.coordinates = AttribDict({
+                    'latitude': np.nan,
+                    'longitude': np.nan,
+                    'elevation': np.nan
+                })
 
         lat_list.append(tr.stats.coordinates.latitude)
         lon_list.append(tr.stats.coordinates.longitude)
