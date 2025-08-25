@@ -140,11 +140,11 @@ if __name__ == '__main__':
         if utc(T1) > utc(T2):
             raise ValueError("Start time must be before end time.")
     elif args.duration is not None:
-        duration_value = int(args.duration[:-1])
+        duration_value = args.duration[:-1]
         if args.duration.endswith("h"):
-            dt = pd.Timedelta(hours=duration_value)
+            dt = pd.Timedelta(hours=int(duration_value))
         elif args.duration.endswith("d"):
-            dt = pd.Timedelta(days=duration_value)
+            dt = pd.Timedelta(days=int(duration_value))
         else:
             raise ValueError("Invalid duration format. Use 'h' for hours or 'd' for days.")
 
