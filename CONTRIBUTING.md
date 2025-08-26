@@ -9,7 +9,7 @@ issue.
 
 If you have direct contributions you would like considered for incorporation
 into the project you can [fork this repository][2] and
-[submit a pull request][3] for review.
+[submit a merge request][3] for review.
 
 [1]: https://code.usgs.gov/vsc/seis/tools/ipensive/-/issues
 [2]: https://docs.gitlab.com/ee/user/project/repository/forking_workflow.html#create-a-fork
