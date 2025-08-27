@@ -14,12 +14,10 @@ readme = "README.md"
 license = { text = "CC0-1.0" }
 requires-python = ">=3.10"
 dependencies = [
-    "numpy==1.26.4",
-    "pandas==2.2.3",
-    "matplotlib==3.8.4",
-    "obspy==1.4.1",
-    "jinja2==3.1.5",
-    "pyyaml==6.0.2",
+    "obspy",
+    "pandas",
+    "jinja2",
+    "pyyaml",
     "numba"
 ]
 classifiers = [
@@ -33,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: CC0 1.0 Universal (CC0 1.0)",
 ]
 keywords = ["infrasound", "volcano", "array processing", "monitoring"]
