@@ -21,7 +21,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     config_file = args.config
-    config = utils.load_config(config_file)
+    config, _ = utils.load_config(config_file)
 
     utils.setup_logging(utc.utcnow(), config)
     update_stationXML(config)

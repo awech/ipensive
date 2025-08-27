@@ -64,6 +64,7 @@ def load_config(config_file):
 
     Returns:
         dict: Configuration dictionary with additional metadata.
+        pathlib.Path: Path to the arrays configuration file.
     """
 
     ###### Load main iPensive config ######
