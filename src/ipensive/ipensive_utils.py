@@ -367,6 +367,7 @@ def write_ascii_file(t2, tmp_df, config):
     if filename.exists():
         df = pd.read_csv(filename, sep="\t", parse_dates=["Time"])
         df = df[(df["Time"] <= t1.strftime("%Y-%m-%d %H:%M:%S")) | (df["Time"] > t2.strftime("%Y-%m-%d %H:%M:%S"))]
+        df = df.rename(columns={"rms": "Sigma_tau"})
         df = pd.concat([df, tmp_df])
         df = df.sort_values("Time")
     else:
