@@ -11,14 +11,31 @@ cache:
     - venv/
 
 stages:
-  - build
   - test
+  - build
+
+test-coverage:
+  stage: test
+  image: code.chs.usgs.gov:5001/ctek/docker/python:3.12
+  before_script:
+    - pip install --upgrade pip
+    - pip install -e .
+    - pip install coverage pytest
+  script:
+    - coverage run -m pytest
+    - coverage report
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+
 
 build:image:
   stage: build
   image: docker:latest
   services:
     - docker:dind
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: always
+    - when: never
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - >-
@@ -29,14 +46,3 @@ build:image:
       .
     - docker push $CI_REGISTRY_IMAGE:${CI_COMMIT_SHA}
     - docker push $CI_REGISTRY_IMAGE:latest
-
-test-coverage:
-  stage: test
-  before_script:
-    - pip install --upgrade pip
-    - pip install -e .
-    - pip install coverage pytest
-  script:
-    - coverage run -m pytest
-    - coverage report
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
