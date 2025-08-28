@@ -23,7 +23,7 @@ test-coverage:
   script:
     - coverage run -m pytest
     - coverage report
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  coverage: '/(?i)total.*? ([1-9]?\d|100)\%$/'
 
 
 build:image:
