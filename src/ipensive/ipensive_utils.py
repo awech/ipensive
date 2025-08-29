@@ -337,6 +337,8 @@ def write_ascii_file(t2, tmp_df, config):
                             Velocity: Velocity values.
                             MCCM: MCCM values.
                             Sigma_tau: Sigma_tau values.
+                            Vel_err: Confidence interval for velocity.
+                            Baz_err: Confidence interval for backazimuth.
         name (str): Array name.
         config (dict): Configuration dictionary.
 
@@ -375,7 +377,7 @@ def write_ascii_file(t2, tmp_df, config):
         df = tmp_df
 
     # Round values for better readability
-    df = df.round({"Azimuth": 1, "Velocity": 1, "MCCM": 2, "Pressure": 3, "Sigma_tau": 2})
+    df = df.round({"Azimuth": 1, "Velocity": 1, "MCCM": 2, "Pressure": 3, "Sigma_tau": 2, "Vel_err": 1, "Baz_err": 1})
 
     # Save the DataFrame to a file
     df.to_csv(filename, index=False, header=True, sep="\t")
@@ -397,6 +399,8 @@ def write_valve_file(t2, df, name, config):
                             Velocity: Velocity values.
                             MCCM: MCCM values.
                             Sigma_tau: Sigma_tau values.
+                            Vel_err: Confidence interval for velocity.
+                            Baz_err: Confidence interval for backazimuth.                            
         config (dict): Configuration dictionary.
 
     Returns:
@@ -408,7 +412,7 @@ def write_valve_file(t2, df, name, config):
     # Create a DataFrame with the results
     A = df.rename(columns={"Time": "TIMESTAMP", "Array": "CHANNEL"})
 
-    A = A[["TIMESTAMP", "CHANNEL", "Azimuth", "Velocity", "MCCM", "Pressure", "Sigma_tau"]]
+    A = A[["TIMESTAMP", "CHANNEL", "Azimuth", "Velocity", "MCCM", "Pressure", "Sigma_tau", "Vel_err", "Baz_err"]]
 
     # Save the DataFrame to a CSV file
     out_valve_dir = config["OUT_VALVE_DIR"]
