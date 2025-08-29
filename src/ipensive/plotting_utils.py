@@ -171,6 +171,8 @@ def plot_trace_velocities(ax, T1, T2, df, array_params, plot_params):
         )
 
     # Scatter plot of trace velocities with color mapping based on MCCM values
+    if plot_params["plot_size"] == "big":
+        ax.errorbar(df["Time"], df["Velocity"]/1000, yerr=df["Vel_err"]/1000, fmt='none', ecolor='gray', elinewidth=0.2, zorder=-1)
     sc = ax.scatter(df["Time"], df["Velocity"]/1000, c=df["MCCM"], s=plot_params["s_dot"], edgecolors="k", lw=plot_params["scatter_lw"], cmap=plot_params["cm"])
     # Set y-axis limits based on the array type
     if array_params["ARRAY_LABEL"] == "Hydroacoustic":
@@ -252,6 +254,8 @@ def plot_back_azimuths(ax, T1, T2, df, array_params, plot_params):
                 ax.text(df["Time"][1], baz, target, bbox=box_style, fontsize=8, va='center', style='italic', zorder=10)
 
     # Scatter plot for back-azimuth values, colored by MCCM
+    if plot_params["plot_size"] == "big":
+        ax.errorbar(df["Time"], tmp_azimuth, yerr=df["Baz_err"], fmt='none', ecolor='gray', elinewidth=0.2, zorder=-1)
     sc = ax.scatter(df["Time"], tmp_azimuth, c=df["MCCM"], s=plot_params["s_dot"], edgecolors='k', lw=plot_params["scatter_lw"], cmap=plot_params["cm"], zorder=1000)
     ax.set_ylim(az_min, az_max)
     ax.set_xlim(T1, T2)

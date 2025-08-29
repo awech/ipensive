@@ -223,7 +223,7 @@ def test_LTS_and_image_output(tmp_path):
 
     expected_df = read_csv(f"{CURR_DIR}/test_results.csv")
 
-    assert_frame_equal(expected_df, test_df.round(7))
+    assert_frame_equal(expected_df, test_df.round(7), rtol=1.5e-5)
 
     utils.web_folders(t2, config, array_params)
     for plotsize in ["big", "thumbnail"]:

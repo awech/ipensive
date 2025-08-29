@@ -103,7 +103,7 @@ def do_LTS(st, array_params, lat_list, lon_list, skip_chans):
     overlap_fraction = array_params["OVERLAP"] / array_params["WINDOW_LENGTH"]
     ALPHA = array_params["LTS_ALPHA"] if len(st) > 3 else 1.0
     skip_inds = [i for i, tr in enumerate(st) if tr.id in skip_chans]
-    velocity, azimuth, t, mccm, lts_dict, sigma_tau, *_ = ltsva(
+    velocity, azimuth, t, mccm, lts_dict, sigma_tau, Vel_err, Baz_err = ltsva(
         st.copy(), lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA, remove_elements=skip_inds
     )
 
@@ -115,6 +115,8 @@ def do_LTS(st, array_params, lat_list, lon_list, skip_chans):
         "MCCM": mccm,
         "Pressure": data_utils.get_pressures(st, t, array_params),
         "Sigma_tau": sigma_tau,
+        "Vel_err": 1000 * Vel_err, # Convert to m/s
+        "Baz_err": Baz_err
     })
 
     return df, lts_dict
