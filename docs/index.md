@@ -33,8 +33,21 @@ ipensive
 └── ...
 ```
 
-Navigate to and open `output/html/index.html` with your web browser to verify the webpage and images were generated.
+Navigate to and open `output/html/index.html` with your web browser to verify the webpage and images were generated. It should look like this:
+<br/><br/><img src="./run_processing.png" alt="drawing" width="600px">
 
+and you should be able to toggle between the different arrays either through the dropdown menus or the top row of arrows. 
+
+Next (also from `ops_scripts/`) run:
+```bash
+python back_populate.py -dt 3h
+```
+
+This will process the past 3 hours of data, resulting in the webpage looking like this:
+<br/><br/><img src="./back_populate.png" alt="drawing" width="600px">
+
+>NOTE:
+>The images themselves will look different based on more recent data
 
 ## Configuration Files
 There are 2 configuration files in `config/`:
