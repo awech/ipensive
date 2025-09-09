@@ -102,6 +102,9 @@ def do_LTS(st, array_params, lat_list, lon_list, skip_chans):
     my_log.info("Performing LTS analysis...")
     overlap_fraction = array_params["OVERLAP"] / array_params["WINDOW_LENGTH"]
     ALPHA = array_params["LTS_ALPHA"] if len(st) > 3 else 1.0
+    if len(st) - len(skip_chans) < 4:
+        my_log.warning("3 or fewer stations remaining after QC. Setting LTS_ALPHA to 1.0")
+        ALPHA = 1.0
     skip_inds = [i for i, tr in enumerate(st) if tr.id in skip_chans]
     velocity, azimuth, t, mccm, lts_dict, sigma_tau, Vel_err, Baz_err = ltsva(
         st.copy(), lat_list, lon_list, array_params["WINDOW_LENGTH"], overlap_fraction, alpha=ALPHA, remove_elements=skip_inds
