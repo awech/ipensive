@@ -100,7 +100,10 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
             # check if you should process this time window
             file = utils.get_pngfile_path(t, array_name, config)
             if not file.exists() or OVERWRITE:
-                process_array(config, array_name, utc(t))
+                try:
+                    process_array(config, array_name, utc(t))
+                except Exception as ex:
+                    my_log.error(f"Error processing {array_name}: {ex}")
                 my_log.info("\n")
             else:
                 my_log.info("File exists. No overwrite. Skip " + array_name)
