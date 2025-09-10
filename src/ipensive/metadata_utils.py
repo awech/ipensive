@@ -71,6 +71,23 @@ def update_stationXML(config):
     return
 
 
+def FDSN_connect(client_name, max_tries=3):
+
+    client = []
+    attempts = 0
+    while attempts < max_tries:
+        try:
+            client = FDSNClient(client_name, timeout=10)
+            break
+        except Exception as ex:
+            sleep(1)
+            attempts += 1
+            my_log.warning(f"Error on attempt number {attempts:g}")
+            my_log.error(ex)
+
+    return client
+
+
 def check_FDSN(tr, client):
     """
     Check if a trace exists in the FDSN client.
@@ -98,7 +115,6 @@ def check_FDSN(tr, client):
         if "No data available for request." in err.args[0]:
             value = False
     return value
-
 
 
 def check_inventory(tr, inv):
@@ -184,10 +200,20 @@ def add_metadata(st, config, array_name, skip_chans=[]):
         my_log.info(f"Adding metadata from {config['STATION_XML']}")
         inventory = read_inventory(config["STATION_XML"])
 
+    empty_coords = AttribDict({
+                    'latitude': np.nan,
+                    'longitude': np.nan,
+                    'elevation': np.nan
+                })
 
     for tr in st:
         my_log.info(f"Getting metadata for {tr.id}")
-        if check_inventory(tr, inventory):
+
+        if tr.id in skip_chans:
+            my_log.info(f"{tr.id} is in the skip list. Adding empty coordinates.")
+            tr.stats.coordinates = empty_coords
+
+        elif check_inventory(tr, inventory):
             inv = inventory.select(
                 network=tr.stats.network,
                 station=tr.stats.station,
@@ -198,12 +224,18 @@ def add_metadata(st, config, array_name, skip_chans=[]):
             )
             tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
             tr.inventory = inv
+
         else:
             my_log.warning(
                 f"No station response info in stationXML file. Getting station response for {tr.id} from IRIS"
             )
-            client = FDSNClient("IRIS")
-            if check_FDSN(tr, client):
+
+            client = FDSN_connect("IRIS", max_tries=3)
+            if not client:
+                my_log.error(f"IRIS FDSN client unavailable for channel {tr.id}")
+                my_log.warning("...Adding empty coordinates. This might break things")
+                tr.stats.coordinates = empty_coords
+            elif check_FDSN(tr, client):
                 sleep(0.25)
                 inv = client.get_stations(
                     network=tr.stats.network,
@@ -217,12 +249,9 @@ def add_metadata(st, config, array_name, skip_chans=[]):
                 tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
                 tr.inventory = inv
             else:
-                my_log.warning(f"No data available for request for channel {tr.id}. Adding NaNs")
-                tr.stats.coordinates = AttribDict({
-                    'latitude': np.nan,
-                    'longitude': np.nan,
-                    'elevation': np.nan
-                })
+                my_log.error(f"No data available for request for channel {tr.id}. Adding NaNs")
+                my_log.warning("...This might break things")
+                tr.stats.coordinates = empty_coords
 
         lat_list.append(tr.stats.coordinates.latitude)
         lon_list.append(tr.stats.coordinates.longitude)

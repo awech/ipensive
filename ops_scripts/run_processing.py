@@ -40,7 +40,10 @@ if __name__ == "__main__":
         # Process all arrays in the configuration
         for array_name in config["array_list"]:
             timer_tmp = time.time()
-            array_processing.process_array(config, array_name, T0)
+            try:
+                array_processing.process_array(config, array_name, T0)
+            except Exception as ex:
+                my_log.error(f"Error processing {array_name}: {ex}")
             dt = time.time() - timer_tmp
             my_log.info(f"{dt:.1f} seconds to process {array_name}\n")
 
