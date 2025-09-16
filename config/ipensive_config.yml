@@ -20,6 +20,9 @@ TARGETS_FILE: ../data/volcano_list.txt
 # This can be set here, or as an environment variable.
 # If neither is set, it defaults to ../config/arrays_config.yml
 # 
+ARRAYS_CONFIG: 
+  - ../config/AVO_arrays_config.yml
+  - ../config/CNMI_arrays_config.yml
 
 
 ## Optional urls that get linked from the iPensive webpage
