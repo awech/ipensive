@@ -1,0 +1,21 @@
+Target,Longitude,Latitude
+Saipan,145.743,15.198
+Agrigan,145.67,18.77
+Pagan,145.8,18.13
+Ruby,145.57,15.62
+Sarigan,145.78,16.708
+Supply Reef,145.1,20.13
+Diakoku seamount,144.194,21.324
+East Diamante,145.67,15.93
+Fukujin Seamount,143.47,21.93
+Kasuga 2,143.637,21.6
+South Sarigan Seamount,145.78,16.58
+Zealandia Bank,145.85,16.88
+Ahyi Seamount,145.03,20.42
+Alamagan,145.83,17.6
+Anatahan,145.67,16.35
+Asuncion,145.4,19.67
+Esmeralda Bank,145.25,15
+Farallon de Pajaros,144.9,20.53
+Guguan,145.85,17.32
+Maug Islands,145.22,20.02
