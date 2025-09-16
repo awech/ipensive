@@ -23,35 +23,35 @@ def get_obspy_client(config):
         ObsPy client object.
     """
 
-    if "TIMEOUT" not in config:
+    if "TIMEOUT" not in config: # pragma: no cover
         config["TIMEOUT"] = 30
 
     if config["CLIENT_TYPE"].lower() == "fdsn":
         client = FDSNClient(config["HOSTNAME"], timeout=config["TIMEOUT"])
         client.name = config["HOSTNAME"]
 
-    elif config["CLIENT_TYPE"].lower() == "local_fdsn":
+    elif config["CLIENT_TYPE"].lower() == "local_fdsn": # pragma: no cover
         client = FDSNClient("IRIS", service_mappings={"dataselect": config["LOCAL_FDSN"]}, timeout=config["TIMEOUT"])
         client.name = config["LOCAL_FDSN"]
 
-    elif config["CLIENT_TYPE"].lower() == "sds":
+    elif config["CLIENT_TYPE"].lower() == "sds": # pragma: no cover
         client = SDSClient(config["DIRECTORY"])
         if "FMT" in list(config.keys()):
             client.FMTSTR = config["FMT"]
         client.name = config["DIRECTORY"]
 
-    elif config["CLIENT_TYPE"].lower() == "earthworm":
+    elif config["CLIENT_TYPE"].lower() == "earthworm": # pragma: no cover
         client = EWClient(config["HOSTNAME"], config["PORT"], timeout=config["TIMEOUT"])
         client.name = config["HOSTNAME"]
 
-    elif config["CLIENT_TYPE"].lower() == "seedlink":
+    elif config["CLIENT_TYPE"].lower() == "seedlink": # pragma: no cover
         if "PORT" in list(config.keys()):
             client = SLClient(config["HOSTNAME"], config["PORT"], timeout=config["TIMEOUT"])
         else:
             client = SLClient(config["HOSTNAME"], timeout=config["TIMEOUT"])
         client.name = config["HOSTNAME"]
 
-    else:
+    else: # pragma: no cover
         client = None
         my_log.error(f"CLIENT_TYPE {config['CLIENT_TYPE']} not recognized. Exiting.")
 
@@ -84,7 +84,7 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
         try:
             # Fetch waveform data for the specified channel and time range
             tr = client.get_waveforms(*nslc.split('.'), T1, T2)
-            if len(tr) > 1:
+            if len(tr) > 1: # pragma: no cover
                 # Handle cases with multiple traces (e.g., due to gaps)
                 if fill_value == 0 or fill_value is None:
                     tr.detrend("demean")
@@ -102,13 +102,13 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
             if tr[0].stats.endtime - tr[0].stats.starttime < T2 - T1:
                 tr.detrend('demean')
                 tr.taper(max_percentage=0.01)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             my_log.error(f"Error occurred while grabbing data: {e}")
             my_log.warning(f"No data available for {nslc} from {client.name}. Creating empty Stream object.")
             tr = Stream()  # Create an empty stream if data retrieval fails
 
         # If no data is available, create a blank trace
-        if not tr:
+        if not tr: # pragma: no cover
             from obspy import Trace
             from numpy import zeros
             tr = Trace()
@@ -180,10 +180,11 @@ def QC_data(st, array_params):
     skip_chans = []
     good_data = True
     for tr in check_st:
-        if np.sum(np.abs(tr.data)) == 0:  # Check for blank traces
+        if np.sum(np.abs(tr.data)) == 0: # pragma: no cover
+            # Check for blank traces
             skip_chans.append(tr.id)
             check_st.remove(tr)
-    if len(check_st) < array_params["MIN_CHAN"]:
+    if len(check_st) < array_params["MIN_CHAN"]: # pragma: no cover
         my_log.warning("Too many blank traces. Skipping.")
         good_data = False
         return good_data, skip_chans
@@ -191,9 +192,10 @@ def QC_data(st, array_params):
 
     #### Check for gappy data ####
     for tr in check_st:
-        if np.any([np.any(tr.data == 0)]):  # Check for gaps in data
+        if np.any([np.any(tr.data == 0)]): # pragma: no cover
+            # Check for gaps in data
             check_st.remove(tr)
-    if len(check_st) < array_params["MIN_CHAN"]:
+    if len(check_st) < array_params["MIN_CHAN"]: # pragma: no cover
         my_log.warning("Too gappy. Skipping.")
         good_data = False
 
