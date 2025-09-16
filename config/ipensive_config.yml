@@ -3,6 +3,7 @@ CLIENT_TYPE: fdsn  # <obspy client type (earthworm, fdsn, local_fdsn, sds, seedl
 HOSTNAME: iris     # <fdsn name or server ip_address>
 PORT:              # <int (if relevant)>
 TIMEOUT: 10        # optional. Defaults to 30
+LATENCY: 60        # how long to pause and wait for data latency to catch up before processing (seconds)
 #################################
 
 ############ Output #############

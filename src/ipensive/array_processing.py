@@ -9,6 +9,7 @@ import argparse
 import logging
 import time
 import pandas as pd
+import numpy as np
 from obspy import UTCDateTime as utc
 from . import ipensive_utils as utils
 from .plotting_utils import plot_results, save_figure
@@ -87,7 +88,8 @@ def get_starttime(config, args):
     else:
         # Use the current UTC time and add latency and window length
         T0 = utc.utcnow()
-        wait = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
+        window_length = np.max([config[arr]["WINDOW_LENGTH"] for arr in config["array_list"]])
+        wait = config["LATENCY"] + window_length
 
     # Round down to the nearest 10-minute interval
     T0 = utc(T0.strftime(date_fmt)[:-1] + "0")

@@ -88,7 +88,7 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
         ARRAYS (list): List of arrays to process.
     """
 
-    t1 = utc(T1) + config["PARAMS"]["DURATION"]
+    t1 = utc(T1) + config["DURATION"]
     for t in pd.date_range(T2, t1.strftime("%Y%m%d%H%M"), freq="-10min"):
         my_log.info(t)
 

@@ -152,6 +152,11 @@ def load_ipensive_config(config_file):
     else:
         ARRAYS_CONFIG["EXTRA_LINKS"] = []
 
+    if "LATENCY" in ipensive_config:
+        ARRAYS_CONFIG["LATENCY"] = ipensive_config["LATENCY"]
+    else:
+        ARRAYS_CONFIG["LATENCY"] = 0  # default latency in seconds
+
 
     ###### Load data output configuration ######
     ARRAYS_CONFIG["OUT_WEB_DIR"] = Path(ipensive_config["OUT_WEB_DIR"])
@@ -162,6 +167,12 @@ def load_ipensive_config(config_file):
         ARRAYS_CONFIG["OUT_VALVE_DIR"] = Path(ipensive_config["OUT_VALVE_DIR"])
 
     ARRAYS_CONFIG["array_config_files"] = array_file
+
+    ARRAYS_CONFIG["DURATION"] = 600  # default duration in seconds
+    for array in array_list:
+        ARRAYS_CONFIG[array]["DURATION"] = ARRAYS_CONFIG["DURATION"]  # default duration in seconds
+
+    ARRAYS_CONFIG["NETWORKS"] = get_network_dict(ARRAYS_CONFIG)
 
     return ARRAYS_CONFIG
 
