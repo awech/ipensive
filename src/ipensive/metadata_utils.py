@@ -22,9 +22,8 @@ def get_stations(config):
     """
 
     NSLC = []
-    for net in list(config["NETWORKS"].keys()):
-        for array in config["NETWORKS"][net]:
-            NSLC += config[array]["NSLC"]
+    for array in config["array_list"]:
+        NSLC += config[array]["NSLC"]
 
     return NSLC
 
