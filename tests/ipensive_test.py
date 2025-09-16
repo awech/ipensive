@@ -276,3 +276,20 @@ def test_manual_metadata(tmp_path):
 
     image_files = list(tmp_path.rglob('*.png'))
     assert len(image_files) == 2
+
+
+def test_multiple_array_configs(tmp_path):
+    
+    config1 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
+    IPENSIVE_CONFIG_PATH2 = os.path.abspath(os.path.join(CURR_DIR, '../config/example_2/ipensive_config.yml'))
+    config2 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH2)
+
+    assert config1.keys() == config2.keys()
+
+    for arr in config1['array_list']:
+        assert arr in config2['array_list']
+        assert config1[arr]["STATION_XML"] != config2[arr]["STATION_XML"]
+        assert config1[arr]["TARGETS_FILE"] != config2[arr]["TARGETS_FILE"]
+
+    assert len(config1["array_config_files"]) == 1
+    assert len(config2["array_config_files"]) == 2
