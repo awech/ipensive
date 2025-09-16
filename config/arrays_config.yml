@@ -115,10 +115,3 @@ Wake Island South:
     Saipan: 263.8      # put target back-azimuth in directly
     Anatahan: 267.1
     Ahyi: 278.0
-
-
-## optional urls that get linked from the iPensive webpage
-EXTRA_LINKS:
-  - Data Output: ../tests/ascii_output/
-  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
-  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth

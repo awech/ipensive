@@ -20,7 +20,13 @@ TARGETS_FILE: ../data/volcano_list.txt
 # This can be set here, or as an environment variable.
 # If neither is set, it defaults to ../config/arrays_config.yml
 # 
-# ARRAYS_CONFIG: <path_to_arrays_config.yml>
+
+
+## Optional urls that get linked from the iPensive webpage
+EXTRA_LINKS:
+  - Data Output: ../tests/ascii_output/
+  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
+  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
 
 
 # Example data source configurations:
