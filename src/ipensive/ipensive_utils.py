@@ -104,6 +104,26 @@ def load_array_config(array_file, ipensive_config):
     return arrays_config, network_list, array_list
 
 
+def get_network_dict(config):
+    """Get a dictionary mapping network names to their corresponding arrays.
+
+    Args:
+        config (dict): Configuration dictionary.
+
+    Returns:
+        dict: Dictionary mapping network names to lists of arrays.
+    """
+    
+    network_dict = {}
+    for array in config["array_list"]:
+        network_name = config[array]["NETWORK_NAME"]
+        if network_name not in network_dict:
+            network_dict[network_name] = []
+        network_dict[network_name].append(array)
+
+    return network_dict
+
+
 def load_ipensive_config(config_file):
     """
     Load configuration from a YAML file and initialize network and array settings.
@@ -144,7 +164,6 @@ def load_ipensive_config(config_file):
             array_list.extend(tmp_array_list)
 
     ##### Add network and array summary information
-    ARRAYS_CONFIG["network_list"] = net_list
     ARRAYS_CONFIG["array_list"] = array_list
 
     if "EXTRA_LINKS" in ipensive_config:
@@ -310,7 +329,7 @@ def write_html(config):
     with open(template_file, "r") as f:
         template = jinja2.Template(f.read())
     html = template.render(
-        networks=config["network_list"],
+        networks=list(config['NETWORKS'].keys()),
         arrays=config["NETWORKS"],
         extra_links=config["EXTRA_LINKS"],
     )

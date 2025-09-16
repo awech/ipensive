@@ -168,8 +168,6 @@ def test_write_html(tmp_path):
     # Set a temporary output directory for HTML
     config['OUT_WEB_DIR'] = tmp_path
     # Add required keys for template rendering if missing
-    if 'network_list' not in config:
-        config['network_list'] = list(config['NETWORKS'].keys())
     if 'EXTRA_LINKS' not in config:
         config['EXTRA_LINKS'] = []
 
