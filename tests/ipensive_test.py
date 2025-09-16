@@ -94,10 +94,10 @@ def test_env_variable_load_config(monkeypatch, tmp_path):
     monkeypatch.setenv("ARRAYS_CONFIG", env_array_file)
 
     ipensive_config_file = utils.get_config_file()
-    config2, array_config_file = utils.load_ipensive_config(ipensive_config_file)
+    config2 = utils.load_ipensive_config(ipensive_config_file)
 
     assert str(ipensive_config_file) == env_ipensive_file
-    assert array_config_file == env_array_file
+    assert config2["array_config_files"] == [env_array_file]
 
 
 def test_get_pngfile_path():
