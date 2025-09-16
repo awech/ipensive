@@ -195,9 +195,9 @@ def add_metadata(st, config, array_name, skip_chans=[]):
             lon_list.append(tr.stats.coordinates.longitude)
         return st, lat_list, lon_list
 
-    if "STATION_XML" in config.keys():
-        my_log.info(f"Adding metadata from {config['STATION_XML']}")
-        inventory = read_inventory(config["STATION_XML"])
+    if "STATION_XML" in config[array_name].keys():
+        my_log.info(f"Adding metadata from {config[array_name]['STATION_XML']}")
+        inventory = read_inventory(config[array_name]["STATION_XML"])
 
     empty_coords = AttribDict({
                     'latitude': np.nan,

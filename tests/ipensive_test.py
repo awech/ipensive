@@ -218,7 +218,7 @@ def test_LTS_and_image_output(tmp_path):
     st = read(f"{CURR_DIR}/test_preprocessed.mseed")
 
     st, lat_list, lon_list = metadata_utils.add_metadata(st, config, ARRAY, skip_chans)
-    array_params = utils.get_target_backazimuth(st, config, array_params)
+    array_params = utils.get_target_backazimuth(st, array_params)
     test_df, lts_dict = ap.do_LTS(st, array_params, lat_list, lon_list, skip_chans)
 
     expected_df = read_csv(f"{CURR_DIR}/test_results.csv")

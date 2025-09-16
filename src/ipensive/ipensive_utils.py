@@ -256,7 +256,7 @@ def setup_logging(day, config, arg_opt=None):
     sys.stderr = StreamToLogger(my_log, logging.ERROR)
 
 
-def get_target_backazimuth(st, config, array_params):
+def get_target_backazimuth(st, array_params):
     """
     Calculate the backazimuths for target locations relative to the array's average coordinates.
 
@@ -271,7 +271,7 @@ def get_target_backazimuth(st, config, array_params):
     # Calculate the average latitude and longitude of the array
     lon0 = np.nanmean([tr.stats.coordinates.longitude for tr in st])
     lat0 = np.nanmean([tr.stats.coordinates.latitude for tr in st])
-    DF = pd.read_csv(config["TARGETS_FILE"])  # Load target locations from a CSV file
+    DF = pd.read_csv(array_params["TARGETS_FILE"])  # Load target locations from a CSV file
 
     tmp_targets = []
     tmp_baz = []
