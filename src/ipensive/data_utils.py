@@ -213,7 +213,9 @@ def get_pressures(st, t, array_params):
     Returns:
         np.ndarray: Array of pressure values.
     """
-    
+
+    if "PLOTCHAN" in array_params and array_params["PLOTCHAN"] is not None:
+        st = st.select(id=array_params["PLOTCHAN"])
     pressure = []
     for ti in t:
         t1 = utc(dates.num2date(ti)) - array_params["WINDOW_LENGTH"] / 2
