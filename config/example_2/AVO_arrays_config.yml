@@ -23,17 +23,14 @@ PARAMS: &defaults
 ########################################
 ########################################
 
+STATION_XML: ../data/example_2/AVO_station.xml
+TARGETS_FILE: ../data/example_2/AVO_volcano_list.txt
 
 # Define arrays to be processed
 NETWORKS:
   AVO:
     - Kenai
     - Sand Point
-  CNMI:
-    - Saipan
-    - Wake Island North
-    - Wake Island South
-
 
 # Configure each array's channels, back-azimuth targets, 
 # and (optionally) different pre-processing/plotting parameters
@@ -73,59 +70,3 @@ Sand Point:
   AZ_MAX: 60
   FREQMIN: 1
 
-Saipan:
-  <<: *defaults
-  NSLC:
-    - MI.FLX.01.HDF
-    - MI.FLX.02.HDF
-    - MI.FLX.03.HDF
-    - MI.FLX.04.HDF
-    - MI.FLX.05.HDF
-    - MI.FLX.06.HDF
-  TARGETS:
-    - Anatahan
-    - Pagan
-  AZ_MIN: 205
-  AZ_MAX: 15
-
-Wake Island North: &hydro_defaults
-  <<: *defaults
-  NSLC:
-    - IM.H11N1.--.EDH
-    - IM.H11N2.--.EDH
-    - IM.H11N3.--.EDH
-  TARGETS:
-    - Saipan
-    - Anatahan
-    - Pagan
-    - Ahyi Seamount
-  FREQMIN: 1
-  FREQMAX: 10
-  VEL_MIN: 1.4
-  VEL_MAX: 1.6
-  AZ_MIN : 250
-  AZ_MAX : 290
-  ARRAY_LABEL: Hydroacoustic
-
-##                               ##
-# Example of manual metadata entry:
-##                               ##
-Wake Island South:
-  <<: *hydro_defaults
-  NSLC:
-    IM.H11S1..EDH:
-      lat: 18.50827
-      lon: 166.700272
-      gain: 1860.86
-    IM.H11S2..EDH:
-      lat: 18.49082
-      lon: 166.705002
-      gain: 1860.86
-    IM.H11S3..EDH:
-      lat: 18.49568    # put station latitude in directly
-      lon: 166.686462  # put station longitude in directly
-      gain: 1860.86    # put station gain in directly
-  TARGETS:
-    Saipan: 263.8      # put target back-azimuth in directly
-    Anatahan: 267.1
-    Ahyi: 278.0

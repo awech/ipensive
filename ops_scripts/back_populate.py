@@ -88,7 +88,7 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
         ARRAYS (list): List of arrays to process.
     """
 
-    t1 = utc(T1) + config["PARAMS"]["DURATION"]
+    t1 = utc(T1) + config["DURATION"]
     for t in pd.date_range(T2, t1.strftime("%Y%m%d%H%M"), freq="-10min"):
         my_log.info(t)
 
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     args = parse_args()  # Parse command-line arguments
     ipensive_config_file = args.config
-    config, array_config_file = utils.load_config(ipensive_config_file)
+    config = utils.load_ipensive_config(ipensive_config_file)
     config["plot"] = not args.no_plot
 
     if args.arrays is not None:
@@ -129,7 +129,8 @@ if __name__ == '__main__':
 
     utils.setup_logging(utc.utcnow(), config, arg_opt=args.log)
     my_log = logging.getLogger(__name__)
-    my_log.info(f"Array config: {array_config_file}")
+    for f in config["array_config_files"]:
+        my_log.info(f"Array config: {f}")
     for key, value in args.__dict__.items():
         if key in ["starttime", "endtime"]:
             if value is not None:

@@ -39,7 +39,7 @@ def test_starttime(monkeypatch):
     monkeypatch.setattr(sys, 'argv', ['array_processing.py', '--time', T1])
     args = ap.parse_args()
 
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)    
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)    
     T1, delay = ap.get_starttime(config, args)
 
     assert T0 == UTCDateTime(T1)
@@ -54,7 +54,7 @@ def test_ipensive_logger_output(monkeypatch, tmp_path, caplog):
 
     monkeypatch.setenv("FROMCRON", "yep")
     
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     config["LOGS_DIR"] = tmp_path
     T0, delay = ap.get_starttime(config, args)
 
@@ -69,7 +69,7 @@ def test_ipensive_logger_output(monkeypatch, tmp_path, caplog):
 
 
 def test_load_config_and_arrays():
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     assert 'NETWORKS' in config
     assert 'array_list' in config
     assert isinstance(config['array_list'], list)
@@ -94,15 +94,15 @@ def test_env_variable_load_config(monkeypatch, tmp_path):
     monkeypatch.setenv("ARRAYS_CONFIG", env_array_file)
 
     ipensive_config_file = utils.get_config_file()
-    config2, array_config_file = utils.load_config(ipensive_config_file)
+    config2 = utils.load_ipensive_config(ipensive_config_file)
 
     assert str(ipensive_config_file) == env_ipensive_file
-    assert array_config_file == env_array_file
+    assert config2["array_config_files"] == [env_array_file]
 
 
 def test_get_pngfile_path():
     from pandas import Timestamp
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     t = Timestamp("2024-01-01T12:00:00")
     arr = config['array_list'][0]
     path = utils.get_pngfile_path(t, arr, config)
@@ -119,7 +119,7 @@ def test_get_obspy_client_fdsn():
 def test_update_metadata(tmp_path):
     from obspy import read
     
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     config["STATION_XML"] = tmp_path / "station.xml"
 
     st = read(f"{CURR_DIR}/test_raw.mseed")
@@ -137,7 +137,7 @@ def test_data_and_preprocessing():
 
 
     config_file = utils.get_config_file()
-    config, _ = utils.load_config(config_file)
+    config = utils.load_ipensive_config(config_file)
     array_params = config[ARRAY]
 
     t1 = utc(T0) - array_params["DURATION"]
@@ -164,12 +164,10 @@ def test_data_and_preprocessing():
 
 def test_write_html(tmp_path):
 
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     # Set a temporary output directory for HTML
     config['OUT_WEB_DIR'] = tmp_path
     # Add required keys for template rendering if missing
-    if 'network_list' not in config:
-        config['network_list'] = list(config['NETWORKS'].keys())
     if 'EXTRA_LINKS' not in config:
         config['EXTRA_LINKS'] = []
 
@@ -187,7 +185,7 @@ def test_write_data_files(tmp_path):
     import pandas as pd
     from obspy import UTCDateTime, read
     
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     config['OUT_ASCII_DIR'] = tmp_path / "ascii"
     config['OUT_VALVE_DIR'] = tmp_path / "valve"
 
@@ -209,7 +207,7 @@ def test_LTS_and_image_output(tmp_path):
     from pandas import read_csv
     from pandas.testing import assert_frame_equal
 
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     config['OUT_WEB_DIR'] = tmp_path
 
     t2 = utc(T0)
@@ -218,7 +216,7 @@ def test_LTS_and_image_output(tmp_path):
     st = read(f"{CURR_DIR}/test_preprocessed.mseed")
 
     st, lat_list, lon_list = metadata_utils.add_metadata(st, config, ARRAY, skip_chans)
-    array_params = utils.get_target_backazimuth(st, config, array_params)
+    array_params = utils.get_target_backazimuth(st, array_params)
     test_df, lts_dict = ap.do_LTS(st, array_params, lat_list, lon_list, skip_chans)
 
     expected_df = read_csv(f"{CURR_DIR}/test_results.csv")
@@ -247,7 +245,7 @@ def test_LTS_and_image_output(tmp_path):
 
 def test_array_processing(tmp_path):
     from obspy import UTCDateTime as utc
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
 
     config['OUT_ASCII_DIR'] = tmp_path / "ascii"
     config['OUT_VALVE_DIR'] = tmp_path / "valve"
@@ -266,7 +264,7 @@ def test_array_processing(tmp_path):
 
 def test_manual_metadata(tmp_path):
     from obspy import UTCDateTime as utc
-    config, _ = utils.load_config(IPENSIVE_CONFIG_PATH)
+    config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
 
     config['OUT_ASCII_DIR'] = tmp_path / "ascii"
     config['OUT_VALVE_DIR'] = tmp_path / "valve"
@@ -278,3 +276,20 @@ def test_manual_metadata(tmp_path):
 
     image_files = list(tmp_path.rglob('*.png'))
     assert len(image_files) == 2
+
+
+def test_multiple_array_configs(tmp_path):
+    
+    config1 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
+    IPENSIVE_CONFIG_PATH2 = os.path.abspath(os.path.join(CURR_DIR, '../config/example_2/ipensive_config.yml'))
+    config2 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH2)
+
+    assert config1.keys() == config2.keys()
+
+    for arr in config1['array_list']:
+        assert arr in config2['array_list']
+        assert config1[arr]["STATION_XML"] != config2[arr]["STATION_XML"]
+        assert config1[arr]["TARGETS_FILE"] != config2[arr]["TARGETS_FILE"]
+
+    assert len(config1["array_config_files"]) == 1
+    assert len(config2["array_config_files"]) == 2

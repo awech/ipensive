@@ -55,7 +55,76 @@ def get_config_file():
     return default_config_file
 
 
-def load_config(config_file):
+def load_array_config(array_file, ipensive_config):
+    """
+    Load array configuration from a YAML file.
+
+    Args:
+        array_file (str): Path to the array configuration file.
+
+    Returns:
+        dict: Array configuration dictionary.
+    """
+    with open(array_file, "r") as file:
+        arrays_config = yaml.safe_load(file)
+
+    ###### Load data source configuration ######
+    client = get_obspy_client(ipensive_config)
+
+    network_list = list(arrays_config["NETWORKS"].keys())
+    array_list = []
+    for net in network_list:
+        for array in arrays_config["NETWORKS"][net]:
+            arrays_config[array]["NETWORK_NAME"] = net
+            arrays_config[array]["ARRAY_NAME"] = array
+            array_list.append(array)
+
+            if "CLIENT_TYPE" not in arrays_config[array]:
+                arrays_config[array]["CLIENT"] = client
+            else:
+                arrays_config[array]["CLIENT"] = get_obspy_client(arrays_config[array])
+
+            if "STATION_XML" in arrays_config:
+                arrays_config[array]["STATION_XML"] = Path(arrays_config["STATION_XML"])
+            else:
+                arrays_config[array]["STATION_XML"] = Path(ipensive_config["STATION_XML"])
+
+            if "TARGETS_FILE" in arrays_config:
+                arrays_config[array]["TARGETS_FILE"] = Path(arrays_config["TARGETS_FILE"])
+            else:
+                arrays_config[array]["TARGETS_FILE"] = Path(ipensive_config["TARGETS_FILE"])
+
+    arrays_config.pop("PARAMS")
+    arrays_config.pop("NETWORKS")
+    if "STATION_XML" in arrays_config:
+        arrays_config.pop("STATION_XML")
+    if "TARGETS_FILE" in arrays_config:
+        arrays_config.pop("TARGETS_FILE")
+
+    return arrays_config, network_list, array_list
+
+
+def get_network_dict(config):
+    """Get a dictionary mapping network names to their corresponding arrays.
+
+    Args:
+        config (dict): Configuration dictionary.
+
+    Returns:
+        dict: Dictionary mapping network names to lists of arrays.
+    """
+    
+    network_dict = {}
+    for array in config["array_list"]:
+        network_name = config[array]["NETWORK_NAME"]
+        if network_name not in network_dict:
+            network_dict[network_name] = []
+        network_dict[network_name].append(array)
+
+    return network_dict
+
+
+def load_ipensive_config(config_file):
     """
     Load configuration from a YAML file and initialize network and array settings.
 
@@ -74,53 +143,57 @@ def load_config(config_file):
 
     ###### Load array configurations ######
     if "ARRAYS_CONFIG" in os.environ:
-        array_file = os.environ["ARRAYS_CONFIG"]
+        array_file = [os.environ["ARRAYS_CONFIG"]]
     elif "ARRAYS_CONFIG" in ipensive_config.keys():
         array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
         array_file = Path(__file__).parent.parent.parent / "config" / "arrays_config.yml"
-    my_log.info(f"Using arrays config file: {array_file}")
-    with open(array_file, "r") as file:
-        arrays_config = yaml.safe_load(file)
+    if not isinstance(array_file, list):
+        array_file = [array_file]
 
 
-    ###### Load target & metadata info ######
-    arrays_config["STATION_XML"] = Path(ipensive_config["STATION_XML"])
-    arrays_config["TARGETS_FILE"] = Path(ipensive_config["TARGETS_FILE"])
-    if "EXTRA_LINKS" not in arrays_config.keys():
-        arrays_config["EXTRA_LINKS"] = []
+    for i, f in enumerate(array_file):
+        my_log.info(f"Loading arrays config file: {f}")
 
+        if i == 0:
+            ARRAYS_CONFIG, net_list, array_list = load_array_config(f, ipensive_config)
+        if i > 0:
+            tmp_arrays_config, tmp_net_list, tmp_array_list = load_array_config(f, ipensive_config)
+            ARRAYS_CONFIG.update(tmp_arrays_config)
+            net_list.extend(tmp_net_list)
+            array_list.extend(tmp_array_list)
 
-    ##### Extract network and array information
-    all_nets = list(arrays_config["NETWORKS"].keys())
-    array_list = []
-    for net in all_nets:
-        for array in arrays_config["NETWORKS"][net]:
-            arrays_config[array]["NETWORK_NAME"] = net
-            arrays_config[array]["ARRAY_NAME"] = array
-            array_list.append(array)
-    arrays_config["network_list"] = all_nets
-    arrays_config["array_list"] = array_list
+    ##### Add network and array summary information
+    ARRAYS_CONFIG["array_list"] = array_list
+
+    if "EXTRA_LINKS" in ipensive_config:
+        ARRAYS_CONFIG["EXTRA_LINKS"] = ipensive_config["EXTRA_LINKS"]
+    else:
+        ARRAYS_CONFIG["EXTRA_LINKS"] = []
+
+    if "LATENCY" in ipensive_config:
+        ARRAYS_CONFIG["LATENCY"] = ipensive_config["LATENCY"]
+    else:
+        ARRAYS_CONFIG["LATENCY"] = 0  # default latency in seconds
 
 
     ###### Load data output configuration ######
-    arrays_config["OUT_WEB_DIR"] = Path(ipensive_config["OUT_WEB_DIR"])
-    arrays_config["LOGS_DIR"] = Path(ipensive_config["LOGS_DIR"])
+    ARRAYS_CONFIG["OUT_WEB_DIR"] = Path(ipensive_config["OUT_WEB_DIR"])
+    ARRAYS_CONFIG["LOGS_DIR"] = Path(ipensive_config["LOGS_DIR"])
     if "OUT_ASCII_DIR" in ipensive_config and ipensive_config["OUT_ASCII_DIR"]:
-        arrays_config["OUT_ASCII_DIR"] = Path(ipensive_config["OUT_ASCII_DIR"])
+        ARRAYS_CONFIG["OUT_ASCII_DIR"] = Path(ipensive_config["OUT_ASCII_DIR"])
     if "OUT_VALVE_DIR" in ipensive_config and ipensive_config["OUT_VALVE_DIR"]:
-        arrays_config["OUT_VALVE_DIR"] = Path(ipensive_config["OUT_VALVE_DIR"])
-    ###### Load data source configuration ######
-    client = get_obspy_client(ipensive_config)
-    
-    # Assign or update the client for each array
-    for array in arrays_config["array_list"]:
-        if "CLIENT_TYPE" not in arrays_config[array]:
-            arrays_config[array]["CLIENT"] = client
-        else:
-            arrays_config[array]["CLIENT"] = get_obspy_client(arrays_config[array])
+        ARRAYS_CONFIG["OUT_VALVE_DIR"] = Path(ipensive_config["OUT_VALVE_DIR"])
 
-    return arrays_config, array_file
+    ARRAYS_CONFIG["array_config_files"] = array_file
+
+    ARRAYS_CONFIG["DURATION"] = 600  # default duration in seconds
+    for array in array_list:
+        ARRAYS_CONFIG[array]["DURATION"] = ARRAYS_CONFIG["DURATION"]  # default duration in seconds
+
+    ARRAYS_CONFIG["NETWORKS"] = get_network_dict(ARRAYS_CONFIG)
+
+    return ARRAYS_CONFIG
 
 
 def get_pngfile_path(t, array_name, config):
@@ -202,7 +275,7 @@ def setup_logging(day, config, arg_opt=None):
     sys.stderr = StreamToLogger(my_log, logging.ERROR)
 
 
-def get_target_backazimuth(st, config, array_params):
+def get_target_backazimuth(st, array_params):
     """
     Calculate the backazimuths for target locations relative to the array's average coordinates.
 
@@ -217,7 +290,7 @@ def get_target_backazimuth(st, config, array_params):
     # Calculate the average latitude and longitude of the array
     lon0 = np.nanmean([tr.stats.coordinates.longitude for tr in st])
     lat0 = np.nanmean([tr.stats.coordinates.latitude for tr in st])
-    DF = pd.read_csv(config["TARGETS_FILE"])  # Load target locations from a CSV file
+    DF = pd.read_csv(array_params["TARGETS_FILE"])  # Load target locations from a CSV file
 
     tmp_targets = []
     tmp_baz = []
@@ -256,7 +329,7 @@ def write_html(config):
     with open(template_file, "r") as f:
         template = jinja2.Template(f.read())
     html = template.render(
-        networks=config["network_list"],
+        networks=list(config['NETWORKS'].keys()),
         arrays=config["NETWORKS"],
         extra_links=config["EXTRA_LINKS"],
     )
