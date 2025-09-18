@@ -55,6 +55,21 @@ def get_config_file():
     return default_config_file
 
 
+def check_path(path):
+    """
+    Check if a file path is absolute or relative, and return the absolute path.
+
+    Args:
+        path (str or pathlib.Path): The file path to check.
+
+    Returns:
+        pathlib.Path: The absolute file path.
+    """
+    if not os.path.isabs(path):
+        path = Path(__file__).parent.parent.parent / path
+    return Path(path).resolve()
+
+
 def load_array_config(array_file, ipensive_config):
     """
     Load array configuration from a YAML file.
@@ -85,14 +100,13 @@ def load_array_config(array_file, ipensive_config):
                 arrays_config[array]["CLIENT"] = get_obspy_client(arrays_config[array])
 
             if "STATION_XML" in arrays_config:
-                arrays_config[array]["STATION_XML"] = Path(arrays_config["STATION_XML"])
+                arrays_config[array]["STATION_XML"] = check_path(arrays_config["STATION_XML"])
             else:
-                arrays_config[array]["STATION_XML"] = Path(ipensive_config["STATION_XML"])
-
+                arrays_config[array]["STATION_XML"] = check_path(ipensive_config["STATION_XML"])            
             if "TARGETS_FILE" in arrays_config:
-                arrays_config[array]["TARGETS_FILE"] = Path(arrays_config["TARGETS_FILE"])
+                arrays_config[array]["TARGETS_FILE"] = check_path(arrays_config["TARGETS_FILE"])
             else:
-                arrays_config[array]["TARGETS_FILE"] = Path(ipensive_config["TARGETS_FILE"])
+                arrays_config[array]["TARGETS_FILE"] = check_path(ipensive_config["TARGETS_FILE"])
 
     arrays_config.pop("PARAMS")
     arrays_config.pop("NETWORKS")
@@ -150,6 +164,7 @@ def load_ipensive_config(config_file):
         array_file = Path(__file__).parent.parent.parent / "config" / "arrays_config.yml"
     if not isinstance(array_file, list):
         array_file = [array_file]
+    array_file = [check_path(af) for af in array_file]
 
 
     for i, f in enumerate(array_file):
