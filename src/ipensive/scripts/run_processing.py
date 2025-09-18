@@ -4,7 +4,7 @@ from ipensive import ipensive_utils as utils
 from ipensive import array_processing
 
 
-if __name__ == "__main__":
+def main():
     """
     Main entry point for the script.
     """
@@ -52,3 +52,7 @@ if __name__ == "__main__":
     utils.write_html(config)
 
     my_log.info(f"{time.time() - timer_0:.1f} seconds to process all")
+
+
+if __name__ == "__main__":
+    main()

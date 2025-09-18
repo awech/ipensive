@@ -4,7 +4,7 @@ from obspy import UTCDateTime as utc
 import ipensive.ipensive_utils as utils
 from ipensive.metadata_utils import update_stationXML
 
-if __name__ == "__main__":
+def main():
     """
     Main entry point for the metadata update script.
     """
@@ -38,3 +38,6 @@ if __name__ == "__main__":
         tmp_config["array_list"] = tmp_array_list
         tmp_config["STATION_XML"] = tmp_xml
         update_stationXML(tmp_config)
+
+if __name__ == "__main__":
+    main()
