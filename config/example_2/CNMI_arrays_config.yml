@@ -23,8 +23,8 @@ PARAMS: &defaults
 ########################################
 ########################################
 
-STATION_XML: ../data/example_2/CNMI_station.xml
-TARGETS_FILE: ../data/example_2/CNMI_volcano_list.txt
+STATION_XML: data/example_2/CNMI_station.xml
+TARGETS_FILE: data/example_2/CNMI_volcano_list.txt
 
 # Define arrays to be processed
 NETWORKS:
