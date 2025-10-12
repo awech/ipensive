@@ -1,3 +1,4 @@
+#!/home/seismicd/miniconda3/envs/ipensive/bin/python
 import argparse
 from obspy import UTCDateTime as utc
 import ipensive.ipensive_utils as utils

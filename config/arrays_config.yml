@@ -4,15 +4,15 @@ PARAMS: &defaults
 
   # PROCESSING PARAMETERS
   DURATION      : 600   # DON'T CHANGE THIS!
-  LATENCY       : 60     # how long to pause and wait for data latency to catch up before processing (seconds)
+  LATENCY       : 30     # how long to pause and wait for data latency to catch up before processing (seconds)
   EXTRA_PAUSE   : 0     # extra pause in case some arrays are extra latent (Dillingham)
-  FREQMIN       : 0.8   # minimum frequency
-  FREQMAX       : 5.0   # maximum frequency
+  FREQMIN       : 1.0   # minimum frequency
+  FREQMAX       : 10.0   # maximum frequency
   TAPER         : 5.0   # seconds to taper beginning and end of trace before filtering
   WINDOW_LENGTH : 30    # window length for each calculation [seconds]
   OVERLAP       : 15    # amount of overlap between windows [seconds]
   MIN_CHAN      : 3     # minimum number of channels needed to perform inversion
-  LTS_ALPHA     : 0.75  # decimal [0.50, 1.0] amount of data to keep in the subsets
+  LTS_ALPHA     : 0.5   # decimal [0.50, 1.0] amount of data to keep in the subsets
 
   # PLOTTING PARAMETERS
   PLOT_MCCM     : True  # make MdCCM scatter subplot
@@ -28,97 +28,168 @@ PARAMS: &defaults
 
 # Define arrays to be processed
 NETWORKS:
-  AVO:
-    - Kenai
-    - Sand Point
-  CNMI:
-    - Wake Island North
-    - Wake Island South
+  HVO:
+    - UWE
+    - AHUD
+    - MENE
+    - AIND
+    - SHEEP
+    - Kahaluu
 
 
 # Configure each array's channels, back-azimuth targets, 
 # and (optionally) different pre-processing/plotting parameters
-Kenai:
+UWE:
   <<: *defaults
   NSLC: 
-    - AV.KENI.01.HDF
-    - AV.KENI.02.HDF
-    - AV.KENI.03.HDF
-    - AV.KENI.04.HDF
-    - AV.KENI.05.HDF
-    - AV.KENI.06.HDF
+    - HV.UWE.01.HDF
+    - HV.UWE.02.HDF
+    - HV.UWE.03.HDF
+    - HV.UWE.04.HDF
+    - HV.UWE.05.HDF
+    - HV.UWE.06.HDF
   TARGETS: 
-    - Wrangell
-    - Spurr
-    - Redoubt
-    - Iliamna
-    - Augustine
-  AZ_MIN: 200
-  AZ_MAX: 80
+    - Kulani
+    - North Vent
+    - Puu Oo
+    - ML summit
+    - PLAD
+    - MLOD
+    - Kapoho Crater
+    - KOSM
+    - SHEEP
+  # AZ_MIN: 0
+  # AZ_MAX: 360
 
-Sand Point:
+AHUD:
   <<: *defaults
   NSLC: 
-    - AV.SDPI.01.HDF
-    - AV.SDPI.02.HDF
-    - AV.SDPI.03.HDF
-    - AV.SDPI.04.HDF
-    - AV.SDPI.05.HDF
-    - AV.SDPI.06.HDF
+    - HV.AHUD.01.HDF
+    - HV.AHUD.02.HDF
+    - HV.AHUD.03.HDF
+    - HV.AHUD.04.HDF
+    - HV.AHUD.05.HDF
+    - HV.AHUD.06.HDF
   TARGETS: 
-    - Pavlof
-    - Veniaminof
-    - Shishaldin
-    - Trident
-  AZ_MIN: 240
-  AZ_MAX: 60
-  FREQMIN: 1
+    - North Vent
+    - Puu Oo
+    - ML summit
+    - KOSM
+    - RCOD
+    - PLAD
+    - MLOD
+    - DAND
+    - HOVE
+  # AZ_MIN: 0
+  # AZ_MAX: 360
 
-Wake Island North: &hydro_defaults
+MENE:
+  <<: *defaults
+  NSLC: 
+    - HV.MENE.01.HDF
+    - HV.MENE.02.HDF
+    - HV.MENE.03.HDF
+    - HV.MENE.04.HDF
+  TARGETS: 
+    - Kulani
+    - ML summit
+    - HOVE
+    - MLOD
+    - North Vent
+    - Mauna Ulu
+    - Puu Oo
+    - Napau Crater
+    - KOSM
+  # AZ_MIN: 60
+  # AZ_MAX: 270
+
+AIND:
+  <<: *defaults
+  NSLC: 
+    - HV.AIND.01.HDF
+    - HV.AIND.02.HDF
+    - HV.AIND.03.HDF
+    - HV.AIND.04.HDF
+  TARGETS: 
+    - North Vent
+    - Puu Oo
+    - KOSM
+    - ML summit
+    - Pahala
+    - RCOD
+    - PLAD
+    - MLOD
+    - DAND
+    - HOVE
+  # AZ_MIN: 205
+  # AZ_MAX: 30
+
+SHEEP:
+  <<: *defaults
+  NSLC: 
+    - HV.SHEEP.01.HDF
+    - HV.SHEEP.02.HDF
+    - HV.SHEEP.03.HDF
+    - HV.SHEEP.04.HDF
+    - HV.SHEEP.05.HDF
+    - HV.SHEEP.06.HDF
+  TARGETS: 
+    - Kulani
+    - Halemaumau
+    - Puu Oo
+    - ML summit
+    - PLAD
+    - MLOD
+    - Kapoho Crater
+  # AZ_MIN: 100
+  # AZ_MAX: 270
+
+Kahaluu:
   <<: *defaults
   NSLC:
-    - IM.H11N1.--.EDH
-    - IM.H11N2.--.EDH
-    - IM.H11N3.--.EDH
+    - IM.I59H1.--.BDF
+    - IM.I59H2.--.BDF
+    - IM.I59H3.--.BDF
+    - IM.I59H4.--.BDF
   TARGETS:
-    - Saipan
-    - Anatahan
-    - Pagan
-    - Ahyi Seamount
-  FREQMIN: 1
-  FREQMAX: 10
-  VEL_MIN: 1.4
-  VEL_MAX: 1.6
-  AZ_MIN : 250
-  AZ_MAX : 290
-  ARRAY_LABEL: Hydroacoustic
+    - Hualalai
+    - Maunakea
+    - ML summit
+    - RCOD
+    - PLAD
+    - MLOD
+    - DAND
+    - HOVE
+  # AZ_MIN : 0
+  # AZ_MAX : 240
+  EXTRA_PAUSE: 210
 
 ##                               ##
 # Example of manual metadata entry:
 ##                               ##
-Wake Island South:
-  <<: *hydro_defaults
-  NSLC:
-    IM.H11S1..EDH:
-      lat: 18.50827
-      lon: 166.700272
-      gain: 1860.86
-    IM.H11S2..EDH:
-      lat: 18.49082
-      lon: 166.705002
-      gain: 1860.86
-    IM.H11S3..EDH:
-      lat: 18.49568    # put station latitude in directly
-      lon: 166.686462  # put station longitude in directly
-      gain: 1860.86    # put station gain in directly
-  TARGETS:
-    Saipan: 263.8      # put target back-azimuth in directly
-    Anatahan: 267.1
-    Ahyi: 278.0
+# Wake Island South:
+#   <<: *hydro_defaults
+#   NSLC:
+#     IM.H11S1..BDF:
+#       lat: 18.50827
+#       lon: 166.700272
+#       gain: 1860.86
+#     IM.H11S2..BDF:
+#       lat: 18.49082
+#       lon: 166.705002
+#       gain: 1860.86
+#     IM.H11S3..BDF:
+#       lat: 18.49568    # put station latitude in directly
+#       lon: 166.686462  # put station longitude in directly
+#       gain: 1860.86    # put station gain in directly
+#   TARGETS:
+#     Saipan: 263.8      # put target back-azimuth in directly
+#     Anatahan: 267.1
+#     Ahyi: 278.0
 
 
 ## optional urls that get linked from the iPensive webpage
 EXTRA_LINKS:
   - Data Output: ../tests/ascii_output/
-  - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
-  - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
+  - Array Locations: https://ds.iris.edu/gmap/#network=HV,IM&channel=*DF&maxlat=21&maxlon=-154&minlat=18&minlon=-157&drawingmode=box&planet=earth
+  

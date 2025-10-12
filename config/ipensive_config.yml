@@ -1,8 +1,8 @@
 ########## Data Source ##########
-CLIENT_TYPE: fdsn  # <obspy client type (earthworm, fdsn, local_fdsn, sds, seedlink)>
-HOSTNAME: iris     # <fdsn name or server ip_address>
-PORT:              # <int (if relevant)>
-TIMEOUT: 10        # optional. Defaults to 30
+CLIENT_TYPE: earthworm
+HOSTNAME: 130.118.86.154
+PORT: 16022
+TIMEOUT: 10       # optional. Defaults to 30
 #################################
 
 ############ Output #############

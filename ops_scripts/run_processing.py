@@ -1,3 +1,4 @@
+#!/home/seismicd/miniconda3/envs/ipensive/bin/python
 import time
 import logging
 from ipensive import ipensive_utils as utils
