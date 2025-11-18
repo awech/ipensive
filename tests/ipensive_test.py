@@ -14,8 +14,8 @@ from ipensive import data_utils, metadata_utils, plotting_utils
 from ipensive import array_processing as ap
 
 CURR_DIR = os.path.dirname(__file__)
-IPENSIVE_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/example_1/ipensive_config.yml'))
-ARRAYS_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/example_1/arrays_config.yml'))
+IPENSIVE_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/ipensive_config.yml'))
+ARRAYS_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/arrays_config.yml'))
 os.chdir(CURR_DIR)
 
 T0 = "2025-08-19 20:30"
@@ -84,6 +84,7 @@ def test_load_config_and_arrays():
 
 def test_env_variable_load_config(monkeypatch, tmp_path):
     import shutil
+    from pathlib import Path
 
     env_ipensive_file = str(tmp_path / "ipensive_config_env.yml")
     env_array_file = str(tmp_path / "arrays_config_env.yml")
@@ -97,7 +98,7 @@ def test_env_variable_load_config(monkeypatch, tmp_path):
     config2 = utils.load_ipensive_config(ipensive_config_file)
 
     assert str(ipensive_config_file) == env_ipensive_file
-    assert utils.check_path(config2["array_config_files"][0]) == utils.check_path(env_array_file)
+    assert Path(config2["array_config_files"][0]).resolve() == Path(env_array_file).resolve()
 
 
 def test_get_pngfile_path():
@@ -281,7 +282,7 @@ def test_manual_metadata(tmp_path):
 def test_multiple_array_configs(tmp_path):
     
     config1 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
-    IPENSIVE_CONFIG_PATH2 = os.path.abspath(os.path.join(CURR_DIR, '../config/example_2/ipensive_config.yml'))
+    IPENSIVE_CONFIG_PATH2 = os.path.abspath(os.path.join(CURR_DIR, '..example_2/config/ipensive_config.yml'))
     config2 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH2)
 
     assert config1.keys() == config2.keys()

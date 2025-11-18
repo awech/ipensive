@@ -39,7 +39,7 @@ def get_config_file():
         pathlib.Path: Path to the configuration file.
     """
 
-    default_config_file = Path(__file__).parent.parent.parent / "config" / "example_1" /"ipensive_config.yml"
+    default_config_file = Path(__file__).parent.parent.parent / "config/ipensive_config.yml"
 
     if "IPENSIVE_CONFIG" in os.environ:
         env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
@@ -53,21 +53,6 @@ def get_config_file():
         my_log.info(f"Using default config file: {default_config_file}")
 
     return default_config_file
-
-
-def check_path(path):
-    """
-    Check if a file path is absolute or relative, and return the absolute path.
-
-    Args:
-        path (str or pathlib.Path): The file path to check.
-
-    Returns:
-        pathlib.Path: The absolute file path.
-    """
-    if not os.path.isabs(path):
-        path = Path(__file__).parent.parent.parent / path
-    return Path(path).resolve()
 
 
 def load_array_config(array_file, ipensive_config):
@@ -100,13 +85,13 @@ def load_array_config(array_file, ipensive_config):
                 arrays_config[array]["CLIENT"] = get_obspy_client(arrays_config[array])
 
             if "STATION_XML" in arrays_config:
-                arrays_config[array]["STATION_XML"] = check_path(arrays_config["STATION_XML"])
+                arrays_config[array]["STATION_XML"] = Path(arrays_config["STATION_XML"]).resolve()
             else:
-                arrays_config[array]["STATION_XML"] = check_path(ipensive_config["STATION_XML"])            
+                arrays_config[array]["STATION_XML"] = Path(ipensive_config["STATION_XML"]).resolve()
             if "TARGETS_FILE" in arrays_config:
-                arrays_config[array]["TARGETS_FILE"] = check_path(arrays_config["TARGETS_FILE"])
+                arrays_config[array]["TARGETS_FILE"] = Path(arrays_config["TARGETS_FILE"]).resolve()
             else:
-                arrays_config[array]["TARGETS_FILE"] = check_path(ipensive_config["TARGETS_FILE"])
+                arrays_config[array]["TARGETS_FILE"] = Path(ipensive_config["TARGETS_FILE"]).resolve()
 
     arrays_config.pop("PARAMS")
     arrays_config.pop("NETWORKS")
@@ -154,18 +139,16 @@ def load_ipensive_config(config_file):
     with open(config_file, "r") as file:
         ipensive_config = yaml.safe_load(file)
 
-
     ###### Load array configurations ######
     if "ARRAYS_CONFIG" in os.environ:
         array_file = [os.environ["ARRAYS_CONFIG"]]
-    elif "ARRAYS_CONFIG" in ipensive_config.keys():
+    elif "ARRAYS_CONFIG" in ipensive_config:
         array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
-        array_file = Path(__file__).parent.parent.parent / "config" / "arrays_config.yml"
+        array_file = Path(__file__).parent.parent.parent / "config/arrays_config.yml"
     if not isinstance(array_file, list):
         array_file = [array_file]
-    array_file = [check_path(af) for af in array_file]
-
+    array_file = [Path(af).resolve() for af in array_file]
 
     for i, f in enumerate(array_file):
         my_log.info(f"Loading arrays config file: {f}")
@@ -190,7 +173,6 @@ def load_ipensive_config(config_file):
         ARRAYS_CONFIG["LATENCY"] = ipensive_config["LATENCY"]
     else:
         ARRAYS_CONFIG["LATENCY"] = 0  # default latency in seconds
-
 
     ###### Load data output configuration ######
     ARRAYS_CONFIG["OUT_WEB_DIR"] = Path(ipensive_config["OUT_WEB_DIR"])
