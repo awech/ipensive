@@ -27,7 +27,7 @@ Infrasound array processing for volcano monitoring. Developed for operational us
 
 3. **Install ipensive as a package:**
     ```bash
-    pip install -e .
+    pip install .
     ```
 
     >Note: This will also install Jordan Bishop's [lts_array](https://github.com/uafgeotools/lts_array) which is included in ipensive package
