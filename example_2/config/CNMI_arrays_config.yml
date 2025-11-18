@@ -23,58 +23,15 @@ PARAMS: &defaults
 ########################################
 ########################################
 
+STATION_XML: example_2/data/CNMI_station.xml
+TARGETS_FILE: example_2/data/CNMI_volcano_list.txt
 
 # Define arrays to be processed
 NETWORKS:
-  AVO:
-    - Kenai
-    - Sand Point
   CNMI:
     - Saipan
     - Wake Island North
     - Wake Island South
-
-
-# Configure each array's channels, back-azimuth targets, 
-# and (optionally) different pre-processing/plotting parameters
-Kenai:
-  <<: *defaults
-  NSLC: 
-    - AV.KENI.01.HDF
-    - AV.KENI.02.HDF
-    - AV.KENI.03.HDF
-    - AV.KENI.04.HDF
-    - AV.KENI.05.HDF
-    - AV.KENI.06.HDF
-  TARGETS: 
-    - Wrangell
-    - Spurr
-    - Redoubt
-    - Iliamna
-    - Augustine
-  AZ_MIN: 200
-  AZ_MAX: 80
-  # PLOTCHAN:  # optional specify a single channel to plot waveforms from 
-  #              (defaults to first in obspy stream). Also controls peak
-  #              pressure calculations.
-
-Sand Point:
-  <<: *defaults
-  NSLC: 
-    - AV.SDPI.01.HDF
-    - AV.SDPI.02.HDF
-    - AV.SDPI.03.HDF
-    - AV.SDPI.04.HDF
-    - AV.SDPI.05.HDF
-    - AV.SDPI.06.HDF
-  TARGETS: 
-    - Pavlof
-    - Veniaminof
-    - Shishaldin
-    - Trident
-  AZ_MIN: 240
-  AZ_MAX: 60
-  FREQMIN: 1
 
 Saipan:
   <<: *defaults
@@ -90,6 +47,7 @@ Saipan:
     - Pagan
   AZ_MIN: 205
   AZ_MAX: 15
+
 
 Wake Island North: &hydro_defaults
   <<: *defaults
