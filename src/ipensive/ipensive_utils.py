@@ -39,7 +39,7 @@ def get_config_file():
         pathlib.Path: Path to the configuration file.
     """
 
-    default_config_file = Path(__file__).parent.parent.parent / "config" / "ipensive_config.yml"
+    default_config_file = Path(__file__).parent.parent.parent / "config" / "example_1" /"ipensive_config.yml"
 
     if "IPENSIVE_CONFIG" in os.environ:
         env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
