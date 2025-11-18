@@ -14,8 +14,8 @@ from ipensive import data_utils, metadata_utils, plotting_utils
 from ipensive import array_processing as ap
 
 CURR_DIR = os.path.dirname(__file__)
-IPENSIVE_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/ipensive_config.yml'))
-ARRAYS_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/arrays_config.yml'))
+IPENSIVE_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/example_1/ipensive_config.yml'))
+ARRAYS_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/example_1/arrays_config.yml'))
 os.chdir(CURR_DIR)
 
 T0 = "2025-08-19 20:30"
