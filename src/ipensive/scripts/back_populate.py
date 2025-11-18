@@ -20,7 +20,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        epilog="e.g.: python back_populate.py -c <filename.yml> -s 202201010000 -e 202201020000"
+        epilog="e.g.: ipensive-backfill -c <filename.yml> -s 202201010000 -e 202201020000"
     )
 
     parser.add_argument(

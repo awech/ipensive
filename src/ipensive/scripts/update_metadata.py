@@ -10,7 +10,7 @@ def main():
     """
 
     parser = argparse.ArgumentParser(
-        epilog="e.g.: python update_metadata.py -c <filename.yml>"
+        epilog="e.g.: ipensive-metadata -c <filename.yml>"
     )
 
     parser.add_argument(
