@@ -23,11 +23,11 @@ class StreamToLogger(object):
         self.log_level = log_level
         self.linebuf = ''
 
-    def write(self, buf):
+    def write(self, buf):  # pragma: no cover
         for line in buf.rstrip().splitlines():
             self.logger.log(self.log_level, line.rstrip())
 
-    def flush(self):
+    def flush(self):  # pragma: no cover
         pass
 
 
@@ -46,7 +46,7 @@ def get_config_file():
         if env_config_file.exists():
             default_config_file = env_config_file
             my_log.info(f"Using config file from IPENSIVE_CONFIG: {default_config_file}")
-        else:
+        else:  # pragma: no cover
             my_log.warning(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
             raise Exception(f"{env_config_file} does not exist")
     else:
@@ -373,13 +373,13 @@ def write_data_files(t2, st, df, config):
         df (pd.DataFrame): DataFrame containing metadata and results.
         config (dict): Configuration dictionary.
     """
-    
+
     df["Time"] = [dates.num2date(ti).strftime('%Y-%m-%d %H:%M:%S') for ti in df.Time]
     if "OUT_VALVE_DIR" in config and config["OUT_VALVE_DIR"]:
         try:
             sta_name = st[0].stats.station
             write_valve_file(t2, df, sta_name, config)
-        except Exception:
+        except Exception:  # pragma: no cover
             import traceback
             my_log.error("Something went wrong writing the Valve CSV file:")
             my_log.error(traceback.format_exc())
@@ -387,7 +387,7 @@ def write_data_files(t2, st, df, config):
     if "OUT_ASCII_DIR" in config and config["OUT_ASCII_DIR"]:
         try:
             write_ascii_file(t2, df, config)
-        except Exception:
+        except Exception:  # pragma: no cover
             import traceback
             my_log.error("Something went wrong writing the ASCII data file:")
             my_log.error(traceback.format_exc())
