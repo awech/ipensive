@@ -23,11 +23,11 @@ class StreamToLogger(object):
         self.log_level = log_level
         self.linebuf = ''
 
-    def write(self, buf):
+    def write(self, buf):  # pragma: no cover
         for line in buf.rstrip().splitlines():
             self.logger.log(self.log_level, line.rstrip())
 
-    def flush(self):
+    def flush(self):  # pragma: no cover
         pass
 
 
@@ -39,14 +39,14 @@ def get_config_file():
         pathlib.Path: Path to the configuration file.
     """
 
-    default_config_file = Path(__file__).parent.parent.parent / "config" / "ipensive_config.yml"
+    default_config_file = Path(__file__).parent.parent.parent / "config/ipensive_config.yml"
 
     if "IPENSIVE_CONFIG" in os.environ:
         env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
         if env_config_file.exists():
             default_config_file = env_config_file
             my_log.info(f"Using config file from IPENSIVE_CONFIG: {default_config_file}")
-        else:
+        else:  # pragma: no cover
             my_log.warning(f"IPENSIVE_CONFIG does not exist: {env_config_file}")
             raise Exception(f"{env_config_file} does not exist")
     else:
@@ -85,14 +85,13 @@ def load_array_config(array_file, ipensive_config):
                 arrays_config[array]["CLIENT"] = get_obspy_client(arrays_config[array])
 
             if "STATION_XML" in arrays_config:
-                arrays_config[array]["STATION_XML"] = Path(arrays_config["STATION_XML"])
+                arrays_config[array]["STATION_XML"] = Path(arrays_config["STATION_XML"]).resolve()
             else:
-                arrays_config[array]["STATION_XML"] = Path(ipensive_config["STATION_XML"])
-
+                arrays_config[array]["STATION_XML"] = Path(ipensive_config["STATION_XML"]).resolve()
             if "TARGETS_FILE" in arrays_config:
-                arrays_config[array]["TARGETS_FILE"] = Path(arrays_config["TARGETS_FILE"])
+                arrays_config[array]["TARGETS_FILE"] = Path(arrays_config["TARGETS_FILE"]).resolve()
             else:
-                arrays_config[array]["TARGETS_FILE"] = Path(ipensive_config["TARGETS_FILE"])
+                arrays_config[array]["TARGETS_FILE"] = Path(ipensive_config["TARGETS_FILE"]).resolve()
 
     arrays_config.pop("PARAMS")
     arrays_config.pop("NETWORKS")
@@ -140,17 +139,16 @@ def load_ipensive_config(config_file):
     with open(config_file, "r") as file:
         ipensive_config = yaml.safe_load(file)
 
-
     ###### Load array configurations ######
     if "ARRAYS_CONFIG" in os.environ:
         array_file = [os.environ["ARRAYS_CONFIG"]]
-    elif "ARRAYS_CONFIG" in ipensive_config.keys():
+    elif "ARRAYS_CONFIG" in ipensive_config:
         array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
-        array_file = Path(__file__).parent.parent.parent / "config" / "arrays_config.yml"
+        array_file = Path(__file__).parent.parent.parent / "config/arrays_config.yml"
     if not isinstance(array_file, list):
         array_file = [array_file]
-
+    array_file = [Path(af).resolve() for af in array_file]
 
     for i, f in enumerate(array_file):
         my_log.info(f"Loading arrays config file: {f}")
@@ -175,7 +173,6 @@ def load_ipensive_config(config_file):
         ARRAYS_CONFIG["LATENCY"] = ipensive_config["LATENCY"]
     else:
         ARRAYS_CONFIG["LATENCY"] = 0  # default latency in seconds
-
 
     ###### Load data output configuration ######
     ARRAYS_CONFIG["OUT_WEB_DIR"] = Path(ipensive_config["OUT_WEB_DIR"])
@@ -376,13 +373,13 @@ def write_data_files(t2, st, df, config):
         df (pd.DataFrame): DataFrame containing metadata and results.
         config (dict): Configuration dictionary.
     """
-    
+
     df["Time"] = [dates.num2date(ti).strftime('%Y-%m-%d %H:%M:%S') for ti in df.Time]
     if "OUT_VALVE_DIR" in config and config["OUT_VALVE_DIR"]:
         try:
             sta_name = st[0].stats.station
             write_valve_file(t2, df, sta_name, config)
-        except Exception:
+        except Exception:  # pragma: no cover
             import traceback
             my_log.error("Something went wrong writing the Valve CSV file:")
             my_log.error(traceback.format_exc())
@@ -390,7 +387,7 @@ def write_data_files(t2, st, df, config):
     if "OUT_ASCII_DIR" in config and config["OUT_ASCII_DIR"]:
         try:
             write_ascii_file(t2, df, config)
-        except Exception:
+        except Exception:  # pragma: no cover
             import traceback
             my_log.error("Something went wrong writing the ASCII data file:")
             my_log.error(traceback.format_exc())

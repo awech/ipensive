@@ -20,7 +20,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        epilog="e.g.: python back_populate.py -c <filename.yml> -s 202201010000 -e 202201020000"
+        epilog="e.g.: ipensive-backfill -c <filename.yml> -s 202201010000 -e 202201020000"
     )
 
     parser.add_argument(
@@ -76,7 +76,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
+def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS, my_log):
     """
     Run the back population process for the specified time window and arrays.
 
@@ -112,7 +112,7 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
     utils.write_html(config)
 
 
-if __name__ == '__main__':
+def main():
     """
     Main entry point for the back population script.
     """
@@ -170,4 +170,8 @@ if __name__ == '__main__':
     T1 = utc(T1).strftime(date_fmt)[:-1] + "0"
     T2 = utc(T2).strftime(date_fmt)[:-1] + "0"
 
-    run_backpopulate(config, T1, T2, args.overwrite, ARRAYS)
+    run_backpopulate(config, T1, T2, args.overwrite, ARRAYS, my_log)
+
+
+if __name__ == '__main__':
+    main()

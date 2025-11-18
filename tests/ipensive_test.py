@@ -8,15 +8,14 @@
 # `coverage html -d ~/Desktop/test_html` to generate HTML report
 
 import os
-
+from pathlib import Path
 from ipensive import ipensive_utils as utils
 from ipensive import data_utils, metadata_utils, plotting_utils
 from ipensive import array_processing as ap
 
-CURR_DIR = os.path.dirname(__file__)
-IPENSIVE_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/ipensive_config.yml'))
-ARRAYS_CONFIG_PATH = os.path.abspath(os.path.join(CURR_DIR, '../config/arrays_config.yml'))
-os.chdir(CURR_DIR)
+
+IPENSIVE_CONFIG_PATH = Path("config/ipensive_config.yml")
+ARRAYS_CONFIG_PATH = Path("config/arrays_config.yml")
 
 T0 = "2025-08-19 20:30"
 ARRAY = "Kenai"
@@ -84,6 +83,7 @@ def test_load_config_and_arrays():
 
 def test_env_variable_load_config(monkeypatch, tmp_path):
     import shutil
+    from pathlib import Path
 
     env_ipensive_file = str(tmp_path / "ipensive_config_env.yml")
     env_array_file = str(tmp_path / "arrays_config_env.yml")
@@ -97,7 +97,7 @@ def test_env_variable_load_config(monkeypatch, tmp_path):
     config2 = utils.load_ipensive_config(ipensive_config_file)
 
     assert str(ipensive_config_file) == env_ipensive_file
-    assert config2["array_config_files"] == [env_array_file]
+    assert Path(config2["array_config_files"][0]) == Path(env_array_file)
 
 
 def test_get_pngfile_path():
@@ -122,7 +122,7 @@ def test_update_metadata(tmp_path):
     config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     config["STATION_XML"] = tmp_path / "station.xml"
 
-    st = read(f"{CURR_DIR}/test_raw.mseed")
+    st = read("tests/test_raw.mseed")
     assert metadata_utils.check_FDSN(st[0], config[ARRAY]["CLIENT"])
 
     metadata_utils.update_stationXML(config)
@@ -147,7 +147,7 @@ def test_data_and_preprocessing():
     T2 = t2 + array_params["WINDOW_LENGTH"] + array_params["TAPER"]  # Exte
 
     st = data_utils.grab_data(array_params["CLIENT"], array_params["NSLC"], T1, T2)
-    ST = read(f"{CURR_DIR}/test_raw.mseed")
+    ST = read("tests/test_raw.mseed")
 
     for tr in st:
         TR = ST.select(id=tr.id)[0]
@@ -155,7 +155,7 @@ def test_data_and_preprocessing():
 
     st, *_ = metadata_utils.add_metadata(st, config, ARRAY, [])
     st = data_utils.preprocess_data(st, t1, t2, [], array_params)
-    ST = read(f"{CURR_DIR}/test_preprocessed.mseed")
+    ST = read("tests/test_preprocessed.mseed")
 
     for tr in st:
         TR = ST.select(id=tr.id)[0]
@@ -189,8 +189,8 @@ def test_write_data_files(tmp_path):
     config['OUT_ASCII_DIR'] = tmp_path / "ascii"
     config['OUT_VALVE_DIR'] = tmp_path / "valve"
 
-    DF = pd.read_csv(f"{CURR_DIR}/test_results.csv")
-    st = read(f"{CURR_DIR}/test_preprocessed.mseed")
+    DF = pd.read_csv("tests/test_results.csv")
+    st = read("tests/test_preprocessed.mseed")
     utils.write_data_files(UTCDateTime(T0), st, DF, config)
 
     # Check files exist
@@ -213,13 +213,13 @@ def test_LTS_and_image_output(tmp_path):
     t2 = utc(T0)
     array_params = config[ARRAY]
     skip_chans = []
-    st = read(f"{CURR_DIR}/test_preprocessed.mseed")
+    st = read("tests/test_preprocessed.mseed")
 
     st, lat_list, lon_list = metadata_utils.add_metadata(st, config, ARRAY, skip_chans)
     array_params = utils.get_target_backazimuth(st, array_params)
     test_df, lts_dict = ap.do_LTS(st, array_params, lat_list, lon_list, skip_chans)
 
-    expected_df = read_csv(f"{CURR_DIR}/test_results.csv")
+    expected_df = read_csv("tests/test_results.csv")
 
     assert_frame_equal(expected_df, test_df.round(7), rtol=1.5e-5)
 
@@ -281,7 +281,7 @@ def test_manual_metadata(tmp_path):
 def test_multiple_array_configs(tmp_path):
     
     config1 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
-    IPENSIVE_CONFIG_PATH2 = os.path.abspath(os.path.join(CURR_DIR, '../config/example_2/ipensive_config.yml'))
+    IPENSIVE_CONFIG_PATH2 = Path("example_2/config/ipensive_config.yml")
     config2 = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH2)
 
     assert config1.keys() == config2.keys()

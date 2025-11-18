@@ -30,7 +30,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        epilog="e.g.: python array_processing.py -c <filename.yml>"
+        epilog="e.g.: ipensive-run -c <filename.yml>"
     )
 
     parser.add_argument(

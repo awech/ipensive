@@ -98,7 +98,7 @@ def check_FDSN(tr, client):
     Returns:
         bool: True if the trace exists in the FDSN client, False otherwise.
     """
-    
+
     value = True
     try:
         client.get_stations(
@@ -110,7 +110,7 @@ def check_FDSN(tr, client):
             endtime=tr.stats.starttime,
             level="response",
         )
-    except Exception as err:
+    except Exception as err:  # pragma: no cover
         if "No data available for request." in err.args[0]:
             value = False
     return value
@@ -179,7 +179,7 @@ def add_metadata(st, config, array_name, skip_chans=[]):
     Returns:
         Stream: Stream with updated metadata.
     """
-    
+
     import warnings
 
     warnings.simplefilter("ignore", UserWarning, append=True)
@@ -224,7 +224,7 @@ def add_metadata(st, config, array_name, skip_chans=[]):
             tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
             tr.inventory = inv
 
-        else:
+        else: # pragma: no cover
             my_log.warning(
                 f"No station response info in stationXML file. Getting station response for {tr.id} from IRIS"
             )

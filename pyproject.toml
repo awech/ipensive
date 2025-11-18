@@ -36,6 +36,11 @@ classifiers = [
 ]
 keywords = ["infrasound", "volcano", "array processing", "monitoring"]
 
+[project.scripts]
+ipensive-backfill = "ipensive.scripts.back_populate:main"
+ipensive-run = "ipensive.scripts.run_processing:main"
+ipensive-metadata = "ipensive.scripts.update_metadata:main"
+
 [tool.setuptools.dynamic]
 version = {attr = "ipensive.__version__"}
 

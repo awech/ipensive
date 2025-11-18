@@ -7,9 +7,9 @@ LATENCY: 60        # how long to pause and wait for data latency to catch up bef
 #################################
 
 ############ Output #############
-OUT_WEB_DIR: ../output/html
-OUT_ASCII_DIR: ../output/ascii_output
-LOGS_DIR: ../output/logs
+OUT_WEB_DIR: output/html
+OUT_ASCII_DIR: output/ascii_output
+LOGS_DIR: output/logs
 #################################
 
 # Optional array config file location.
@@ -17,13 +17,13 @@ LOGS_DIR: ../output/logs
 # If neither is set, it defaults to ../config/arrays_config.yml
 # 
 ARRAYS_CONFIG: 
-  - ../config/example_2/AVO_arrays_config.yml
-  - ../config/example_2/CNMI_arrays_config.yml
+  - example_2/config/AVO_arrays_config.yml
+  - example_2/config/CNMI_arrays_config.yml
 
 
 ## Optional urls that get linked from the iPensive webpage
 EXTRA_LINKS:
-  - Data Output: ../tests/ascii_output/
+  - Data Output: output/ascii_output
   - AK Array Locations: https://ds.iris.edu/gmap/#network=AV&location=01&channel=HDF&planet=earth
   - CNMI Array Locations: https://ds.iris.edu/gmap/#network=MI,IM&station=FLX,H11N1,H11S1&planet=earth
 

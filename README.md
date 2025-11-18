@@ -21,16 +21,33 @@ Infrasound array processing for volcano monitoring. Developed for operational us
 
 2. **(Recommended) Create and activate a virtual environment:**
     ```bash
-    conda create -n ipensive python=3.12
+    conda create -n ipensive python=3.13
     conda activate ipensive
     ```
 
 3. **Install ipensive as a package:**
     ```bash
-    pip install -e .
+    pip install .
     ```
 
     >Note: This will also install Jordan Bishop's [lts_array](https://github.com/uafgeotools/lts_array) which is included in ipensive package
 
 ## Usage 
 #### Details and documentation found [here](/docs/index.md)
+
+## Citation
+This code may be cited directly as:
+> Wech, A.W. (2025) ipensive (Version 1.0.0), U.S. Geological Survey Software Release, https://doi.org/10.5066/P1JBRDDF.
+
+The least trimmed squares infrasound methodology can be cited as:
+>Bishop, J.W., Fee, D., & Szuberla, C. A. L., (2020). Improved infrasound array processing with robust estimators, Geophys. J. Int., 221(3) p. 2058-2074 doi: https://doi.org/10.1093/gji/ggaa110. 
+
+And the accompanying `lts_array` code can be found here:
+>https://github.com/uafgeotools/lts_array
+
+## License and Disclaimer
+[License](https://code.usgs.gov/vsc/seis/tools/ipensive/-/blob/main/LICENSE.md):
+This project is in the public domain.
+
+[Disclaimer](https://code.usgs.gov/vsc/seis/tools/ipensive/-/blob/main/DISCLAIMER.md):
+This software is preliminary or provisional and is subject to revision.
