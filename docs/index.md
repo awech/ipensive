@@ -1,10 +1,11 @@
 ## Quick-start
+ipensive is a tool to process infrasound or hydroacoustic array data in 10-minute intervals, write out data results to a flat file, create plots of results, and provide a web interface to view these plots.<br><br>
 There are 3 command-line tools to run ipensive
-1. ipensive-run
+1. `ipensive-run`
     - main command to process data
-2. ipensive-backfill
+2. `ipensive-backfill`
     - used to backfill data
-3. ipensive-metadata
+3. `ipensive-metadata`
     - creates/updates the station xml metadata file
 ##
 To run ipensive, `cd` to the main ipensive directory and type the following:
@@ -91,9 +92,8 @@ This config file defines:
 1. **processing parameters** `PARAMS`
     - processing parameters: controlling data processing details (filters, window length, etc.)
     - plotting parameters: slight control on how a few things appear (mostly this allows for differentiating between acoustic and hydroacoustic velocities)
-    >NOTE: these are defaults for all arrays, but each individual array can have its own unique parameters to selectively override the default.<br><br>
-    `&defaults` after an entry defines reusable key-value pairs for the ensuing configuration block which can then be merged with later configuration blocks by calling `<<: *defaults` and subsequently modified. See line 1 and line 41 in [`arrays_config.yml`](../config/arrays_config.yml).
-    3. **network parameters** `NETWORKS`
+        >NOTE: values set in `PARAMS` are the defaults for all arrays, but individual arrays can selectively override the defaults by redefining  key-value pairs in their resepective `<ARRAY_NAME>` section
+3. **network parameters** `NETWORKS`
     - network and array structure for the web output
 4. **array parameters** `<ARRAY_NAME>`
     - `NSLC`: list of array channels. Metadata must be in `STATION_XML` file, or can include lat/lon/gain information manually here
@@ -108,7 +108,8 @@ Assuming you are in the right environment
 
     ```ipensive-run -c <config_file> -t <yyyymmddHHMM>```
 
-     `-c` and `-t` are optional. If `-c` is not supplied, the config defaults to either the path defined by environment varable `IPENSIVE_CONFIG` (1st) or `config/ipensive_config.yml` (2nd). If `-t` is not supplied, the time is rounded to the most recent 10-minute mark. 
+     `-c` and `-t` are optional. If `-c` is not supplied, the config defaults to either the path defined by environment varable `IPENSIVE_CONFIG` (1st) or `config/ipensive_config.yml` (2nd). 
+     >NOTE: The time flag `-t` defines the ***END TIME*** of a 10 minute window, ***NOT THE START TIME***. And times are always rounded to the nearest 10-minute mark (e.g., 07:10, 07:20, 07:30...). If `-t` is not supplied, the most recent 10-minute mark is used.
      
      See ```ipensive-run -h``` for more options. In particular, the ```-a``` option is useful for processing a subset of arrays if more than one are defined in `arrays_config.yml`
 
@@ -123,7 +124,7 @@ Assuming you are in the right environment
     ipensive-backfill -s 202507010000 -e 202507020000
     ```
 
-    See ```ipensive-backfill -h``` for more options.
+    where `-s` and `-e` define start and endtimes in `yyyymmddHHMM` (again rounded to nearest 10-minute mark). Each can also be used together with `-dt` which defines a duration in hours or days (e.g. `-s 202507010000 -dt 4h` processes the four hours after 2025-07-01, or `-e 202507010000 -dt 5d` processes the five days before 2025-07-01). See `ipensive-backfill -h` for more options.
 
 4. **Update Metadata**
     ```bash
