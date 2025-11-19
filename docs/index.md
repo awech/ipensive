@@ -5,7 +5,7 @@ There are 3 command-line tools to run ipensive
 2. ipensive-backfill
     - used to backfill data
 3. ipensive-metadata
-    - creates/updates the a station xml metadata file
+    - creates/updates the station xml metadata file
 ##
 To run ipensive, type the following:
 ```
