@@ -7,7 +7,7 @@ There are 3 command-line tools to run ipensive
 3. ipensive-metadata
     - creates/updates the station xml metadata file
 ##
-To run ipensive, type the following:
+To run ipensive, `cd` to the main ipensive directory and type the following:
 ```
 ipensive-run
 ```
