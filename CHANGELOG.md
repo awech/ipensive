@@ -40,12 +40,14 @@ This version is the official public release of ipensive and the start of semanti
 ### :books: Documentation
 - improved documentation
 - implement pytests
+- improved logging with timestamps
 
 ### :gear: Configuration
 - change `.py` config files to  `.yml` files
 - moved channel metadata out of array config file and into `.xml` file
 - moved infrasound target locations to separate `.csv` file
 - separated array configuration from system configuration
+- new option to use environment variables pointing to config files
 
 ### :hammer_and_wrench: Under the hood
 - structured as package for simpler installation
