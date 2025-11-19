@@ -63,8 +63,7 @@ ipensive
 
 Both files have example/template entries in them to demonstrate the structure and available configuration options. And their corresponding target and metadata files are located in `data/`. The simplest step would be to edit these `config/*yml` files in place with your arrays, data source, and desired output locations. The path to a separate `ipensive_config.yml` can also be provided as an argument to the `ipensive-run`, `ipensive-backfill`, and `ipensive-metadata` scripts. And the path to `arrays_config.yml` can also be defined within `ipensive_config.yml`.
 
->NOTE:
->There is also the option to create environment variables `IPENSIVE_CONFIG` and `ARRAYS_CONFIG` defining paths to separate locations of these configs. This is the recommended method for automatic processing via cron.
+>NOTE: The default is to look for `ipensive_config.yml` and `arrays_config.yml` in `config/`. There is also the option to define the path to `arrays_config.yml` within `ipensive_config.yml` and use the `-c` flag to point to `/some_path/ipensive_config.yml`.<br><br>There is also the option to create environment variables `IPENSIVE_CONFIG` and/or `ARRAYS_CONFIG` defining paths to separate locations of these configs. This is recommended for automatic processing via cron. Personally, I define the path to `arrays_config.yml` within `ipensive_config.yml` and set `IPENSIVE_CONFIG` to point to `/some_dir/ipensive_config.yml` 
 
 
 ### System config: `ipensive_config.yml`
@@ -92,7 +91,7 @@ This config file defines:
 1. **processing parameters** `PARAMS`
     - processing parameters: controlling data processing details (filters, window length, etc.)
     - plotting parameters: slight control on how a few things appear (mostly this allows for differentiating between acoustic and hydroacoustic velocities)
-    >NOTE: these are defaults for all arrays, but each individual array can have its own unique parameters to selectively override the default<br>
+    >NOTE: these are defaults for all arrays, but each individual array can have its own unique parameters to selectively override the default.<br><br>
     `&defaults` after an entry defines reusable key-value pairs for the ensuing configuration block which can then be merged with later configuration blocks by calling `<<: *defaults` and subsequently modified. See line 1 and line 41 in [`arrays_config.yml`](../config/arrays_config.yml).
     3. **network parameters** `NETWORKS`
     - network and array structure for the web output
