@@ -1,6 +1,6 @@
 ############### Defaults ###############
 ########################################
-PARAMS: &defaults # define reusable key-value pairs
+PARAMS: &defaults # defines `defaults` as reusable key-value pairs (see line 41)
 
   # PROCESSING PARAMETERS
   EXTRA_PAUSE   : 0     # extra pause in case some arrays are extra latent (Dillingham)
@@ -38,7 +38,7 @@ NETWORKS:
 # Configure each array's channels, back-azimuth targets, 
 # and (optionally) different pre-processing/plotting parameters
 Kenai:
-  <<: *defaults # reusable defaults from PARAMS above
+  <<: *defaults # loads key-value pairs from `&defaults` set for PARAMS above (line 3)
   NSLC: 
     - AV.KENI.01.HDF
     - AV.KENI.02.HDF
