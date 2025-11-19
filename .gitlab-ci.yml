@@ -71,10 +71,10 @@ build:image:
   image: docker:latest
   services:
     - docker:dind
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: always
-    - when: never
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH == "main"
+  #     when: always
+  #   - when: never
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - >-
