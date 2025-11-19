@@ -92,15 +92,15 @@ This config file defines:
 1. **processing parameters** `PARAMS`
     - processing parameters: controlling data processing details (filters, window length, etc.)
     - plotting parameters: slight control on how a few things appear (mostly this allows for differentiating between acoustic and hydroacoustic velocities)
-        >NOTE: values set in `PARAMS` are the defaults for all arrays, but individual arrays can selectively override the defaults by redefining  key-value pairs in their resepective `<ARRAY_NAME>` section
-3. **network parameters** `NETWORKS`
+        >NOTE: values set in `PARAMS` are the defaults for all arrays, but individual arrays can selectively override the defaults by redefining  key-value pairs in their resepective `<ARRAY_NAME>` section (see array_parameters below)
+2. **network parameters** `NETWORKS`
     - network and array structure for the web output
-4. **array parameters** `<ARRAY_NAME>`
+3. **array parameters** `<ARRAY_NAME>`
     - `NSLC`: list of array channels. Metadata must be in `STATION_XML` file, or can include lat/lon/gain information manually here
     - `TARGETS`: list of targets for which you want to plot back-azimuths. Must be in `TARGETS_FILE`, or can include lat/lon information manually here
     - Any parameter set in `PARAMS` above can be customized for individual arrays here
 ##
->Note. `example_2/config` and `example_2/data` provide an example of how you can configure ipensive to run with multiple `arrays_config` files
+>Note. `example_2/config` and `example_2/data` provide an example of how you can configure ipensive to run with multiple array config files
 
 ## Usage
 Assuming you are in the right environment
