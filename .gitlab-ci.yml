@@ -45,6 +45,16 @@ test-python-3.11:
   script:
     - pytest -v 
 
+test-python-3.12:
+  image: python:3.12
+  stage: test
+  before_script:
+    - pip install --upgrade pip
+    - pip install -e .
+    - pip install pytest
+  script:
+    - pytest -v 
+
 test-python-3.13:
   image: python:3.13
   stage: test
