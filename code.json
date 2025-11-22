@@ -10,13 +10,13 @@
             "licenses": [
                 {
                     "name": "Public Domain, CC0-1.0",
-                    "URL": "https://code.usgs.gov/vsc/seis/tools/ipensive/-/raw/main/LICENSE.md"
+                    "URL": "https://code.usgs.gov/vsc/seis/tools/ipensive/-/raw/1.0.0/LICENSE.md"
                 }
             ]
         },
         "homepageURL": "https://code.usgs.gov/vsc/seis/tools/ipensive",
-        "downloadURL": "---- placeholder ----",
-        "disclaimerURL": "https://code.usgs.gov/vsc/seis/tools/ipensive/-/raw/main/DISCLAIMER.md",
+        "downloadURL": "https://code.usgs.gov/vsc/seis/tools/ipensive/-/archive/1.0.0/ipensive-1.0.0.zip",
+        "disclaimerURL": "https://code.usgs.gov/vsc/seis/tools/ipensive/-/raw/1.0.0/DISCLAIMER.md",
         "repositoryURL": "https://code.usgs.gov/vsc/seis/tools/ipensive.git",
         "vcs": "git",
         "laborHours": 0,
@@ -35,7 +35,7 @@
             "email": "awech@usgs.gov"
         },
         "date": {
-            "metadataLastUpdated": "2025-08-26"
+            "metadataLastUpdated": "2025-11-21"
         }
     }
 ]
