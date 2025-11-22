@@ -12,16 +12,13 @@ OUT_ASCII_DIR: output/ascii_output
 LOGS_DIR: output/logs
 #################################
 
-###### Targets & Metadata #######
-STATION_XML: data/stations.xml
-TARGETS_FILE: data/volcano_list.txt
-#################################
-
 # Optional array config file location.
 # This can be set here, or as an environment variable.
 # If neither is set, it defaults to ../config/arrays_config.yml
 # 
-ARRAYS_CONFIG: config/arrays_config.yml
+ARRAYS_CONFIG: 
+  - example_2/config/AVO_arrays_config.yml
+  - example_2/config/CNMI_arrays_config.yml
 
 
 ## Optional urls that get linked from the iPensive webpage

@@ -20,7 +20,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        epilog="e.g.: python back_populate.py -c <filename.yml> -s 202201010000 -e 202201020000"
+        epilog="e.g.: ipensive-backfill -c <filename.yml> -s 202201010000 -e 202201020000"
     )
 
     parser.add_argument(
@@ -76,7 +76,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
+def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS, my_log):
     """
     Run the back population process for the specified time window and arrays.
 
@@ -88,7 +88,7 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
         ARRAYS (list): List of arrays to process.
     """
 
-    t1 = utc(T1) + config["PARAMS"]["DURATION"]
+    t1 = utc(T1) + config["DURATION"]
     for t in pd.date_range(T2, t1.strftime("%Y%m%d%H%M"), freq="-10min"):
         my_log.info(t)
 
@@ -112,14 +112,14 @@ def run_backpopulate(config, T1, T2, OVERWRITE, ARRAYS):
     utils.write_html(config)
 
 
-if __name__ == '__main__':
+def main():
     """
     Main entry point for the back population script.
     """
 
     args = parse_args()  # Parse command-line arguments
     ipensive_config_file = args.config
-    config, array_config_file = utils.load_config(ipensive_config_file)
+    config = utils.load_ipensive_config(ipensive_config_file)
     config["plot"] = not args.no_plot
 
     if args.arrays is not None:
@@ -129,7 +129,8 @@ if __name__ == '__main__':
 
     utils.setup_logging(utc.utcnow(), config, arg_opt=args.log)
     my_log = logging.getLogger(__name__)
-    my_log.info(f"Array config: {array_config_file}")
+    for f in config["array_config_files"]:
+        my_log.info(f"Array config: {f}")
     for key, value in args.__dict__.items():
         if key in ["starttime", "endtime"]:
             if value is not None:
@@ -169,4 +170,8 @@ if __name__ == '__main__':
     T1 = utc(T1).strftime(date_fmt)[:-1] + "0"
     T2 = utc(T2).strftime(date_fmt)[:-1] + "0"
 
-    run_backpopulate(config, T1, T2, args.overwrite, ARRAYS)
+    run_backpopulate(config, T1, T2, args.overwrite, ARRAYS, my_log)
+
+
+if __name__ == '__main__':
+    main()

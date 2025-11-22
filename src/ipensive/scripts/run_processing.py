@@ -4,7 +4,7 @@ from ipensive import ipensive_utils as utils
 from ipensive import array_processing
 
 
-if __name__ == "__main__":
+def main():
     """
     Main entry point for the script.
     """
@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     args = array_processing.parse_args()  # Parse command-line arguments
     ipensive_config_file = args.config
-    config, array_config_file = utils.load_config(ipensive_config_file)  # Load configuration
+    config = utils.load_ipensive_config(ipensive_config_file)  # Load configuration
 
     config["plot"] = False if args.no_plot else True
 
@@ -22,7 +22,8 @@ if __name__ == "__main__":
     utils.setup_logging(T0, config, arg_opt=args.log)
     my_log = logging.getLogger(__name__)
     my_log.info(f"Using ipensive config file: {ipensive_config_file}")
-    my_log.info(f"Using array config file: {array_config_file}")
+    for f in config["array_config_files"]:
+        my_log.info(f"Using array config file: {f}")
     my_log.info("Process Started")
 
     if delay > 0:
@@ -51,3 +52,7 @@ if __name__ == "__main__":
     utils.write_html(config)
 
     my_log.info(f"{time.time() - timer_0:.1f} seconds to process all")
+
+
+if __name__ == "__main__":
+    main()

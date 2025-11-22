@@ -9,6 +9,7 @@ import argparse
 import logging
 import time
 import pandas as pd
+import numpy as np
 from obspy import UTCDateTime as utc
 from . import ipensive_utils as utils
 from .plotting_utils import plot_results, save_figure
@@ -29,7 +30,7 @@ def parse_args():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        epilog="e.g.: python array_processing.py -c <filename.yml>"
+        epilog="e.g.: ipensive-run -c <filename.yml>"
     )
 
     parser.add_argument(
@@ -87,7 +88,8 @@ def get_starttime(config, args):
     else:
         # Use the current UTC time and add latency and window length
         T0 = utc.utcnow()
-        wait = config["PARAMS"]["LATENCY"] + config["PARAMS"]["WINDOW_LENGTH"]
+        window_length = np.max([config[arr]["WINDOW_LENGTH"] for arr in config["array_list"]])
+        wait = config["LATENCY"] + window_length
 
     # Round down to the nearest 10-minute interval
     T0 = utc(T0.strftime(date_fmt)[:-1] + "0")
@@ -170,7 +172,7 @@ def process_array(config, array_name, T0, return_figure=False):
     st, lat_list, lon_list = add_metadata(st, config, array_name, skip_chans)
 
     # Add volcano backazimuths
-    array_params = utils.get_target_backazimuth(st, config, array_params)
+    array_params = utils.get_target_backazimuth(st, array_params)
 
     # Preprocess data
     st = data_utils.preprocess_data(st, t1, t2, skip_chans, array_params)

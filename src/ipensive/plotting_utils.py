@@ -74,6 +74,9 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_params):
         plot_params (dict): Parameters for the plot, including size and line widths.
     """
 
+    if "PLOTCHAN" in array_params and array_params["PLOTCHAN"] is not None:
+        st = st.select(id=array_params["PLOTCHAN"])
+
     # Generate a time vector for plotting waveforms
     tvec = np.linspace(
         dates.date2num(st[0].stats.starttime.datetime),
@@ -92,6 +95,8 @@ def plot_waveform(ax, T1, T2, st, array_params, plot_params):
         ax2 = ax.twinx()
         ax2.set_yticks([])
         ax2.set_ylabel(
+            f"{st[0].id}\n"
+            "----------------------\n"
             f"{array_params['FREQMIN']:.1f} - {array_params['FREQMAX']:.1f} Hz",
             labelpad=6,
         )

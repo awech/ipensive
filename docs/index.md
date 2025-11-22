@@ -1,31 +1,24 @@
 ## Quick-start
-Navigate to the `ops_scripts/` subdirectory 
-```bash
-ipensive
-├── config/
-├── data/
-├── src/
-├── ops_scripts/
-│   ├── run_processing.py
-│   ├── update_metadata.py
-│   └── back_populate.py
-├── templates/
-├── tests/
-└── ...
+ipensive is a tool to process infrasound or hydroacoustic array data in 10-minute intervals, write out data results to a flat file, create plots of results, and provide a web interface to view these plots.<br><br>
+There are 3 command-line tools to run ipensive
+1. `ipensive-run`
+    - main command to process data
+2. `ipensive-backfill`
+    - used to backfill data
+3. `ipensive-metadata`
+    - creates/updates the station xml metadata file
+##
+To run ipensive, `cd` to the main ipensive directory and type the following:
 ```
-
-and execute the `run_processing.py` script:
-```bash
-cd ops_scripts
-python run_processing.py
+ipensive-run
 ```
 
 This should create an `output/` folder with  `output/html/` and `output/ascii_output/` subdirectories:
 ```bash
 ipensive
 ├── config/
+├── data/
 ├── src/
-├── ops_scripts/
 ...
 ├── output/
 │   ├── html/
@@ -33,18 +26,23 @@ ipensive
 └── ...
 ```
 
-Navigate to and open `output/html/index.html` with your web browser to verify the webpage and images were generated. It should look like this:
-<br/><br/><img src="./run_processing.png" alt="drawing" width="600px">
+Navigate to and open `output/html/index.html` with your web browser to verify the webpage and images were generated. Or open using:
+```
+open output/html/index.html
+```
+It should look like this:
+<br/><br/><img src="run_processing.png" alt="drawing" width="600px">
 
-and you should be able to toggle between the different arrays either through the dropdown menus or the top row of arrows. 
+You should be able to toggle between the different arrays either through the dropdown menus or the top row of arrows. Clicking on the thumbnail images generated should open a large-scale version with more detail, as described below:
+<br/><img src="labeled_plot.png" alt="drawing" width="600px">
 
-Next (also from `ops_scripts/`) run:
+Next, let's backfill the past 3 hours (using the `-dt` flag) of just the Kenai and Sand Point arrays (using `-a` flag) by running:
 ```bash
-python back_populate.py -dt 3h
+ipensive-backfill -dt 3h -a Kenai,Sand_Point
 ```
 
-This will process the past 3 hours of data, resulting in the webpage looking like this:
-<br/><br/><img src="./back_populate.png" alt="drawing" width="600px">
+This process should take &plusmn; 3.5 minutes, depending on data availability and download speeds from EarthScope. The resulting webpage should look something like this:
+<br/><br/><img src="back_populate.png" alt="drawing" width="600px">
 
 >NOTE:
 >The images themselves will look different based on more recent data
@@ -54,20 +52,19 @@ There are 2 configuration files in `config/`:
 ```bash
 ipensive
 ├── config/
-│   ├── ipensive_config.yml
-│   └── arrays_config.yml
+    ├── ipensive_config.yml
+    └── arrays_config.yml
+├── data/
 ├── src/
-├── ops_scripts/
 └── ...
 ```
 
 1.  [`ipensive_config.yml`](../config/ipensive_config.yml) controls the data source and the output locations
 2.  [`arrays_config.yml`](../config/arrays_config.yml) defines the arrays, processing parameters, and plot controls
 
-Both files have example/template entries in them to demonstrate the structure and available configuration options. The simplest step would be to edit these files in place with your arrays, data source, and desired output locations. The path to a separate `ipensive_config.yml` can also be provided as an argument to the scripts in `/ops_scripts`, and the path to `arrays_config.yml` can also be defined within `ipensive_config.yml`.
+Both files have example/template entries in them to demonstrate the structure and available configuration options. And their corresponding target and metadata files are located in `data/`. The simplest step would be to edit these `config/*yml` files in place with your arrays, data source, and desired output locations. The path to a separate `ipensive_config.yml` can also be provided as an argument to the `ipensive-run`, `ipensive-backfill`, and `ipensive-metadata` scripts. And the path to `arrays_config.yml` can also be defined within `ipensive_config.yml`.
 
->NOTE:
->There is also the option to create an environment variables `IPENSIVE_CONFIG` and `ARRAYS_CONFIG` defining paths to separate locations of these configs. 
+>NOTE: The default is to look for `ipensive_config.yml` and `arrays_config.yml` in `config/`. There is also the option to define the path to `arrays_config.yml` within `ipensive_config.yml` and use the `-c` flag to point to `/some_path/ipensive_config.yml`.<br><br>There is also the option to create environment variables `IPENSIVE_CONFIG` and/or `ARRAYS_CONFIG` defining paths to separate locations of these configs. This is recommended for automatic processing via cron. Personally, I define the path to `arrays_config.yml` within `ipensive_config.yml` and set `IPENSIVE_CONFIG` to point to `/some_dir/ipensive_config.yml` 
 
 
 ### System config: `ipensive_config.yml`
@@ -81,10 +78,11 @@ This config file defines
 2. Output Directories:
     - `OUT_WEB_DIR`: <directory_path> location to output html and images
     - `OUT_ASCII_DIR`: <directory_path> location to output ascii files of processing results
-    - `LOGS_DIR`: <directory_path> location to output log files (*Note: must set environment variable* `FROMCRON=yep` *to write log output*)
+    - `LOGS_DIR`: <directory_path> location to output log files 
+        >NOTE: must set environment variable `FROMCRON=yep` to write log output
 
 3. Metadata and back-azimuth target information:
-    - `STATION_XML`: <path_to_file> (station.xml file updated routinely by `ops_sripts/update_metadata.py`)
+    - `STATION_XML`: <path_to_file> (station.xml file updated routinely by `ipensive-metadata`)
     - `TARGETS_FILE`: <path_to_file> (.csv file with columns: `Target`,`Longitude`,`Latitude`)
 
 
@@ -94,41 +92,45 @@ This config file defines:
 1. **processing parameters** `PARAMS`
     - processing parameters: controlling data processing details (filters, window length, etc.)
     - plotting parameters: slight control on how a few things appear (mostly this allows for differentiating between acoustic and hydroacoustic velocities)
-    - *NOTE*: these are defaults for all arrays, but each individual array can have its own unique parameters to selectively override the default
-3. **network parameters** `NETWORKS`
+        >NOTE: values set in `PARAMS` are the defaults for all arrays, but individual arrays can selectively override the defaults by redefining  key-value pairs in their resepective `<ARRAY_NAME>` section (see array_parameters below)
+2. **network parameters** `NETWORKS`
     - network and array structure for the web output
-4. **array parameters** `<ARRAY_NAME>`
+3. **array parameters** `<ARRAY_NAME>`
     - `NSLC`: list of array channels. Metadata must be in `STATION_XML` file, or can include lat/lon/gain information manually here
     - `TARGETS`: list of targets for which you want to plot back-azimuths. Must be in `TARGETS_FILE`, or can include lat/lon information manually here
     - Any parameter set in `PARAMS` above can be customized for individual arrays here
-
+##
+>Note. `example_2/config` and `example_2/data` provide an example of how you can configure ipensive to run with multiple array config files
 
 ## Usage
-Operational scripts are located in `ops_scripts/` directory
-
+Assuming you are in the right environment
 1. **Manually**
 
-    ```python run_processing.py.py -c <config_file> -t <yyyymmddHHMM>```
+    ```ipensive-run -c <config_file> -t <yyyymmddHHMM>```
 
-     `-c` and `-t` are optional. If `-c` is not supplied, the config defaults to either the path defined by environment varable `IPENSIVE_CONFIG` (1st) or `config/ipensive_config.yml` (2nd). If `-t` is not supplied, the time is rounded to the most recent 10-minute mark. See ```python run_processing.py -h``` for more options. In particular, the ```-a``` option is useful for processing a single array if more than one are defined in the arrays config file.
+     `-c` and `-t` are optional. If `-c` is not supplied, the config defaults to either the path defined by environment varable `IPENSIVE_CONFIG` (1st) or `config/ipensive_config.yml` (2nd). 
+     >NOTE: The time flag `-t` defines the ***END TIME*** of a 10 minute window, ***NOT THE START TIME***. And times are always rounded to the nearest 10-minute mark (e.g., 07:10, 07:20, 07:30...). If `-t` is not supplied, the most recent 10-minute mark is used.
+     
+     See ```ipensive-run -h``` for more options. In particular, the ```-a``` option is useful for processing a subset of arrays if more than one are defined in `arrays_config.yml`
 
 2. **Automatically on a cron**
 
-    ```*/10 * * * * python /<path_to_file>/run_processing.py.py >> /dev/null 2>&1```
+    ```*/10 * * * * ipensive-run >> /dev/null 2>&1```
+    >NOTE: must set environment variable `FROMCRON=yep` to redirect log output to a file
 
 3. **Back populate**
 
     ```bash
-    python back_populate.py -s 202507010000 -e 202507020000
+    ipensive-backfill -s 202507010000 -e 202507020000
     ```
 
-    see ```python back_populate.py -h``` for more options.
+    where `-s` and `-e` define start and endtimes in `yyyymmddHHMM` (again rounded to nearest 10-minute mark). Each can also be used together with `-dt` which defines a duration in hours or days (e.g. `-s 202507010000 -dt 4h` processes the four hours after 2025-07-01, or `-e 202507010000 -dt 5d` processes the five days before 2025-07-01). See `ipensive-backfill -h` for more options.
 
 4. **Update Metadata**
     ```bash
-    python update_metadata.py -c <config_file>
+    ipensive-metadata -c <config_file>
     ```
-    This will update the `data/stations.xml` file with station-channel lat/lon information used for array processing. Ideally run somewhat periodically, though not as often as the array processing itself.
+    This will update the `data/stations.xml` file with station-channel lat/lon information used for array processing. Ideally this would get run somewhat periodically, though not as often as the array processing itself.
 
 
 ### Webpage configuration
