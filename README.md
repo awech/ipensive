@@ -37,7 +37,7 @@ Infrasound array processing for volcano monitoring. Developed for operational us
 
 ## Citation
 This code may be cited directly as:
-> Wech, A.W. (2025) ipensive (Version 1.0.0), U.S. Geological Survey Software Release, https://doi.org/10.5066/P1JBRDDF.
+> Wech, A.W. (2026) ipensive (Version 1.0.1), U.S. Geological Survey Software Release, https://doi.org/10.5066/P14GHLCY.
 
 The least trimmed squares infrasound methodology can be cited as:
 >Bishop, J.W., Fee, D., & Szuberla, C. A. L., (2020). Improved infrasound array processing with robust estimators, Geophys. J. Int., 221(3) p. 2058-2074 doi: https://doi.org/10.1093/gji/ggaa110. 

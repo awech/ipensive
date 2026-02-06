@@ -1,16 +1,6 @@
 # Release Notes
 
-## Upgrading
-
-You can always update to the latest version of `ipensive` using pip:
-```
-pip install --upgrade ipensive
-```
-
-or install a specific version:
-```
-pip install ipensive==version-number
-```
+## Versions
 
 To check which version of `ipensive` you have installed:
 ```
@@ -22,10 +12,18 @@ pip show ipensive
 Current and past maintainers of `ipensive`:
 - [@awech](https://github.com/awech)
 
+## [1.0.1] - 2026-02-06
 
-## [1.0.0] - 2025-08-26
+**Minor Patch** - [https://doi.org/10.5066/P14GHLCY](https://doi.org/10.5066/P14GHLCY)
 
-**Not Yet Approved Release**
+This release fixes a relative paths bug introduced when converting scripts to command-line executables. 
+
+### :bug: Bugs
+- fixed relative pathing issue in `ipensive_utils` when no default config file is set. This is mainly an issue that affects its usability right out of the box
+
+## [1.0.0] - 2025-11-25
+
+**Fist Approved Release** - [https://doi.org/10.5066/P1JBRDDF](https://doi.org/10.5066/P1JBRDDF)
 
 This version is the official public release of ipensive and the start of semantic versioning. This version is a massive overhaul from the original Github code base, which is included as a release here as version 0.0.1. Changes include how ipensive is installed, configured and run. The full commit history is preserved in this repository. Notable changes are listed below:
 

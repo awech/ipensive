@@ -3,7 +3,7 @@
         "name": "ipensive",
         "organization": "U.S. Geological Survey",
         "description": "Tool for processing infrasound array data & displaying results",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "status": "Production",
         "permissions": {
             "usageType": "openSource",
@@ -35,7 +35,7 @@
             "email": "awech@usgs.gov"
         },
         "date": {
-            "metadataLastUpdated": "2025-08-26"
+            "metadataLastUpdated": "2026-02-06"
         }
     }
 ]
