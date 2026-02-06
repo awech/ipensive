@@ -80,6 +80,7 @@ build:image:
     - >-
       docker build
       --no-cache
+      --provenance=false
       --tag $CI_REGISTRY_IMAGE:${CI_COMMIT_SHA}
       --tag $CI_REGISTRY_IMAGE:latest
       .

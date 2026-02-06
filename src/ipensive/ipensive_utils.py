@@ -38,8 +38,7 @@ def get_config_file():
     Returns:
         pathlib.Path: Path to the configuration file.
     """
-
-    default_config_file = Path(__file__).parent.parent.parent / "config/ipensive_config.yml"
+    default_config_file = Path.cwd() / "config/ipensive_config.yml"
 
     if "IPENSIVE_CONFIG" in os.environ:
         env_config_file = Path(os.environ["IPENSIVE_CONFIG"])
@@ -145,7 +144,7 @@ def load_ipensive_config(config_file):
     elif "ARRAYS_CONFIG" in ipensive_config:
         array_file = ipensive_config["ARRAYS_CONFIG"]
     else:
-        array_file = Path(__file__).parent.parent.parent / "config/arrays_config.yml"
+        array_file = Path.cwd() / "config/arrays_config.yml"
     if not isinstance(array_file, list):
         array_file = [array_file]
     array_file = [Path(af).resolve() for af in array_file]
@@ -321,8 +320,8 @@ def write_html(config):
     Returns:
         None
     """
-    
-    template_file = Path(__file__).parent.parent.parent / "templates" / "index.template"
+
+    template_file = Path.cwd() / "templates" / "index.template"
     with open(template_file, "r") as f:
         template = jinja2.Template(f.read())
     html = template.render(
