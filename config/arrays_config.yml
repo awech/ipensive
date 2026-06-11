@@ -39,6 +39,31 @@ NETWORKS:
 
 # Configure each array's channels, back-azimuth targets, 
 # and (optionally) different pre-processing/plotting parameters
+UWE-HF:
+  <<: *defaults
+  NSLC: 
+    - HV.UWE.01.HDF
+    - HV.UWE.02.HDF
+    - HV.UWE.03.HDF
+    - HV.UWE.04.HDF
+    - HV.UWE.05.HDF
+    - HV.UWE.06.HDF
+  TARGETS: 
+    - Kulani
+    - North Vent
+    - Puu Oo
+    - ML summit
+    - PLAD
+    - MLOD
+    - Kapoho Crater
+    - KOSM
+    - SHEEP
+  FREQMIN: 20.0
+  FREQMAX: 45.0
+  WINDOW_LENGTH : 20
+  # AZ_MIN: 0
+  # AZ_MAX: 360
+  
 UWE:
   <<: *defaults
   NSLC: 
@@ -58,6 +83,31 @@ UWE:
     - Kapoho Crater
     - KOSM
     - SHEEP
+  # AZ_MIN: 0
+  # AZ_MAX: 360
+
+AHUD-HF:
+  <<: *defaults
+  NSLC: 
+    - HV.AHUD.01.HDF
+    - HV.AHUD.02.HDF
+    - HV.AHUD.03.HDF
+    - HV.AHUD.04.HDF
+    - HV.AHUD.05.HDF
+    - HV.AHUD.06.HDF
+  TARGETS: 
+    - North Vent
+    - Puu Oo
+    - ML summit
+    - KOSM
+    - RCOD
+    - PLAD
+    - MLOD
+    - DAND
+    - HOVE
+  FREQMIN: 20.0
+  FREQMAX: 45.0
+  WINDOW_LENGTH : 20
   # AZ_MIN: 0
   # AZ_MAX: 360
 
@@ -82,26 +132,6 @@ AHUD:
     - HOVE
   # AZ_MIN: 0
   # AZ_MAX: 360
-
-MENE:
-  <<: *defaults
-  NSLC: 
-    - HV.MENE.01.HDF
-    - HV.MENE.02.HDF
-    - HV.MENE.03.HDF
-    - HV.MENE.04.HDF
-  TARGETS: 
-    - Kulani
-    - ML summit
-    - HOVE
-    - MLOD
-    - North Vent
-    - Mauna Ulu
-    - Puu Oo
-    - Napau Crater
-    - KOSM
-  # AZ_MIN: 60
-  # AZ_MAX: 270
 
 AIND:
   <<: *defaults
