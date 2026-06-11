@@ -33,7 +33,6 @@ NETWORKS:
     - UWE
     - AHUD-HF
     - AHUD
-    - MENE
     - AIND
     - SHEEP
     - Kahaluu
