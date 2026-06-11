@@ -39,7 +39,7 @@ NETWORKS:
 
 # Configure each array's channels, back-azimuth targets, 
 # and (optionally) different pre-processing/plotting parameters
-UWE-HF:
+UWEHF:
   <<: *defaults
   NSLC: 
     - HV.UWE.01.HDF
@@ -86,7 +86,7 @@ UWE:
   # AZ_MIN: 0
   # AZ_MAX: 360
 
-AHUD-HF:
+AHUDHF:
   <<: *defaults
   NSLC: 
     - HV.AHUD.01.HDF
