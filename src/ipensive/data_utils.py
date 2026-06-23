@@ -58,7 +58,7 @@ def get_obspy_client(config):
     return client
 
 
-def grab_data(client, NSLC, T1, T2, fill_value=0):
+def grab_data(client, NSLC, T1, T2):
     """
     Retrieve waveform data for specified channels and time range.
 
@@ -67,7 +67,6 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
         NSLC (list or dict): List of channel identifiers (e.g., 'NET.STA.LOC.CHA').
         T1 (obspy.UTCDateTime): Start time for data retrieval.
         T2 (obspy.UTCDateTime): End time for data retrieval.
-        fill_value (int or str): Value to fill gaps in data (default is 0).
 
     Returns:
         Stream: ObsPy Stream object containing the retrieved data.
