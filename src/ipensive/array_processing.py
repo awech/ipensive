@@ -162,21 +162,21 @@ def process_array(config, array_name, T0, return_figure=False):
     # Download data
     st = data_utils.grab_data(array_params["CLIENT"], array_params["NSLC"], T1, T2)
     # st.write("test_raw.mseed")
+
+    # Add metadata or coordinates
+    st, lat_list, lon_list = add_metadata(st, config, array_name)
+    
+    # Preprocess data
+    st = data_utils.preprocess_data(st, t1, t2, array_params)
+    # st.write("test_preprocessed.mseed")
     
     # Check data quality
     good_data, skip_chans = data_utils.QC_data(st, array_params)
     if not good_data:
         return None
 
-    # Add metadata or coordinates
-    st, lat_list, lon_list = add_metadata(st, config, array_name, skip_chans)
-
     # Add volcano backazimuths
     array_params = utils.get_target_backazimuth(st, array_params)
-
-    # Preprocess data
-    st = data_utils.preprocess_data(st, t1, t2, skip_chans, array_params)
-    # st.write("test_preprocessed.mseed")
 
     # Perform array processing
     results_df, lts_dict = do_LTS(st, array_params, lat_list, lon_list, skip_chans)
