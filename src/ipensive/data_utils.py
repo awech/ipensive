@@ -87,9 +87,10 @@ def grab_data(client, NSLC, T1, T2):
                 # Handle cases with multiple traces (e.g., due to gaps)
                 for sub_trace in tr:
                     # Ensure consistent data types and sampling rates
-                    sub_trace = qc_sub_trace(sub_trace)
+                    sub_trace = _qc_sub_trace(sub_trace)
                 if not tr.get_gaps():
                     # handle case where multiple traces returned with no gaps between them
+                    my_log.info(f"{nslc}: Multiple traces returned with no gaps between. Simple merge")
                     tr.merge()
 
         except Exception as e: # pragma: no cover
@@ -148,7 +149,7 @@ def preprocess_data(ST, t1, t2, array_params):
     return st
 
 
-def qc_sub_trace(sub_trace):
+def _qc_sub_trace(sub_trace):
     """
     Ensure consistent data type and sampling rate for a trace.
 
@@ -162,8 +163,10 @@ def qc_sub_trace(sub_trace):
         obspy.Trace: The trace with corrected data type and sampling rate.
     """
     if sub_trace.data.dtype.name != "int32":
+        my_log.info(f"{sub_trace.id}: changing dtype to int32")
         sub_trace.data = sub_trace.data.astype("int32")
     if sub_trace.stats.sampling_rate != np.round(sub_trace.stats.sampling_rate):
+        my_log.info(f"{sub_trace.id}: sampling rate is non-integer. Rounding to nearest integer value")
         sub_trace.stats.sampling_rate = np.round(sub_trace.stats.sampling_rate)
     return sub_trace
 
