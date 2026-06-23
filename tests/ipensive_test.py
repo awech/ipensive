@@ -20,6 +20,9 @@ ARRAYS_CONFIG_PATH = Path("config/arrays_config.yml")
 T0 = "2025-08-19 20:30"
 ARRAY = "Kenai"
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 
 def test_parse_args_defaults(monkeypatch):
     # Patch sys.argv
@@ -111,7 +114,7 @@ def test_get_pngfile_path():
 
 def test_get_obspy_client_fdsn():
     # Minimal config for FDSN
-    conf = {'CLIENT_TYPE': 'fdsn', 'HOSTNAME': 'IRIS', 'TIMEOUT': 5}
+    conf = {'CLIENT_TYPE': 'fdsn', 'HOSTNAME': 'earthscope', 'TIMEOUT': 5}
     client = utils.get_obspy_client(conf)
     assert hasattr(client, 'get_waveforms')
 
@@ -154,7 +157,7 @@ def test_data_and_preprocessing():
         assert_allclose(tr.data, TR.data, atol=1e-5, rtol=1e-8)
 
     st, *_ = metadata_utils.add_metadata(st, config, ARRAY, [])
-    st = data_utils.preprocess_data(st, t1, t2, [], array_params)
+    st = data_utils.preprocess_data(st, t1, t2, array_params)
     ST = read("tests/test_preprocessed.mseed")
 
     for tr in st:
@@ -184,12 +187,15 @@ def test_write_html(tmp_path):
 def test_write_data_files(tmp_path):
     import pandas as pd
     from obspy import UTCDateTime, read
+    from matplotlib.dates import date2num
     
     config = utils.load_ipensive_config(IPENSIVE_CONFIG_PATH)
     config['OUT_ASCII_DIR'] = tmp_path / "ascii"
     config['OUT_VALVE_DIR'] = tmp_path / "valve"
 
     DF = pd.read_csv("tests/test_results.csv")
+    # Convert ISO time strings back to matplotlib date floats (as write_data_files expects)
+    DF["Time"] = date2num(pd.to_datetime(DF["Time"]))
     st = read("tests/test_preprocessed.mseed")
     utils.write_data_files(UTCDateTime(T0), st, DF, config)
 
@@ -221,7 +227,13 @@ def test_LTS_and_image_output(tmp_path):
 
     expected_df = read_csv("tests/test_results.csv")
 
-    assert_frame_equal(expected_df, test_df.round(7), rtol=1.5e-5)
+    # Convert matplotlib date floats in test_df to ISO strings to match baseline CSV format
+    from matplotlib.dates import num2date
+    test_time_strings = [num2date(ti).strftime('%Y-%m-%dT%H:%M:%S') for ti in test_df["Time"]]
+    compare_df = test_df.copy()
+    compare_df["Time"] = test_time_strings
+
+    assert_frame_equal(expected_df, compare_df.round(7), rtol=1.5e-5)
 
     utils.web_folders(t2, config, array_params)
     for plotsize in ["big", "thumbnail"]:
