@@ -1,9 +1,6 @@
 [build-system]
-requires = [
-    "setuptools>61.0",
-    "wheel"
-]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "ipensive"
@@ -19,7 +16,6 @@ dependencies = [
     "jinja2",
     "pyyaml",
     "numba",
-    "setuptools<82.0"
 ]
 classifiers = [
     # How mature is this project? Common values are
@@ -33,22 +29,24 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: CC0 1.0 Universal (CC0 1.0)",
 ]
 keywords = ["infrasound", "volcano", "array processing", "monitoring"]
+
+[project.optional-dependencies]
+test = ["pytest", "coverage"]
 
 [project.scripts]
 ipensive-backfill = "ipensive.scripts.back_populate:main"
 ipensive-run = "ipensive.scripts.run_processing:main"
 ipensive-metadata = "ipensive.scripts.update_metadata:main"
 
-[tool.setuptools.dynamic]
-version = {attr = "ipensive.__version__"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
 [project.urls]
+
+[tool.hatch.version]
+path = "src/ipensive/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ipensive", "src/lts_array"]
 
 [tool.coverage.run]
 omit = [
