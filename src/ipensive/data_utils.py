@@ -31,7 +31,7 @@ def get_obspy_client(config):
         client.name = config["HOSTNAME"]
 
     elif config["CLIENT_TYPE"].lower() == "local_fdsn": # pragma: no cover
-        client = FDSNClient("IRIS", service_mappings={"dataselect": config["LOCAL_FDSN"]}, timeout=config["TIMEOUT"])
+        client = FDSNClient("earthscope", service_mappings={"dataselect": config["LOCAL_FDSN"]}, timeout=config["TIMEOUT"])
         client.name = config["LOCAL_FDSN"]
 
     elif config["CLIENT_TYPE"].lower() == "sds": # pragma: no cover
@@ -58,7 +58,7 @@ def get_obspy_client(config):
     return client
 
 
-def grab_data(client, NSLC, T1, T2, fill_value=0):
+def grab_data(client, NSLC, T1, T2):
     """
     Retrieve waveform data for specified channels and time range.
 
@@ -67,7 +67,6 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
         NSLC (list or dict): List of channel identifiers (e.g., 'NET.STA.LOC.CHA').
         T1 (obspy.UTCDateTime): Start time for data retrieval.
         T2 (obspy.UTCDateTime): End time for data retrieval.
-        fill_value (int or str): Value to fill gaps in data (default is 0).
 
     Returns:
         Stream: ObsPy Stream object containing the retrieved data.
@@ -86,22 +85,14 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
             tr = client.get_waveforms(*nslc.split('.'), T1, T2)
             if len(tr) > 1: # pragma: no cover
                 # Handle cases with multiple traces (e.g., due to gaps)
-                if fill_value == 0 or fill_value is None:
-                    tr.detrend("demean")
-                    tr.taper(max_percentage=0.01)
                 for sub_trace in tr:
                     # Ensure consistent data types and sampling rates
-                    if sub_trace.data.dtype.name != "int32":
-                        sub_trace.data = sub_trace.data.astype("int32")
-                    if sub_trace.stats.sampling_rate != np.round(sub_trace.stats.sampling_rate):
-                        sub_trace.stats.sampling_rate = np.round(sub_trace.stats.sampling_rate)
-                my_log.info("Merging gappy data...")
-                tr.merge(fill_value=fill_value)
+                    sub_trace = _qc_sub_trace(sub_trace)
+                if not tr.get_gaps():
+                    # handle case where multiple traces returned with no gaps between them
+                    my_log.info(f"{nslc}: Multiple traces returned with no gaps between. Simple merge")
+                    tr.merge()
 
-            # Handle cases where the trace length is shorter than expected
-            if tr[0].stats.endtime - tr[0].stats.starttime < T2 - T1:
-                tr.detrend('demean')
-                tr.taper(max_percentage=0.01)
         except Exception as e: # pragma: no cover
             my_log.error(f"Error occurred while grabbing data: {e}")
             my_log.warning(f"No data available for {nslc} from {client.name}. Creating empty Stream object.")
@@ -118,14 +109,10 @@ def grab_data(client, NSLC, T1, T2, fill_value=0):
             tr.data = zeros(int((T2 - T1) * tr.stats["sampling_rate"]), dtype="int32")
         st += tr
 
-    # Trim the stream to the specified time range and fill gaps
-    st.trim(T1, T2, pad=True, fill_value=0)
-    my_log.info("Detrending data...")
-    st.detrend("demean")
     return st
 
 
-def preprocess_data(ST, t1, t2, skip_chans, array_params):
+def preprocess_data(ST, t1, t2, array_params):
     """
     Preprocess seismic data by removing sensitivity, tapering, filtering, and trimming.
 
@@ -133,7 +120,6 @@ def preprocess_data(ST, t1, t2, skip_chans, array_params):
         ST (obspy.Stream): Stream containing seismic traces.
         t1 (obspy.UTCDateTime): Start time for trimming.
         t2 (obspy.UTCDateTime): End time for trimming.
-        skip_chans (list): List of channels to skip.
         array_params (dict): Array parameters including filtering and tapering settings.
 
     Returns:
@@ -141,13 +127,7 @@ def preprocess_data(ST, t1, t2, skip_chans, array_params):
     """
 
     st = ST.copy()
-    for tr in st:
-        if tr.id in skip_chans:
-            continue
-        if isinstance(array_params["NSLC"], dict):
-            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
-        else:
-            tr.remove_sensitivity(tr.inventory)
+
     st.detrend("demean")
     st.taper(max_percentage=None, max_length=array_params["TAPER"])
     st.filter(
@@ -157,9 +137,38 @@ def preprocess_data(ST, t1, t2, skip_chans, array_params):
         corners=2,
         zerophase=True,
     )
-    st.trim(t1, t2 + array_params["WINDOW_LENGTH"])
+    st.merge(fill_value=0)
+    st.trim(t1, t2 + array_params["WINDOW_LENGTH"], pad=True, fill_value=0)
+    
+    for tr in st:
+        if isinstance(array_params["NSLC"], dict):
+            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
+        else:
+            tr.remove_sensitivity(tr.inventory)
 
     return st
+
+
+def _qc_sub_trace(sub_trace):
+    """
+    Ensure consistent data type and sampling rate for a trace.
+
+    Casts trace data to int32 if not already, and rounds the sampling
+    rate to the nearest integer if it is not already a whole number.
+
+    Args:
+        sub_trace (obspy.Trace): A single seismic trace to check.
+
+    Returns:
+        obspy.Trace: The trace with corrected data type and sampling rate.
+    """
+    if sub_trace.data.dtype.name != "int32":
+        my_log.info(f"{sub_trace.id}: changing dtype to int32")
+        sub_trace.data = sub_trace.data.astype("int32")
+    if sub_trace.stats.sampling_rate != np.round(sub_trace.stats.sampling_rate):
+        my_log.info(f"{sub_trace.id}: sampling rate is non-integer. Rounding to nearest integer value")
+        sub_trace.stats.sampling_rate = np.round(sub_trace.stats.sampling_rate)
+    return sub_trace
 
 
 def QC_data(st, array_params):
@@ -172,7 +181,7 @@ def QC_data(st, array_params):
 
     Returns:
         tuple: (good_data, skip_chans) where good_data is a boolean indicating
-               if the data passed QC and skip_chans is a list of channels to skip.
+                if the data passed QC and skip_chans is a list of channels to skip.
     """
     
     #### Check for enough data ####

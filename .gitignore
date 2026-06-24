@@ -1,5 +1,8 @@
 __pycache__/
 .DS_Store
+.vscode/
+.kiro/
+.gitlab/
 *.pyc
 *.pyo
 *.pyd

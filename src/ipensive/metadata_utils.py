@@ -35,7 +35,7 @@ def update_stationXML(config):
         config (dict): Configuration dictionary.
     """
 
-    client_iris = FDSNClient("IRIS")
+    client_earthscope = FDSNClient("earthscope")
     NSLC = get_stations(config)
     my_log.info("______ Begin Updating Metadata ______")
     my_log.info("______ " + utc.utcnow().strftime("%Y-%m-%d %H:%M:%S") + " ______")
@@ -45,7 +45,7 @@ def update_stationXML(config):
         sleep(0.25)
         my_log.info(f"Updating metadata for {nslc}")
         net, sta, loc, chan = nslc.split(".")
-        client = client_iris
+        client = client_earthscope
         attempts = 0
         while attempts < 4:
             try:
@@ -226,12 +226,12 @@ def add_metadata(st, config, array_name, skip_chans=[]):
 
         else: # pragma: no cover
             my_log.warning(
-                f"No station response info in stationXML file. Getting station response for {tr.id} from IRIS"
+                f"No station response info in stationXML file. Getting station response for {tr.id} from Earthscope"
             )
 
-            client = FDSN_connect("IRIS", max_tries=3)
+            client = FDSN_connect("earthscope", max_tries=3)
             if not client:
-                my_log.error(f"IRIS FDSN client unavailable for channel {tr.id}")
+                my_log.error(f"Earthscope FDSN client unavailable for channel {tr.id}")
                 my_log.warning("...Adding empty coordinates. This might break things")
                 tr.stats.coordinates = empty_coords
             elif check_FDSN(tr, client):

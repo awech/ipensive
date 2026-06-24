@@ -1,6 +1,6 @@
 ########## Data Source ##########
 CLIENT_TYPE: fdsn  # <obspy client type (earthworm, fdsn, local_fdsn, sds, seedlink)>
-HOSTNAME: iris     # <fdsn name or server ip_address>
+HOSTNAME: earthscope     # <fdsn name or server ip_address>
 PORT:              # <int (if relevant)>
 TIMEOUT: 10        # optional. Defaults to 30
 LATENCY: 60        # how long to pause and wait for data latency to catch up before processing (seconds)
@@ -45,7 +45,7 @@ EXTRA_LINKS:
 
 ############# FDSN ##############
 # CLIENT_TYPE: fdsn
-# HOSTNAME: url (or obspy mapped name: e.g. IRIS)
+# HOSTNAME: url (or obspy mapped name: e.g. earthscope)
 # TIMEOUT: 10       # optional. Defaults to 30
 #################################
 

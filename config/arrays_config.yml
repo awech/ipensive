@@ -10,7 +10,7 @@ PARAMS: &defaults # defines `defaults` as reusable key-value pairs (see line 41)
   WINDOW_LENGTH : 30    # window length for each calculation [seconds]
   OVERLAP       : 15    # amount of overlap between windows [seconds]
   MIN_CHAN      : 3     # minimum number of channels needed to perform inversion
-  LTS_ALPHA     : 0.75  # decimal [0.50, 1.0] amount of data to keep in the subsets
+  LTS_ALPHA     : 0.5   # decimal [0.50, 1.0] amount of data to keep in the subsets
 
   # PLOTTING PARAMETERS
   PLOT_MCCM     : True  # make MdCCM scatter subplot
