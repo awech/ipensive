@@ -25,7 +25,6 @@ PARAMS: &defaults
 ########################################
 ########################################
 
-
 # Define arrays to be processed
 NETWORKS:
   HVO:
@@ -36,7 +35,6 @@ NETWORKS:
     - AIND
     - SHEEP
     - Kahaluu
-
 
 # Configure each array's channels, back-azimuth targets, 
 # and (optionally) different pre-processing/plotting parameters
@@ -141,6 +139,8 @@ AIND:
     - HV.AIND.02.HDF
     - HV.AIND.03.HDF
     - HV.AIND.04.HDF
+    - HV.AIND.05.HDF
+    - HV.AIND.06.HDF
   TARGETS: 
     - North Vent
     - Puu Oo
