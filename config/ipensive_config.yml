@@ -14,7 +14,7 @@ TIMEOUT: 10
 ############ Output #############
 OUT_WEB_DIR: ../output/html
 OUT_ASCII_DIR: ../output/ascii_output
-OUT_ASCII_DIR: ../output/valve
+OUT_VALVE_DIR: ../output/valve
 LOGS_DIR: ../output/logs
 #################################
 
