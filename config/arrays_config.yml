@@ -221,6 +221,6 @@ Kahaluu:
 
 ## optional urls that get linked from the iPensive webpage
 EXTRA_LINKS:
-  - Data Output: ../tests/ascii_output/
+  - Data Output: ./ascii_output/
   - Array Locations: https://ds.iris.edu/gmap/#network=HV,IM&channel=*DF&maxlat=21&maxlon=-154&minlat=18&minlon=-157&drawingmode=box&planet=earth
   
