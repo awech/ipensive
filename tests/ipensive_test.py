@@ -156,8 +156,9 @@ def test_data_and_preprocessing():
         TR = ST.select(id=tr.id)[0]
         assert_allclose(tr.data, TR.data, atol=1e-5, rtol=1e-8)
 
-    st, *_ = metadata_utils.add_metadata(st, config, ARRAY, [])
     st = data_utils.preprocess_data(st, t1, t2, array_params)
+    st, *_ = metadata_utils.add_metadata(st, config, ARRAY, [])
+    st = metadata_utils.remove_gain(st, array_params)
     ST = read("tests/test_preprocessed.mseed")
 
     for tr in st:

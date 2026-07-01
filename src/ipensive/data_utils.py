@@ -139,12 +139,6 @@ def preprocess_data(ST, t1, t2, array_params):
     )
     st.merge(fill_value=0)
     st.trim(t1, t2 + array_params["WINDOW_LENGTH"], pad=True, fill_value=0)
-    
-    for tr in st:
-        if isinstance(array_params["NSLC"], dict):
-            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
-        else:
-            tr.remove_sensitivity(tr.inventory)
 
     return st
 

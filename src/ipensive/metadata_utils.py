@@ -256,3 +256,12 @@ def add_metadata(st, config, array_name, skip_chans=[]):
         lon_list.append(tr.stats.coordinates.longitude)
 
     return st, lat_list, lon_list
+
+
+def remove_gain(st, array_params):
+    for tr in st:
+        if isinstance(array_params["NSLC"], dict):
+            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
+        else:
+            tr.remove_sensitivity(tr.inventory)
+    return st

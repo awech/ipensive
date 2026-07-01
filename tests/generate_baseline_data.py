@@ -44,16 +44,18 @@ def main():
     st.write("tests/test_raw.mseed", format="MSEED")
     print(f"  Wrote tests/test_raw.mseed ({len(st)} traces)")
 
-    # Add metadata and preprocess
-    st, *_ = metadata_utils.add_metadata(st, config, ARRAY, [])
+    # Preprocess data
     print("Preprocessing data...")
     st = data_utils.preprocess_data(st, t1, t2, array_params)
+
+    # Add metadata and remove gain
+    st, lat_list, lon_list = metadata_utils.add_metadata(st, config, ARRAY, [])
+    st = metadata_utils.remove_gain(st, array_params)
     st.write("tests/test_preprocessed.mseed", format="MSEED")
     print(f"  Wrote tests/test_preprocessed.mseed ({len(st)} traces)")
 
     # Run LTS to generate results CSV
     print("Running LTS analysis...")
-    st, lat_list, lon_list = metadata_utils.add_metadata(st, config, ARRAY, [])
     array_params = utils.get_target_backazimuth(st, array_params)
     results_df, _ = ap.do_LTS(st, array_params, lat_list, lon_list, [])
 

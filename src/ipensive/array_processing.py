@@ -14,7 +14,7 @@ from obspy import UTCDateTime as utc
 from . import ipensive_utils as utils
 from .plotting_utils import plot_results, save_figure
 from . import data_utils
-from .metadata_utils import add_metadata
+from .metadata_utils import add_metadata, remove_gain
 
 from lts_array import ltsva
 import warnings
@@ -163,11 +163,12 @@ def process_array(config, array_name, T0, return_figure=False):
     st = data_utils.grab_data(array_params["CLIENT"], array_params["NSLC"], T1, T2)
     # st.write("test_raw.mseed")
 
-    # Add metadata or coordinates
-    st, lat_list, lon_list = add_metadata(st, config, array_name)
-    
     # Preprocess data
     st = data_utils.preprocess_data(st, t1, t2, array_params)
+    
+    # Add metadata or coordinates
+    st, lat_list, lon_list = add_metadata(st, config, array_name)
+    st = remove_gain(st, array_params)
     # st.write("test_preprocessed.mseed")
     
     # Check data quality
