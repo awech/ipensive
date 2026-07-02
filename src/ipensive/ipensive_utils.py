@@ -321,7 +321,7 @@ def write_html(config):
         None
     """
 
-    template_file = Path.cwd() / "templates" / "index.template"
+    template_file = Path(__file__).parent / "templates" / "index.template"
     with open(template_file, "r") as f:
         template = jinja2.Template(f.read())
     html = template.render(
