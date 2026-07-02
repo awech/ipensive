@@ -134,5 +134,5 @@ Assuming you are in the right environment
 
 
 ### Webpage configuration
-The webpage is automatically generated each time using jinja2 to populate the [index.template](../templates/index.template) file with the network and array structure from the config file.
+The webpage is automatically generated each time using jinja2 to populate the [index.template](../src/ipensive/templates/index.template) file with the network and array structure from the config file.
 (This method was adapted from a forked version of this code by Israel Brewster, and the html and javascript front-end was originally developed by Tom Parker.)

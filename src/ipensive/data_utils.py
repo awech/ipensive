@@ -114,7 +114,7 @@ def grab_data(client, NSLC, T1, T2):
 
 def preprocess_data(ST, t1, t2, array_params):
     """
-    Preprocess seismic data by removing sensitivity, tapering, filtering, and trimming.
+    Preprocess seismic data by tapering, filtering, gap handling, and trimming.
 
     Args:
         ST (obspy.Stream): Stream containing seismic traces.
@@ -137,14 +137,18 @@ def preprocess_data(ST, t1, t2, array_params):
         corners=2,
         zerophase=True,
     )
-    st.merge(fill_value=0)
+    gaps = st.get_gaps()
+    if gaps:
+        my_log.warning(f"Gappy data: {len(gaps)} gap(s)/overlap(s)")
+        for net, sta, loc, chan, t_last, t_next, delta, samples in gaps:
+            my_log.warning(
+                f"{net}.{sta}.{loc}.{chan}: {t_last} -> {t_next} "
+                f"(delta={delta:.3f}s, samples={samples})"
+            )
+        my_log.warning("Attempting to merge (fill_value=0)")
+        st.merge(fill_value=0)
+        
     st.trim(t1, t2 + array_params["WINDOW_LENGTH"], pad=True, fill_value=0)
-    
-    for tr in st:
-        if isinstance(array_params["NSLC"], dict):
-            tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
-        else:
-            tr.remove_sensitivity(tr.inventory)
 
     return st
 
@@ -175,6 +179,9 @@ def QC_data(st, array_params):
     """
     Quality control for seismic data.
 
+    Blank channels or channels with a fraction of zero-filled (gap) 
+    samples exceeding MAX_GAP_FRACTION are flagged and skipped.
+
     Args:
         st (obspy.Stream): Stream containing seismic traces.
         array_params (dict): Array parameters including quality control thresholds.
@@ -183,7 +190,9 @@ def QC_data(st, array_params):
         tuple: (good_data, skip_chans) where good_data is a boolean indicating
                 if the data passed QC and skip_chans is a list of channels to skip.
     """
-    
+
+    max_gap_fraction = array_params.get("MAX_GAP_FRACTION", 0.5)
+
     #### Check for enough data ####
     check_st = st.copy()
     skip_chans = []
@@ -201,8 +210,11 @@ def QC_data(st, array_params):
 
     #### Check for gappy data ####
     for tr in check_st:
-        if np.any([np.any(tr.data == 0)]): # pragma: no cover
-            # Check for gaps in data
+        gap_fraction = np.count_nonzero(tr.data == 0) / tr.stats.npts
+        if gap_fraction > max_gap_fraction: # pragma: no cover
+            # Gap exceeds tolerance. Flag channel for exclusion.
+            my_log.warning(f"{tr.id}: {gap_fraction:.1%} gap exceeds MAX_GAP_FRACTION ({max_gap_fraction:.1%}). Skipping channel.")
+            skip_chans.append(tr.id)
             check_st.remove(tr)
     if len(check_st) < array_params["MIN_CHAN"]: # pragma: no cover
         my_log.warning("Too gappy. Skipping.")
@@ -211,25 +223,36 @@ def QC_data(st, array_params):
     return good_data, skip_chans
 
 
-def get_pressures(st, t, array_params):
+def get_pressures(st, t, array_params, skip_chans=[]):
     """Extract pressure data from the seismic stream.
+
+    Uses the median peak amplitude across all channels not in skip_chans,
+    so a single dead/excluded channel can't bias the reported pressure
+    (either by being picked directly, or by skewing a mean). Note:
+    PLOTCHAN (which selects a single channel for waveform plotting in
+    plotting_utils.py) intentionally does NOT affect this calculation -
+    pressure is a whole-array data output, not a plotting concern.
 
     Args:
         st (obspy.Stream): Stream containing seismic traces.
         t (np.ndarray): Array of time values (matplotlib dates) from ltsva.
         array_params (dict): Array parameters including window length.
+        skip_chans (list): List of channels (NSLC) excluded by QC (e.g. dead
+            or too-gappy channels) that should not contribute to the pressure
+            estimate.
 
     Returns:
         np.ndarray: Array of pressure values.
     """
 
-    if "PLOTCHAN" in array_params and array_params["PLOTCHAN"] is not None:
-        st = st.select(id=array_params["PLOTCHAN"])
+    good_st = Stream([tr for tr in st if tr.id not in skip_chans])
+    keep_st = good_st if len(good_st) > 0 else st  # pragma: no cover
+
     pressure = []
     for ti in t:
         t1 = utc(dates.num2date(ti)) - array_params["WINDOW_LENGTH"] / 2
         t2 = t1 + array_params["WINDOW_LENGTH"]
-        tr_win = st[0].slice(t1, t2)
-        pressure.append(np.max(np.abs(tr_win.data)))
+        peak_amps = [np.max(np.abs(tr.slice(t1, t2).data)) for tr in keep_st]
+        pressure.append(np.median(peak_amps))
     pressure = np.array(pressure)
     return pressure

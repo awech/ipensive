@@ -14,7 +14,7 @@ from obspy import UTCDateTime as utc
 from . import ipensive_utils as utils
 from .plotting_utils import plot_results, save_figure
 from . import data_utils
-from .metadata_utils import add_metadata
+from .metadata_utils import add_coordinates, remove_gain
 
 from lts_array import ltsva
 import warnings
@@ -118,7 +118,7 @@ def do_LTS(st, array_params, lat_list, lon_list, skip_chans):
         "Azimuth": azimuth,
         "Velocity": 1000 * velocity, # Convert velocity to m/s
         "MCCM": mccm,
-        "Pressure": data_utils.get_pressures(st, t, array_params),
+        "Pressure": data_utils.get_pressures(st, t, array_params, skip_chans),
         "Sigma_tau": sigma_tau,
         "Vel_err": 1000 * Vel_err, # Convert to m/s
         "Baz_err": Baz_err
@@ -163,17 +163,18 @@ def process_array(config, array_name, T0, return_figure=False):
     st = data_utils.grab_data(array_params["CLIENT"], array_params["NSLC"], T1, T2)
     # st.write("test_raw.mseed")
 
-    # Add metadata or coordinates
-    st, lat_list, lon_list = add_metadata(st, config, array_name)
-    
     # Preprocess data
     st = data_utils.preprocess_data(st, t1, t2, array_params)
-    # st.write("test_preprocessed.mseed")
-    
+
     # Check data quality
     good_data, skip_chans = data_utils.QC_data(st, array_params)
     if not good_data:
         return None
+
+    # Add coordinates/inventory metadata, then remove gain
+    st, lat_list, lon_list = add_coordinates(st, config, array_name, skip_chans)
+    st = remove_gain(st, array_params)
+    # st.write("test_preprocessed.mseed")
 
     # Add volcano backazimuths
     array_params = utils.get_target_backazimuth(st, array_params)
