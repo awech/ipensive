@@ -157,7 +157,8 @@ def test_data_and_preprocessing():
         assert_allclose(tr.data, TR.data, atol=1e-5, rtol=1e-8)
 
     st = data_utils.preprocess_data(st, t1, t2, array_params)
-    st, *_ = metadata_utils.add_metadata(st, config, ARRAY, [])
+    _, skip_chans = data_utils.QC_data(st, array_params)
+    st, *_ = metadata_utils.add_coordinates(st, config, ARRAY, skip_chans)
     st = metadata_utils.remove_gain(st, array_params)
     ST = read("tests/test_preprocessed.mseed")
 
@@ -222,7 +223,7 @@ def test_LTS_and_image_output(tmp_path):
     skip_chans = []
     st = read("tests/test_preprocessed.mseed")
 
-    st, lat_list, lon_list = metadata_utils.add_metadata(st, config, ARRAY, skip_chans)
+    st, lat_list, lon_list = metadata_utils.add_coordinates(st, config, ARRAY, skip_chans)
     array_params = utils.get_target_backazimuth(st, array_params)
     test_df, lts_dict = ap.do_LTS(st, array_params, lat_list, lon_list, skip_chans)
 

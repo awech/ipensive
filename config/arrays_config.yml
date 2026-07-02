@@ -56,8 +56,7 @@ Kenai:
   AZ_MIN: 200
   AZ_MAX: 80
   # PLOTCHAN:  # optional specify a single channel to plot waveforms from 
-  #              (defaults to first in obspy stream). Also controls peak
-  #              pressure calculations.
+  #              (defaults to first in obspy stream).
 
 Sand Point:
   <<: *defaults

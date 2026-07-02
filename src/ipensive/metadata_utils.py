@@ -140,7 +140,66 @@ def check_inventory(tr, inv):
     return value
 
 
-def add_coordinate_info(st, config, array_name):
+def get_inventory(tr, inventory, skip_chans=[]):
+    """
+    Get the subset inventory (with response) for a single trace.
+
+    Looks up the trace's channel/epoch in the provided (already loaded)
+    inventory. Falls back to an Earthscope FDSN request if the channel
+    isn't found locally. Channels in ``skip_chans`` are skipped entirely
+    (no local lookup, no network fallback) since they're already known
+    to be unusable (e.g. dead/blank channels).
+
+    Args:
+        tr (Trace): ObsPy Trace object.
+        inventory (Inventory): Pre-loaded station inventory (e.g. from STATION_XML).
+        skip_chans (list): List of channels (NSLC) to skip.
+
+    Returns:
+        Inventory or None: The subset inventory for this trace's channel/epoch,
+            or None if the channel should be skipped or no response info could
+            be found.
+    """
+
+    if tr.id in skip_chans:
+        my_log.info(f"{tr.id} is in the skip list. Skipping inventory lookup.")
+        return None
+
+    if check_inventory(tr, inventory):
+        return inventory.select(
+            network=tr.stats.network,
+            station=tr.stats.station,
+            location=tr.stats.location,
+            channel=tr.stats.channel,
+            starttime=tr.stats.starttime,
+            endtime=tr.stats.endtime,
+        )
+
+    my_log.warning( # pragma: no cover
+        f"No station response info in stationXML file. Getting station response for {tr.id} from Earthscope"
+    )
+
+    client = FDSN_connect("earthscope", max_tries=3) # pragma: no cover
+    if not client: # pragma: no cover
+        my_log.error("Earthscope FDSN client unavailable")
+        return None
+    elif check_FDSN(tr, client): # pragma: no cover
+        sleep(0.25)
+        return client.get_stations(
+            network=tr.stats.network,
+            station=tr.stats.station,
+            location=tr.stats.location,
+            channel=tr.stats.channel,
+            starttime=tr.stats.starttime,
+            endtime=tr.stats.endtime,
+            level="response",
+        )
+    else: # pragma: no cover
+        my_log.error(f"No data available for request for channel {tr.id}.")
+        return None
+
+
+def add_coordinates_from_config(st, config, array_name):
     """
     Add coordinate information to traces in a stream.
 
@@ -167,17 +226,23 @@ def add_coordinate_info(st, config, array_name):
     return st
 
 
-def add_metadata(st, config, array_name, skip_chans=[]):
+def add_coordinates(st, config, array_name, skip_chans=[]):
     """
-    Add metadata to traces in a stream.
+    Add coordinate (and inventory) metadata to traces in a stream.
+
+    For each trace, looks up its station coordinates and (when using a
+    STATION_XML-based array) stashes the resolved inventory subset on
+    ``tr.inventory`` for later use (e.g. by ``remove_gain``), so the
+    inventory lookup/Earthscope fallback only happens once per trace.
 
     Args:
         st (Stream): ObsPy Stream object.
         config (dict): Configuration dictionary.
+        array_name (str): Name of the array.
         skip_chans (list): List of channels (NSLC) to skip.
 
     Returns:
-        Stream: Stream with updated metadata.
+        tuple: (st, lat_list, lon_list)
     """
 
     import warnings
@@ -189,7 +254,7 @@ def add_metadata(st, config, array_name, skip_chans=[]):
 
     if isinstance(config[array_name]["NSLC"], dict):
         my_log.info(f"Adding coordinate info for {array_name} directly from config file")
-        st = add_coordinate_info(st, config, array_name)
+        st = add_coordinates_from_config(st, config, array_name)
         for tr in st:
             lat_list.append(tr.stats.coordinates.latitude)
             lon_list.append(tr.stats.coordinates.longitude)
@@ -208,49 +273,14 @@ def add_metadata(st, config, array_name, skip_chans=[]):
     for tr in st:
         my_log.info(f"Getting metadata for {tr.id}")
 
-        if tr.id in skip_chans:
-            my_log.info(f"{tr.id} is in the skip list. Adding empty coordinates.")
-            tr.stats.coordinates = empty_coords
-
-        elif check_inventory(tr, inventory):
-            inv = inventory.select(
-                network=tr.stats.network,
-                station=tr.stats.station,
-                location=tr.stats.location,
-                channel=tr.stats.channel,
-                starttime=tr.stats.starttime,
-                endtime=tr.stats.endtime,
-            )
-            tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
-            tr.inventory = inv
-
-        else: # pragma: no cover
-            my_log.warning(
-                f"No station response info in stationXML file. Getting station response for {tr.id} from Earthscope"
-            )
-
-            client = FDSN_connect("earthscope", max_tries=3)
-            if not client:
-                my_log.error(f"Earthscope FDSN client unavailable for channel {tr.id}")
+        inv = get_inventory(tr, inventory, skip_chans)
+        if inv is None:
+            if tr.id not in skip_chans: # pragma: no cover
                 my_log.warning("...Adding empty coordinates. This might break things")
-                tr.stats.coordinates = empty_coords
-            elif check_FDSN(tr, client):
-                sleep(0.25)
-                inv = client.get_stations(
-                    network=tr.stats.network,
-                    station=tr.stats.station,
-                    location=tr.stats.location,
-                    channel=tr.stats.channel,
-                    starttime=tr.stats.starttime,
-                    endtime=tr.stats.endtime,
-                    level="response",
-                )
-                tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
-                tr.inventory = inv
-            else:
-                my_log.error(f"No data available for request for channel {tr.id}. Adding NaNs")
-                my_log.warning("...This might break things")
-                tr.stats.coordinates = empty_coords
+            tr.stats.coordinates = empty_coords
+        else:
+            tr.stats.coordinates = inv.get_coordinates(tr.id, tr.stats.starttime)
+            tr.stats.inventory = inv
 
         lat_list.append(tr.stats.coordinates.latitude)
         lon_list.append(tr.stats.coordinates.longitude)
@@ -259,9 +289,31 @@ def add_metadata(st, config, array_name, skip_chans=[]):
 
 
 def remove_gain(st, array_params):
+    """
+    Remove instrument gain/sensitivity from traces in a stream.
+
+    Uses the manual per-channel gain value for manually-configured (dict)
+    NSLC arrays, or the inventory attached to each trace (via
+    ``add_coordinates``) for STATION_XML-based arrays. Traces with no
+    attached inventory (e.g. skipped/dead channels) are left as-is.
+
+    Note: inventory is stashed on ``tr.stats.inventory`` (not a bare
+    ``tr.inventory`` attribute) since ``Trace.stats`` is deep-copied by
+    ``Stream.merge()`` and ``Trace.copy()``, while arbitrary attributes
+    set directly on a ``Trace`` object are not preserved by either.
+
+    Args:
+        st (Stream): ObsPy Stream object.
+        array_params (dict): Array parameters.
+
+    Returns:
+        Stream: Stream with gain removed.
+    """
     for tr in st:
         if isinstance(array_params["NSLC"], dict):
             tr.data = tr.data / array_params["NSLC"][tr.id]["gain"]
-        else:
-            tr.remove_sensitivity(tr.inventory)
+        elif "inventory" in tr.stats and tr.stats.inventory is not None:
+            tr.remove_sensitivity(tr.stats.inventory)
+        else: # pragma: no cover
+            my_log.warning(f"{tr.id}: no inventory attached. Skipping gain removal.")
     return st

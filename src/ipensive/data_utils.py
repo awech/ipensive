@@ -114,7 +114,7 @@ def grab_data(client, NSLC, T1, T2):
 
 def preprocess_data(ST, t1, t2, array_params):
     """
-    Preprocess seismic data by removing sensitivity, tapering, filtering, and trimming.
+    Preprocess seismic data by tapering, filtering, gap handling, and trimming.
 
     Args:
         ST (obspy.Stream): Stream containing seismic traces.
@@ -223,25 +223,36 @@ def QC_data(st, array_params):
     return good_data, skip_chans
 
 
-def get_pressures(st, t, array_params):
+def get_pressures(st, t, array_params, skip_chans=[]):
     """Extract pressure data from the seismic stream.
+
+    Uses the median peak amplitude across all channels not in skip_chans,
+    so a single dead/excluded channel can't bias the reported pressure
+    (either by being picked directly, or by skewing a mean). Note:
+    PLOTCHAN (which selects a single channel for waveform plotting in
+    plotting_utils.py) intentionally does NOT affect this calculation -
+    pressure is a whole-array data output, not a plotting concern.
 
     Args:
         st (obspy.Stream): Stream containing seismic traces.
         t (np.ndarray): Array of time values (matplotlib dates) from ltsva.
         array_params (dict): Array parameters including window length.
+        skip_chans (list): List of channels (NSLC) excluded by QC (e.g. dead
+            or too-gappy channels) that should not contribute to the pressure
+            estimate.
 
     Returns:
         np.ndarray: Array of pressure values.
     """
 
-    if "PLOTCHAN" in array_params and array_params["PLOTCHAN"] is not None:
-        st = st.select(id=array_params["PLOTCHAN"])
+    good_st = Stream([tr for tr in st if tr.id not in skip_chans])
+    keep_st = good_st if len(good_st) > 0 else st  # pragma: no cover
+
     pressure = []
     for ti in t:
         t1 = utc(dates.num2date(ti)) - array_params["WINDOW_LENGTH"] / 2
         t2 = t1 + array_params["WINDOW_LENGTH"]
-        tr_win = st[0].slice(t1, t2)
-        pressure.append(np.max(np.abs(tr_win.data)))
+        peak_amps = [np.max(np.abs(tr.slice(t1, t2).data)) for tr in keep_st]
+        pressure.append(np.median(peak_amps))
     pressure = np.array(pressure)
     return pressure
