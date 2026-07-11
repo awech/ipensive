@@ -3,9 +3,9 @@
  <FDSNStationXML xmlns="http://www.fdsn.org/xml/station/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:iris="http://www.fdsn.org/xml/station/1/iris" xsi:schemaLocation="http://www.fdsn.org/xml/station/1 http://www.fdsn.org/xml/station/fdsn-station-1.1.xsd" schemaVersion="1.1">
   <Source>EarthScope</Source>
   <Sender>EarthScope</Sender>
-  <Module>EarthScope WEB SERVICE: fdsnws-station | version: 1.1.54</Module>
+  <Module>EarthScope WEB SERVICE: fdsnws-station | version: 1.1.56</Module>
   <ModuleURI>https://service.earthscope.org/fdsnws/station/1/query?net=HV,IM&amp;cha=HDF,BDF&amp;starttime=2026-06-27T00:00:00&amp;level=response&amp;format=xml&amp;maxlat=25&amp;minlon=-156&amp;maxlon=-154&amp;minlat=18&amp;includecomments=true&amp;nodata=404</ModuleURI>
-  <Created>2026-06-28T22:04:09.2326</Created>
+  <Created>2026-07-11T00:11:12.7980</Created>
   <Network code="HV" startDate="1956-01-01T00:00:00.0000" restrictedStatus="open">
    <Description>Hawaiian Volcano Observatory Network (HVO)</Description>
    <Identifier type="DOI">10.7914/SN/HV
@@ -3133,7 +3133,7 @@
      <Name>Ainapo Ranch, Hawaii Digital</Name>
     </Site>
     <CreationDate>2010-10-27T00:00:00.0000</CreationDate>
-    <TotalNumberChannels>55</TotalNumberChannels>
+    <TotalNumberChannels>58</TotalNumberChannels>
     <SelectedNumberChannels>6</SelectedNumberChannels>
     <Channel code="HDF" locationCode="01" startDate="2025-06-22T00:00:00.0000" restrictedStatus="open">
      <Description>Reconfigure Logger for new Datastream Template</Description>
@@ -3650,15 +3650,14 @@
       </Stage>
      </Response>
     </Channel>
-    <Channel code="HDF" locationCode="02" startDate="2025-06-22T00:00:00.0000" restrictedStatus="open">
-     <Description>Reconfigure Logger for new Datastream Template</Description>
+    <Channel code="HDF" locationCode="02" startDate="2026-06-26T00:00:00.0000" restrictedStatus="open">
      <Comment>
-      <Value>[LOGGER::CENTAUR::8090]</Value>
-      <BeginEffectiveTime>2025-06-22T00:00:00.0000</BeginEffectiveTime>
+      <Value>[SENSOR::64VX2::311]</Value>
+      <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
      </Comment>
      <Latitude>19.372244</Latitude>
      <Longitude>-155.45771</Longitude>
-     <Elevation>1524</Elevation>
+     <Elevation>1531</Elevation>
      <Depth>0</Depth>
      <Azimuth>0</Azimuth>
      <Dip>0</Dip>
@@ -4165,15 +4164,14 @@
       </Stage>
      </Response>
     </Channel>
-    <Channel code="HDF" locationCode="03" startDate="2025-06-22T00:00:00.0000" restrictedStatus="open">
-     <Description>Reconfigure Logger for new Datastream Template</Description>
+    <Channel code="HDF" locationCode="03" startDate="2026-06-26T00:00:00.0000" restrictedStatus="open">
      <Comment>
-      <Value>[LOGGER::CENTAUR::8090]</Value>
-      <BeginEffectiveTime>2025-06-22T00:00:00.0000</BeginEffectiveTime>
+      <Value>[SENSOR::64VX2::287]</Value>
+      <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
      </Comment>
      <Latitude>19.372158</Latitude>
      <Longitude>-155.4568</Longitude>
-     <Elevation>1524</Elevation>
+     <Elevation>1516</Elevation>
      <Depth>0</Depth>
      <Azimuth>0</Azimuth>
      <Dip>0</Dip>
@@ -4680,15 +4678,14 @@
       </Stage>
      </Response>
     </Channel>
-    <Channel code="HDF" locationCode="04" startDate="2025-06-22T00:00:00.0000" restrictedStatus="open">
-     <Description>Reconfigure Logger for new Datastream Template</Description>
+    <Channel code="HDF" locationCode="04" startDate="2026-06-26T00:00:00.0000" restrictedStatus="open">
      <Comment>
-      <Value>[LOGGER::CENTAUR::8090]</Value>
-      <BeginEffectiveTime>2025-06-22T00:00:00.0000</BeginEffectiveTime>
+      <Value>[SENSOR::64VX2::353]</Value>
+      <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
      </Comment>
      <Latitude>19.371567</Latitude>
      <Longitude>-155.45741</Longitude>
-     <Elevation>1524</Elevation>
+     <Elevation>1519</Elevation>
      <Depth>0</Depth>
      <Azimuth>0</Azimuth>
      <Dip>0</Dip>
@@ -5198,16 +5195,16 @@
     <Channel code="HDF" locationCode="05" startDate="2026-06-26T00:00:00.0000" restrictedStatus="open">
      <Description>Instrument Swap</Description>
      <Comment>
-      <Value>[SENSOR::64VX2::586], [SENSOR::64VX2::580]</Value>
-      <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
-     </Comment>
-     <Comment>
       <Value>[SENSOR::64VX2::586]</Value>
       <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
      </Comment>
-     <Latitude>19.37188</Latitude>
-     <Longitude>-155.45671</Longitude>
-     <Elevation>1506</Elevation>
+     <Comment>
+      <Value>[SENSOR::64VX2::586], [SENSOR::64VX2::580]</Value>
+      <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
+     </Comment>
+     <Latitude>19.37269</Latitude>
+     <Longitude>-155.45712</Longitude>
+     <Elevation>1522</Elevation>
      <Depth>0</Depth>
      <Azimuth>0</Azimuth>
      <Dip>0</Dip>
@@ -5717,16 +5714,16 @@
     <Channel code="HDF" locationCode="06" startDate="2026-06-26T00:00:00.0000" restrictedStatus="open">
      <Description>Instrument Swap</Description>
      <Comment>
-      <Value>[SENSOR::64VX2::586], [SENSOR::64VX2::580]</Value>
-      <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
-     </Comment>
-     <Comment>
       <Value>[SENSOR::64VX2::580]</Value>
       <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
      </Comment>
-     <Latitude>19.37269</Latitude>
-     <Longitude>-155.45712</Longitude>
-     <Elevation>1522</Elevation>
+     <Comment>
+      <Value>[SENSOR::64VX2::586], [SENSOR::64VX2::580]</Value>
+      <BeginEffectiveTime>2026-06-26T00:00:00.0000</BeginEffectiveTime>
+     </Comment>
+     <Latitude>19.37188</Latitude>
+     <Longitude>-155.45671</Longitude>
+     <Elevation>1506</Elevation>
      <Depth>0</Depth>
      <Azimuth>0</Azimuth>
      <Dip>0</Dip>
