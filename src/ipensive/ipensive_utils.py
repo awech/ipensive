@@ -409,6 +409,10 @@ def write_valve_file(t2, df, name, config):
 
     my_log.info('Writing CSV file for Valve...')
 
+    array = df.iloc[0]["Array"]
+    array_name = array.replace(" ", "_")
+
+
     # Create a DataFrame with the results
     A = df.rename(columns={"Time": "TIMESTAMP", "Array": "CHANNEL"})
 
@@ -417,7 +421,7 @@ def write_valve_file(t2, df, name, config):
     # Save the DataFrame to a CSV file
     out_valve_dir = config["OUT_VALVE_DIR"]
     out_valve_dir.mkdir(parents=True, exist_ok=True)
-    filename = out_valve_dir / f"{name}_{t2.strftime('%Y%m%d-%H%M')}.txt"
+    filename = out_valve_dir / f"{array_name}_{t2.strftime('%Y%m%d-%H%M')}.txt"
     A.to_csv(filename, index=False, header=True, float_format="%.3f")
 
     return
